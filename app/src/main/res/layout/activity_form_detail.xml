@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="14dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/txt_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="ใบขายฝาก"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="เลขที่  00001/2563"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="วันที่ 1 เดือน มกราคม พ.ศ. 2563"
+                android:layout_marginBottom="16dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+
+                <TextView
+                    android:id="@+id/txt_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="\t\t ข้าพเจ้า " />
+
+                <EditText
+                    android:id="@+id/txt_2"
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_toRightOf="@+id/txt_1"/>
+
+                <TextView
+                    android:id="@+id/txt_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="อายุ"
+                    android:layout_marginTop="14dp"
+                    android:layout_toRightOf="@+id/txt_2" />
+
+                <EditText
+                    android:id="@+id/txt_4"
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_toRightOf="@+id/txt_3"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="ปี"
+                    android:layout_toRightOf="@+id/txt_4"/>
+
+                <TextView
+                    android:id="@+id/txt_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/txt_1"
+                    android:layout_marginTop="14dp"
+                    android:text="บัตรประชาชนเลขที่" />
+
+                <EditText
+                    android:id="@+id/txt_citizenId"
+                    android:layout_width="230dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_below="@+id/txt_1"
+                    android:layout_toRightOf="@+id/txt_5"
+                    />
+
+                <TextView
+                    android:id="@+id/txt_6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_below="@+id/txt_5"
+                    android:text="ผู้ขายฝาก อยู่บ้านเลขที่" />
+
+                <EditText
+                    android:id="@+id/txt_7"
+                    android:layout_width="match_parent"
+                    android:textSize="14dp"
+                    android:layout_below="@+id/txt_5"
+                    android:layout_toRightOf="@+id/txt_6"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/txt_8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_below="@+id/txt_6"
+                    android:text="ตำบล" />
+
+                <EditText
+                    android:id="@+id/txt_district"
+                    android:layout_width="170dp"
+                    android:textSize="14dp"
+                    android:layout_below="@+id/txt_6"
+                    android:layout_toRightOf="@+id/txt_8"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/txt_9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_below="@+id/txt_8"
+                    android:text="อำเภอ" />
+
+                <EditText
+                    android:id="@+id/txt_10"
+                    android:layout_width="170dp"
+                    android:textSize="14dp"
+                    android:layout_below="@+id/txt_8"
+                    android:layout_toRightOf="@+id/txt_9"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/txt_11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_below="@+id/txt_9"
+                    android:text="จังหวัด" />
+
+                <EditText
+                    android:id="@+id/txt_12"
+                    android:layout_width="150dp"
+                    android:textSize="14dp"
+                    android:layout_below="@+id/txt_9"
+                    android:layout_toRightOf="@+id/txt_11"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/txt_13"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:layout_below="@+id/txt_11"
+                    android:text="ได้ทำหนังสือขายฝากนี้ให้แก่ นายสุรศักดิ์ ขจิตธรรมกุล ดังมีข้อความดังต่อไปนี้\n\t
+   ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้" />
+
+                <EditText
+                    android:id="@+id/txt_14"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/txt_13"
+                    android:gravity="top|left"
+                    android:inputType="textMultiLine"
+                    android:lines="8"
+                    android:maxLines="10"
+                    android:minLines="6"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:scrollbars="vertical" />
+
+                <ImageView
+                    android:id="@+id/photo"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_below="@+id/txt_14"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/ic_photo_camera_black_24dp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_below="@+id/photo"
+                    android:padding="10dp" />
+
+                <TextView
+                    android:id="@+id/txt_15"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_below="@+id/recycler_view"
+                    android:text="มาขายฝากให้เป็นจำนวนเงิน" />
+
+                <EditText
+                    android:id="@+id/txt_16"
+                    android:layout_width="90dp"
+                    android:layout_marginTop="24dp"
+                    android:textSize="14dp"
+                    android:layout_below="@+id/recycler_view"
+                    android:layout_toRightOf="@+id/txt_15"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/txt_17"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_below="@+id/recycler_view"
+                    android:layout_toRightOf="@+id/txt_16"
+                    android:text="บาท" />
+
+                <TextView
+                    android:id="@+id/txt_18"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/txt_17"
+                    android:text="และได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้" />
+
+                <TextView
+                    android:id="@+id/txt_19"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/txt_18"
+                    android:text="\t\tข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ยตามจำนวนเงินที่ขายฝากไว้ นับแต่วันทำหนังสือนี้เป็นต้นไป" />
+
+                <TextView
+                    android:id="@+id/txt_20"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/txt_19"
+                    android:text="จนกว่าจะมาไถ่คืนในวันที่" />
+
+                <EditText
+                    android:id="@+id/txt_21"
+                    android:layout_width="30dp"
+                    android:textSize="14dp"
+                    android:layout_below="@+id/txt_19"
+                    android:layout_toRightOf="@+id/txt_20"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/txt_22"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/txt_19"
+                    android:layout_toRightOf="@+id/txt_21"
+                    android:text="เดือน" />
+
+                <EditText
+                    android:id="@+id/txt_23"
+                    android:layout_width="70dp"
+                    android:textSize="14dp"
+                    android:layout_below="@+id/txt_19"
+                    android:layout_toRightOf="@+id/txt_22"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/txt_24"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/txt_19"
+                    android:layout_toRightOf="@+id/txt_23"
+                    android:text="พ.ศ." />
+
+                <EditText
+                    android:id="@+id/txt_25"
+                    android:layout_width="60dp"
+                    android:textSize="14dp"
+                    android:layout_below="@+id/txt_19"
+                    android:layout_toRightOf="@+id/txt_24"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/bg_edittext"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/txt_26"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/txt_25"
+                    android:text="\t\tข้อ 3. ผู้ขายฝากยืนยันว่าผู้ขายฝากเป็นผู้มีกรรมสิทธิ์ในทรัพย์สินที่มาขายฝากแต่เพียงผู้เดียวและไม่มีคู่สมรสแต่อย่างใด\n\t\tข้อ 4. คู่กรณีได้อ่านหนังสือนี้เข้าใจรับว่าถูกต้องเป็นความจริงแล้ว จึงลงลายมือชื่อไว้เป็นหลักฐาน" />
+
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ลงชื่อ"
+                        android:textSize="14dp" />
+
+                    <EditText
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginRight="4dp"
+                        android:layout_marginLeft="4dp"
+                        android:background="@drawable/bg_edittext"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ผู้ขายฝาก"
+                        android:textSize="14dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ลงชื่อ"
+                        android:textSize="14dp" />
+
+                    <EditText
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginRight="4dp"
+                        android:layout_marginLeft="4dp"
+                        android:background="@drawable/bg_edittext"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ผู้รับซื้อฝาก"
+                        android:textSize="14dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ลงชื่อ"
+                        android:textSize="14dp" />
+
+                    <EditText
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginRight="4dp"
+                        android:layout_marginLeft="4dp"
+                        android:background="@drawable/bg_edittext"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="พยาน"
+                        android:textSize="14dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ลงชื่อ"
+                        android:textSize="14dp" />
+
+                    <EditText
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginRight="4dp"
+                        android:layout_marginLeft="4dp"
+                        android:background="@drawable/bg_edittext"
+                        android:textSize="14dp" />
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="พยาน/ผู้พิมพ์"
+                        android:textSize="14dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
