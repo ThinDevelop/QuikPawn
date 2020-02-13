@@ -23,7 +23,7 @@
         <EditText
             android:hint="Merchant ID"
             android:layout_marginTop="20dp"
-            android:background="@color/cardview_light_background"
+            android:background="@drawable/bg_radius"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:paddingLeft="16dp"
@@ -37,7 +37,7 @@
         <EditText
             android:hint="User name"
             android:layout_marginTop="20dp"
-            android:background="@color/cardview_light_background"
+            android:background="@drawable/bg_radius"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:paddingLeft="16dp"
@@ -52,7 +52,7 @@
             android:hint="Password"
             android:inputType="textPassword"
             android:layout_marginTop="20dp"
-            android:background="@color/cardview_light_background"
+            android:background="@drawable/bg_radius"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:paddingLeft="16dp"
