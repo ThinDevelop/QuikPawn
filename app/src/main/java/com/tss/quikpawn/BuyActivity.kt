@@ -1,32 +1,36 @@
 package com.tss.quikpawn
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_sell.*
-import kotlinx.android.synthetic.main.view_image.*
-import java.util.jar.Manifest
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_buy.*
 
 
-class SellActivity : AppCompatActivity() {
-
+class BuyActivity : AppCompatActivity() {
     private val IMAGE_CAPTURE_CODE = 1001
     private val PERMISSION_CODE = 1000
     var image_uri: Uri? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sell)
+        setContentView(R.layout.activity_buy)
+        //clear sign button
+        clearsign_btn.setOnClickListener{
+            signature_pad.clear()
+        }
+        //get bitmap signature
+        ok_btn.setOnClickListener {
+            val Bitmap = signature_pad.getSignatureBitmap()
 
-        capture_btn .setOnClickListener {
+        }
+        barcode_btn.setOnClickListener {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 if (checkSelfPermission(android.Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_DENIED ||
@@ -41,7 +45,6 @@ class SellActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun openCamera() {
         val values = ContentValues()
         values.put(MediaStore.Images.Media.TITLE,"New Picture")
@@ -60,7 +63,7 @@ class SellActivity : AppCompatActivity() {
         when(requestCode){
             PERMISSION_CODE -> {
                 if(grantResults.size > 0 && grantResults[0] ==
-                        PackageManager.PERMISSION_GRANTED){
+                    PackageManager.PERMISSION_GRANTED){
                     openCamera()
                 }
                 else{
@@ -72,7 +75,8 @@ class SellActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(resultCode == Activity.RESULT_OK){
-            img_view.setImageURI(image_uri)
+            img_view1.setImageURI(image_uri)
         }
     }
+
 }

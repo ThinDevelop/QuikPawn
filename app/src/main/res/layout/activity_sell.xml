@@ -149,7 +149,14 @@
             android:layout_marginTop="20dp"
             android:layout_marginRight="30dp"
             android:background="@drawable/bg_radius">
-
+            <FrameLayout
+                android:layout_marginTop="190dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="8dp"
+                android:background="@android:color/darker_gray" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -159,6 +166,14 @@
                 android:layout_marginBottom="20dp"
                 android:hint="ลายเซ็นผู้ขาย"
                 android:textSize="30dp" />
+            <com.github.gcacace.signaturepad.views.SignaturePad
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/signature_pad"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:penColor="@android:color/black"
+                />
         </RelativeLayout>
 
         <TableLayout
