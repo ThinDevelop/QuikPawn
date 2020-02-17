@@ -38,11 +38,12 @@
                 android:background="@drawable/bg_radius">
 
                 <EditText
+                    android:hint="เลขรายการ"
+                    android:id="@+id/order_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:background="@drawable/bg_radius"
-                    android:hint="เลขที่รายการ"
                     android:paddingLeft="16dp"
                     android:paddingTop="16dp"
                     android:paddingRight="16dp"
