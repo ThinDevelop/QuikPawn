@@ -25,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="ขาย"
+                android:text="ฝากขาย"
                 android:textSize="30dp" />
 
             <EditText
@@ -43,6 +43,7 @@
                 android:paddingBottom="16dp" />
 
             <EditText
+                android:id="@+id/edt_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -57,6 +58,7 @@
                 android:paddingBottom="16dp" />
 
             <EditText
+                android:id="@+id/edt_idcard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -118,6 +120,7 @@
             </RelativeLayout>
 
             <EditText
+                android:id="@+id/edt_detail"
                 android:hint="รายละเอียดทรัพย์"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -128,6 +131,7 @@
                 android:background="@drawable/bg_radius" />
 
             <EditText
+                android:id="@+id/edt_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -141,6 +145,7 @@
                 android:paddingRight="16dp"
                 android:paddingBottom="16dp" />
             <EditText
+                android:id="@+id/edt_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -154,6 +159,7 @@
                 android:paddingRight="16dp"
                 android:paddingBottom="16dp" />
             <EditText
+                android:id="@+id/edt_interest"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -218,6 +224,7 @@
                         android:textColor="@color/cardview_light_background"
                         android:textSize="20dp" />
                     <Button
+                        android:id="@+id/btn_ok"
                         android:layout_width="100dp"
                         android:layout_height="70dp"
                         android:layout_marginTop="20dp"

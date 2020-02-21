@@ -28,21 +28,16 @@
             android:text="ขาย"
             android:textSize="30dp" />
 
-        <EditText
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:textSize="18dp"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="20dp"
-            android:layout_marginRight="30dp"
-            android:background="@drawable/bg_radius"
-            android:hint="เลขที่รายการ"
-            android:paddingLeft="16dp"
-            android:paddingTop="16dp"
-            android:paddingRight="16dp"
-            android:paddingBottom="16dp" />
+            android:text="เลขที่รายการ 3982"/>
 
         <EditText
+            android:id="@+id/edt_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -57,6 +52,7 @@
             android:paddingBottom="16dp" />
 
         <EditText
+            android:id="@+id/edt_idcard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -118,6 +114,7 @@
         </RelativeLayout>
 
         <EditText
+            android:id="@+id/edt_sell_detail"
             android:hint="รายละเอียดทรัพย์"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -128,6 +125,7 @@
             android:background="@drawable/bg_radius" />
 
         <EditText
+            android:id="@+id/edt_sell_price"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -136,6 +134,7 @@
             android:layout_marginRight="30dp"
             android:background="@drawable/bg_radius"
             android:hint="จำนวนเงิน (บาท)"
+            android:inputType="number"
             android:paddingLeft="16dp"
             android:paddingTop="16dp"
             android:paddingRight="16dp"
@@ -174,6 +173,14 @@
                 android:layout_height="match_parent"
                 app:penColor="@android:color/black"
                 />
+            <ImageButton
+                android:id="@+id/btn_clearsign"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/delete"
+                android:layout_alignParentRight="true"
+                android:layout_margin="10dp"
+                />
         </RelativeLayout>
 
         <TableLayout
@@ -192,6 +199,7 @@
                     android:textColor="@color/cardview_light_background"
                     android:textSize="20dp" />
                 <Button
+                    android:id="@+id/btn_ok"
                     android:layout_width="100dp"
                     android:layout_height="70dp"
                     android:layout_marginTop="20dp"

@@ -28,6 +28,7 @@
                 android:text="ซื้อ"
                 android:textSize="30dp" />
 
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -59,7 +60,12 @@
                     android:layout_alignParentRight="true"
                     />
             </RelativeLayout>
-
+            <LinearLayout
+                android:id="@+id/layout_detail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#E2F0D9"
+                android:orientation="vertical">
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
@@ -81,10 +87,13 @@
                         android:layout_centerHorizontal="true"
                         android:layout_margin="20dp"
                         android:tooltipText="รูปทรัพย์" />
+
+
                 </ViewFlipper>
             </RelativeLayout>
 
             <EditText
+                android:id="@+id/edt_detail"
                 android:hint="รายละเอียดทรัพย์"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -92,9 +101,12 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="30dp"
                 android:padding="15dp"
-                android:background="@drawable/bg_radius" />
+                android:enabled="false"
+                android:background="@drawable/bg_radius"
+                android:textColor="#000000"/>
 
             <EditText
+                android:id="@+id/edt_cost"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -102,12 +114,16 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="30dp"
                 android:background="@drawable/bg_radius"
+                android:inputType="number"
                 android:hint="ต้นทุน"
+                android:enabled="false"
                 android:paddingLeft="16dp"
                 android:paddingTop="16dp"
                 android:paddingRight="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingBottom="16dp"
+                android:textColor="#000000"/>
             <EditText
+                android:id="@+id/edt_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -115,6 +131,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="30dp"
                 android:background="@drawable/bg_radius"
+                android:inputType="number"
                 android:hint="ราคาซื้อ"
                 android:paddingLeft="16dp"
                 android:paddingTop="16dp"
@@ -193,6 +210,7 @@
                         android:textSize="20dp" />
                 </TableRow>
             </TableLayout>
+        </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.centerm.centermposoversealib.util.LogUtil;
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
 
 public abstract class BaseActivity extends AppCompatActivity {
@@ -53,10 +52,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		bindService();
-		// super.setContentView(R.layout.base_activity);
-//		linearLayout = (LinearLayout) this.findViewById(R.id.tipLinearLayout);
-//		scrollView = (ScrollView) this.findViewById(R.id.tipScrollView);
-//		rightButArea = (LinearLayout) this.findViewById(R.id.main_linearlayout);
 		
 	}
 
@@ -68,17 +63,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 		unbindService(connNew);
 		unbindService(connNew2);
 	}
-	
-//	@Override
-//	protected void onResume() {
-//		// TODO Auto-generated method stub
-//		super.onResume();
-//		if(!this.getClass().getName().equals(MainActivity.class)){
-//			bindService();
-//		}
-//
-//
-//	}
 	
  class MyBroadCastReceiver extends BroadcastReceiver {
 
@@ -162,37 +146,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 	public void clear(){
 		linearLayout.removeAllViews();
 	}
-	
-	/**
-	 * 显示信息
-	 * 
-//	 * @param msg
-//	 * @param color
-	 * @createtor：Administrator
-	 * @date:2014-9-15 下午9:45:18
-	 */
-//	public void updateView(final String msg1, final String msg2, final int color) {
-//		if (showLineNum % 50 == 0) { // 显示够20行的时候重新开始
-//			linearLayout.removeAllViews();
-//			showLineNum = 0;
-//		}
-//		showLineNum++;
-//		LayoutInflater inflater = getLayoutInflater();
-//		View v = inflater.inflate(R.layout.show_item, null);
-//		textView1 = (TextView) v.findViewById(R.id.tip1);
-//		textView2 = (TextView) v.findViewById(R.id.tip2);
-//		textView1.setText(msg1);
-//		textView2.setText(msg2);
-//		textView1.setTextColor(Color.BLACK);
-//		textView2.setTextColor(color);
-//		linearLayout.addView(v);
-//		scrollView.post(new Runnable() {
-//			public void run() {
-//				scrollView.fullScroll(ScrollView.FOCUS_DOWN);
-//			}
-//		});
-//
-//	}
+
 
 	/**
 	 * 更新UI

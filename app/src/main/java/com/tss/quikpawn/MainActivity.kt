@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         btn_sell.setOnClickListener {
-            startActivity(Intent(this@MainActivity, FormDetailActivity::class.java))
+            startActivity(Intent(this@MainActivity, SearchIItemActivity1::class.java))
         }
 
         btn_buy.setOnClickListener {

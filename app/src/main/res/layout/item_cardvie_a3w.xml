@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="right"
-                android:text="รหัสสินค้า G204"
+                android:text="รหัสสินค้า G210"
                 android:textSize="18dp" />
 
 
@@ -43,12 +43,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ราคาทุน xxx บาท"
-                android:textColor="#FF2196F3"
-                android:textSize="14dp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ครบกำหนด 3 มี.ค.63"
                 android:textColor="#FF2196F3"
                 android:textSize="14dp" />
 

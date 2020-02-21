@@ -13,7 +13,7 @@
         android:gravity="center"
         android:background="@drawable/bg_rec_border"
         android:textSize="30dp"
-        android:text="ขายฝาก"/>
+        android:text="สินค้าขายฝาก"/>
 
     <TextView
         android:id="@+id/btn_buy"
@@ -23,6 +23,6 @@
         android:gravity="center"
         android:background="@drawable/bg_rec_border"
         android:textSize="30dp"
-        android:text="ซื้อ" />
+        android:text="สินค้าหลุด" />
 
 </LinearLayout>

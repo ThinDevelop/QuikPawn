@@ -10,13 +10,13 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="18dp"/>
 
-<!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/recycler_view"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:gravity="center"-->
-<!--        android:layout_below="@+id/photo"-->
-<!--        android:padding="10dp" />-->
+    <!--    <androidx.recyclerview.widget.RecyclerView-->
+    <!--        android:id="@+id/recycler_view"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:gravity="center"-->
+    <!--        android:layout_below="@+id/photo"-->
+    <!--        android:padding="10dp" />-->
 
     <ScrollView
         android:layout_width="match_parent"
@@ -27,21 +27,21 @@
             android:orientation="vertical">
 
             <include android:id="@+id/card"
-                layout="@layout/item_cardvie_a1w"/>
+                layout="@layout/item_cardview"/>
             <include android:id="@+id/card2"
-                layout="@layout/item_cardvie_a2w"/>
+                layout="@layout/item_cardview2"/>
             <include android:id="@+id/card3"
-                layout="@layout/item_cardvie_a3w"/>
+                layout="@layout/item_cardview3"/>
             <include android:id="@+id/card4"
-                layout="@layout/item_cardvie_a2w"/>
+                layout="@layout/item_cardview"/>
             <include android:id="@+id/card5"
-                layout="@layout/item_cardvie_a3w"/>
+                layout="@layout/item_cardview2"/>
             <include android:id="@+id/card6"
-                layout="@layout/item_cardvie_a1w"/>
+                layout="@layout/item_cardview3"/>
             <include android:id="@+id/card7"
-                layout="@layout/item_cardvie_a2w"/>
+                layout="@layout/item_cardview"/>
             <include android:id="@+id/card8"
-                layout="@layout/item_cardvie_a3w"/>
+                layout="@layout/item_cardview3"/>
 
         </LinearLayout>
     </ScrollView>
