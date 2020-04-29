@@ -27,21 +27,21 @@
             android:orientation="vertical">
 
             <include android:id="@+id/card"
-                layout="@layout/item_cardview"/>
+                layout="@layout/item_cardvie_a1w"/>
             <include android:id="@+id/card2"
-                layout="@layout/item_cardview2"/>
+                layout="@layout/item_cardvie_a2w"/>
             <include android:id="@+id/card3"
-                layout="@layout/item_cardview3"/>
+                layout="@layout/item_cardvie_a3w"/>
             <include android:id="@+id/card4"
-                layout="@layout/item_cardview"/>
+                layout="@layout/item_cardvie_a2w"/>
             <include android:id="@+id/card5"
-                layout="@layout/item_cardview2"/>
+                layout="@layout/item_cardvie_a3w"/>
             <include android:id="@+id/card6"
-                layout="@layout/item_cardview3"/>
+                layout="@layout/item_cardvie_a1w"/>
             <include android:id="@+id/card7"
-                layout="@layout/item_cardview"/>
+                layout="@layout/item_cardvie_a2w"/>
             <include android:id="@+id/card8"
-                layout="@layout/item_cardview3"/>
+                layout="@layout/item_cardvie_a3w"/>
 
         </LinearLayout>
     </ScrollView>

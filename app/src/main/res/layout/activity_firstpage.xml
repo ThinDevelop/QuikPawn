@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".FirstpageActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#E2F0D9"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:src="@drawable/quikpawn"
+            android:layout_marginRight="50dp"
+            android:layout_marginLeft="50dp"
+            />
+        <EditText
+            android:hint="Merchant ID"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_radius"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:layout_marginLeft="70dp"
+            android:layout_marginRight="70dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+        <EditText
+            android:hint="User name"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_radius"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:layout_marginLeft="70dp"
+            android:layout_marginRight="70dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+        <EditText
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_radius"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:layout_marginLeft="70dp"
+            android:layout_marginRight="70dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+
+        <Button
+            android:id="@+id/login_btn"
+            android:text="Login"
+            android:layout_marginTop="20dp"
+            android:background="#08BA58"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:layout_marginLeft="70dp"
+            android:layout_marginRight="70dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,20 @@
+package com.tss.quikpawn.models
+
+data class OrderModel(var order_code: String,
+                      var idcard: String,
+                      var customer_name: String,
+                      var signature: String,
+                      var total: String,
+                      var price: String,
+                      var interest_month: String,
+                      var interest_price: String,
+                      var num_expire: String,
+                      var date_expire: String,
+                      var type_id: String,
+                      var type_name: String,
+                      var status_id: String,
+                      var status_name: String,
+                      var date_create: String,
+                      var order_parent_id: String,
+                      var products: List<ProductModel>,
+                      var interest: List<InterestModel>)

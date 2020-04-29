@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.stfalcon.multiimageview.MultiImageView
+            android:id="@+id/img_product"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_centerHorizontal="true"/>
+        <ImageView
+            android:id="@+id/btn_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="12dp"
+            android:src="@drawable/ic_close_black_24dp"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/order_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="รหัสทรัพย์ xxx"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:text="รายละเอียดทรัพย์"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:text="ดอกเบี้ย"/>
+
+    <LinearLayout
+        android:id="@+id/interest_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:orientation="vertical"/>
+
+    <EditText
+        android:id="@+id/edt_mulct"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:inputType="number"
+        android:hint="@string/mulct"/>
+
+    <TextView
+        android:id="@+id/summary_pay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginTop="12dp"
+        android:textSize="18dp"
+        android:text="@string/pay_interest"/>
+
+
+
+</LinearLayout>

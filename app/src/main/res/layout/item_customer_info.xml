@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/edt_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:hint="@string/name"
+            android:singleLine="true"
+            android:textSize="20dp" />
+
+        <EditText
+            android:id="@+id/edt_idcard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:singleLine="true"
+            android:hint="@string/card_id"
+            android:textSize="20dp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="30dp"
+            android:background="@drawable/bg_radius">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="190dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="8dp"
+                android:background="@android:color/darker_gray" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="20dp"
+                android:hint="ลายเซ็นผู้ขาย"
+                android:textSize="30dp" />
+
+            <com.github.gcacace.signaturepad.views.SignaturePad xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/signature_pad"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:penColor="@android:color/black" />
+
+            <ImageButton
+                android:id="@+id/btn_clearsign"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_alignParentRight="true"
+                android:layout_margin="10dp"
+                android:background="@drawable/delete" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btn_ok"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/btn_ok"
+            android:text="ตกลง"
+            android:textColor="@color/cardview_light_background"
+            android:textSize="20dp" />
+
+    </LinearLayout>
+</LinearLayout>

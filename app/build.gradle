@@ -9,7 +9,7 @@ android {
     buildToolsVersion "29.0.0"
     defaultConfig {
         applicationId "com.tss.quikpawn"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -36,10 +36,15 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation "androidx.cardview:cardview:1.0.0"
-    implementation files('libs/CentermPosOverseaLib201810151206.jar')
-
+    implementation files('libs/CentermPosOverseaLib201810151203.jar')
+    implementation 'com.github.smalam119:Easy-Signature-Android:0.3.0'
     implementation files('libs/SmartPosLib_V3.1.5_20181109.jar')
-
+    implementation 'com.github.gcacace:signature-pad:1.2.1'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
+    implementation 'me.dm7.barcodescanner:zxing:1.9'
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    implementation 'com.github.stfalcon:multiimageview:0.1'
+
 }
