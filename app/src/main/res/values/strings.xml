@@ -1,3 +1,32 @@
 <resources>
     <string name="app_name">Quik Pawn</string>
+    <string name="name">ชื่อ-สกุล</string>
+    <string name="card_id">รหัสประจำตัวประชาชน</string>
+    <string name="search">ค้นหา</string>
+    <string name="mulct">ค่าปรับ</string>
+
+    <string name="pay_interest">ยอดชำระ %s บาท</string>
+    <string name="calendar">กำหนดคืน</string>
+
+    <string name="return_item">คืนสินค้า</string>
+    <string name="pay_item">ชำระเงิน</string>
+    <string name="buy_item">ซื้อสินค้า</string>
+    <string name="sell_item">ขายสินค้า</string>
+    <string name="consignment_item">ฝากขาย</string>
+    <string name="interest_item">ต่อดอกเบี้ย</string>
+    <string name="redeem_item">ไถ่ถอน</string>
+    <string name="borrow_item">ยืมสินค้า</string>
+    <string name="select_order">เลือกรายการ</string>
+    <string name="msg_search_card_barcode_order">ค้นหาด้วย บัตร ปชช./บาร์โค้ด/เลขที่รายการ</string>
+    <string name="msg_confirm_title_order">ยืนยันทำรายการ</string>
+    <string name="msg_confirm_print">ยืนยันปริ้น</string>
+
+    <string name="text_status">สถานะ %s</string>
+
+    <string name="text_order_code">Order: %s</string>
+
+
+    <string name="delete_tag_key">delete_key</string>
+
+
 </resources>

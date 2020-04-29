@@ -3,7 +3,7 @@ package com.tss.quikpawn
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
+import com.tss.quikpawn.activities.MainMenuActivity
 import kotlinx.android.synthetic.main.activity_firstpage.*
 
 class FirstpageActivity : AppCompatActivity() {

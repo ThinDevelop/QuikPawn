@@ -1,149 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#E2F0D9"
     tools:context=".ConsignmentActivity">
-    <ScrollView
+    <Button
+        android:id="@+id/btn_ok"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/btn_ok"
+        android:text="ตกลง"
+        android:textColor="@color/cardview_light_background"
+        android:textSize="20dp"
+        android:layout_alignParentBottom="true"/>
+
+    <ScrollView
+        android:id="@+id/content_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/btn_ok"
+        >
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#E2F0D9"
-            android:orientation="vertical"
-            >
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="150dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center"
-                android:src="@drawable/quikpawn" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="ฝากขาย"
-                android:textSize="30dp" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="30dp"
-                android:background="@drawable/bg_radius"
-                android:hint="เลขที่รายการ"
-                android:paddingLeft="16dp"
-                android:paddingTop="16dp"
-                android:paddingRight="16dp"
-                android:paddingBottom="16dp" />
+            android:orientation="vertical">
 
             <EditText
                 android:id="@+id/edt_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="30dp"
-                android:background="@drawable/bg_radius"
-                android:hint="ชื่อ-สกุล"
-                android:paddingLeft="16dp"
-                android:paddingTop="16dp"
-                android:paddingRight="16dp"
-                android:paddingBottom="16dp" />
+                android:hint="@string/name"
+                android:singleLine="true"
+                android:textSize="20dp" />
 
             <EditText
                 android:id="@+id/edt_idcard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
                 android:layout_marginRight="30dp"
-                android:background="@drawable/bg_radius"
-                android:hint="เลขที่บัตรประชาชน"
-                android:paddingLeft="16dp"
-                android:paddingTop="16dp"
-                android:paddingRight="16dp"
-                android:paddingBottom="16dp" />
+                android:hint="@string/card_id"
+                android:singleLine="true"
+                android:inputType="number"
+                android:textSize="20dp" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:layout_gravity="center"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="30dp"
-                android:background="@drawable/bg_radius">
-                <ViewFlipper
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    >
-                    <ImageView
-                        android:id="@+id/img_view"
-                        android:src="@drawable/camera"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="20dp"
-                        android:tooltipText="รูปทรัพย์" />
-
-                </ViewFlipper>
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginBottom="20dp">
-
-                    <Button
-                        android:id="@+id/capture_btn"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:layout_margin="10dp"
-                        android:background="@drawable/camera" />
-
-                    <Button
-                        android:id="@+id/delete_btn"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:layout_margin="10dp"
-                        android:background="@drawable/delete" />
-                </LinearLayout>
-
-            </RelativeLayout>
-
-            <EditText
-                android:id="@+id/edt_detail"
-                android:hint="รายละเอียดทรัพย์"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="30dp"
-                android:padding="15dp"
-                android:background="@drawable/bg_radius" />
-
-            <EditText
-                android:id="@+id/edt_price"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="30dp"
-                android:background="@drawable/bg_radius"
-                android:hint="จำนวนเงิน (บาท)"
-                android:paddingLeft="16dp"
-                android:paddingTop="16dp"
-                android:paddingRight="16dp"
-                android:paddingBottom="16dp" />
             <EditText
                 android:id="@+id/edt_time"
                 android:layout_width="match_parent"
@@ -154,12 +60,14 @@
                 android:layout_marginRight="30dp"
                 android:background="@drawable/bg_radius"
                 android:hint="ระยะเวลา (เดือน)"
+                android:inputType="number"
                 android:paddingLeft="16dp"
                 android:paddingTop="16dp"
                 android:paddingRight="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingBottom="16dp"
+                android:singleLine="true" />
             <EditText
-                android:id="@+id/edt_interest"
+                android:id="@+id/edt_interest_rate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -167,74 +75,34 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="30dp"
                 android:background="@drawable/bg_radius"
-                android:hint="อัตราดอกเบี้ย (%)"
+                android:hint="อัตราดอกเบี้ย %"
+                android:inputType="number"
                 android:paddingLeft="16dp"
                 android:paddingTop="16dp"
                 android:paddingRight="16dp"
-                android:paddingBottom="16dp" />
+                android:paddingBottom="16dp"
+                android:singleLine="true" />
 
-            <RelativeLayout
+            <LinearLayout
+                android:id="@+id/layout_detail"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <include layout="@layout/item_detail_consignment_view"/>
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/new_item"
+                android:layout_width="wrap_content"
+                android:layout_height="80dp"
                 android:layout_gravity="center"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="30dp"
-                android:background="@drawable/bg_radius">
-                <FrameLayout
-                    android:layout_marginTop="190dp"
-                    android:layout_marginRight="20dp"
-                    android:layout_marginLeft="20dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="@android:color/darker_gray" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_gravity="bottom"
-                    android:layout_marginBottom="20dp"
-                    android:hint="ลายเซ็นผู้ขายฝาก"
-                    android:textSize="30dp" />
-                <com.github.gcacace.signaturepad.views.SignaturePad
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:app="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/signature_pad"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:penColor="@android:color/black"
-                    />
-            </RelativeLayout>
+                android:src="@drawable/ic_add_circle_black_80dp"/>
 
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
-                >
-                <TableRow>
-                    <Button
-                        android:layout_width="100dp"
-                        android:layout_height="70dp"
-                        android:layout_marginLeft="70dp"
-                        android:layout_marginTop="20dp"
-                        android:background="@drawable/btn_cancel"
-                        android:text="ยกเลิก"
-                        android:textColor="@color/cardview_light_background"
-                        android:textSize="20dp" />
-                    <Button
-                        android:id="@+id/btn_ok"
-                        android:layout_width="100dp"
-                        android:layout_height="70dp"
-                        android:layout_marginTop="20dp"
-                        android:layout_marginLeft="15dp"
-                        android:background="@drawable/btn_ok"
-                        android:text="ตกลง"
-                        android:textColor="@color/cardview_light_background"
-                        android:textSize="20dp" />
-                </TableRow>
-            </TableLayout>
+            <include layout="@layout/item_sign_view"/>
         </LinearLayout>
     </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</RelativeLayout>

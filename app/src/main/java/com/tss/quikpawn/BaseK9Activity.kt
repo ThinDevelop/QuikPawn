@@ -2,42 +2,50 @@ package com.tss.quikpawn
 
 import android.app.Activity
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
+import android.os.Environment
+import android.os.IBinder
 import android.os.RemoteException
 import android.provider.MediaStore
 import android.util.Log
-import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.CallSuper
 import androidx.appcompat.app.AlertDialog
-import com.centerm.centermposoversealib.thailand.AidlIdCardTha
-import com.centerm.centermposoversealib.thailand.AidlIdCardThaListener
-import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
-import com.centerm.centermposoversealib.util.Utility
+import androidx.core.content.FileProvider
+import com.centerm.centermposoversealib.thailand.*
 import com.centerm.smartpos.aidl.iccard.AidlICCard
 import com.centerm.smartpos.aidl.printer.AidlPrinter
 import com.centerm.smartpos.aidl.printer.AidlPrinterStateChangeListener
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager
 import com.centerm.smartpos.constant.Constant
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.WriterException
+import com.google.zxing.common.BitMatrix
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_sell.*
+import java.io.File
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 open class BaseK9Activity: BaseActivity() {
 
-    private val IMAGE_CAPTURE_CODE = 1001
+    val SCAN_REQUEST_CODE = 1002
+
+    open val IMAGE_CAPTURE_CODE = 1001
     private val PERMISSION_CODE = 1000
+    var citizenId = ""
     private var printDev: AidlPrinter? = null
     private val callback = PrinterCallback()
     private var aidlIdCardTha: AidlIdCardTha? = null
@@ -47,12 +55,24 @@ open class BaseK9Activity: BaseActivity() {
     var disposable: Disposable? = null
     var image_uri: Uri? = null
     var imgView: ImageView? = null
+    var imageFilePath = ""
+    var alreadyOpen = true
+    var index = 0
+    var loadingProgressBar: ProgressBar? = null
+
+
+    private val size = 660
+    private val size_width = 660
+    private val size_height = 264
 
     open fun initialK9() {
-        val dialog = createProgressDialog("Loading...")
+        val dialog = createProgressDialog(this, "Loading...")
         disposable = Observable.interval(1, TimeUnit.SECONDS)
             .filter {
                 aidlIcCard?.open()
+                if (aidlIcCard?.status()?.toInt() != 1) {
+                    process = false
+                }
                 aidlIdCardTha != null && !process && aidlIcCard?.status()?.toInt() == 1
             }
             .subscribeOn(Schedulers.io())
@@ -60,8 +80,9 @@ open class BaseK9Activity: BaseActivity() {
             .subscribe({
                 process = true
                 runOnUiThread { dialog?.show() }
-                aidlIdCardTha?.searchIDCard(6000, object : AidlIdCardThaListener.Stub() {
-                    override fun onFindIDCard(p0: ThiaIdInfoBeen?) {
+
+                aidlIdCardTha?.searchIDCardSecurity(6000, object : ThaiIDSecurityListerner.Stub(){
+                    override fun onFindIDCard(p0: ThaiIDSecurityBeen?) {
                         runOnUiThread {
                             dialog?.dismiss()
                             p0?.let {
@@ -80,6 +101,13 @@ open class BaseK9Activity: BaseActivity() {
                         process = false
                     }
                 })
+                aidlIdCardTha?.searchIDCardInfo(6000, object : ThaiInfoListerner.Stub()  {
+
+                    override fun onResult(p0: Int, p1: String?) {
+                        Log.e("panya onResult : ", p1)
+                    }
+
+                })
                 // this method will be called when action is success
             }, { error ->
                 runOnUiThread { dialog?.dismiss() }
@@ -87,21 +115,84 @@ open class BaseK9Activity: BaseActivity() {
             })
     }
 
-    private fun createProgressDialog(title: String): AlertDialog {
+    open fun createProgressDialog(context: Context, title: String): AlertDialog {
         val view = layoutInflater.inflate(R.layout.layout_loading_dialog, null)
         val text = view.findViewById<TextView>(R.id.txt_load)
         text.text = title
-        val builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(context)
         builder.setCancelable(false) // if you want user to wait for some process to finish,
         builder.setView(view)
         return builder.create()
     }
 
-    open fun setupView(info: ThiaIdInfoBeen) {
-
+    @CallSuper
+    open fun setupView(info: ThaiIDSecurityBeen) {
+        citizenId = info.citizenId
     }
 
-    open fun cameraOpen(img_view: ImageView) {
+
+    @Throws(WriterException::class)
+    fun createImageBarcode(message: String?, type: String?): Bitmap? {
+        var bitMatrix: BitMatrix? = null
+        bitMatrix = when (type) {
+            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, size, size)
+            "Barcode" -> MultiFormatWriter().encode(
+                message,
+                BarcodeFormat.CODE_128,
+                size_width,
+                size_height
+            )
+            "Data Matrix" -> MultiFormatWriter().encode(
+                message,
+                BarcodeFormat.DATA_MATRIX,
+                size,
+                size
+            )
+            "PDF 417" -> MultiFormatWriter().encode(
+                message,
+                BarcodeFormat.PDF_417,
+                size_width,
+                size_height
+            )
+            "Barcode-39" -> MultiFormatWriter().encode(
+                message,
+                BarcodeFormat.CODE_39,
+                size_width,
+                size_height
+            )
+            "Barcode-93" -> MultiFormatWriter().encode(
+                message,
+                BarcodeFormat.CODE_93,
+                size_width,
+                size_height
+            )
+            "AZTEC" -> MultiFormatWriter().encode(message, BarcodeFormat.AZTEC, size, size)
+            else -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, size, size)
+        }
+        val width = bitMatrix.width
+        val height = bitMatrix.height
+        val pixels = IntArray(width * height)
+        for (i in 0 until height) {
+            for (j in 0 until width) {
+                if (bitMatrix[j, i]) {
+                    pixels[i * width + j] = -0x1000000
+                } else {
+                    pixels[i * width + j] = -0x1
+                }
+            }
+        }
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+        return bitmap
+    }
+
+    open fun cameraOpen(img_view: ImageView, loading: ProgressBar,imageIndex: Int) {
+        if (!alreadyOpen) {
+            return
+        }
+        index = imageIndex
+        alreadyOpen = false
+        loadingProgressBar = loading
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (checkSelfPermission(android.Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_DENIED ||
@@ -111,8 +202,10 @@ open class BaseK9Activity: BaseActivity() {
                 requestPermissions(permission,PERMISSION_CODE)
             }
             else{
-                openCamera()
+                openCamera2()
             }
+        } else {
+            openCamera2()
         }
 
         imgView = img_view
@@ -128,9 +221,10 @@ open class BaseK9Activity: BaseActivity() {
             PERMISSION_CODE -> {
                 if(grantResults.size > 0 && grantResults[0] ==
                     PackageManager.PERMISSION_GRANTED){
-                    openCamera()
+                    openCamera2()
                 }
                 else{
+                    alreadyOpen = true
                     Toast.makeText(this,"Permission denied", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -138,8 +232,10 @@ open class BaseK9Activity: BaseActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if(resultCode == Activity.RESULT_OK){
-            imgView?.setImageURI(image_uri)
+        alreadyOpen = true
+        if(resultCode != Activity.RESULT_OK) return
+        if (IMAGE_CAPTURE_CODE == requestCode) {
+            imgView?.setImageURI(Uri.parse(imageFilePath))
         }
     }
 
@@ -151,6 +247,36 @@ open class BaseK9Activity: BaseActivity() {
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,image_uri)
         startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
+    }
+
+    fun openCamera2() {
+        val pictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (pictureIntent.resolveActivity(getPackageManager()) != null) {
+            //Create a file to store the image
+            var photoFile: File? = null
+            try {
+
+//                val cw = ContextWrapper(applicationContext)
+//                // path to /data/data/yourapp/app_data/imageDir
+//                // path to /data/data/yourapp/app_data/imageDir
+//                val directory: File = cw.getDir("imageDir", Context.MODE_PRIVATE)
+
+
+
+                val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES+ "/quikpawn")
+                photoFile = File.createTempFile(""+System.currentTimeMillis() ,  /* prefix */
+                    ".jpg",         /* suffix */
+                    storageDir      /* directory */)
+                imageFilePath = photoFile.getAbsolutePath()
+            } catch (ex: IOException) {
+                ex.printStackTrace()
+            }
+            photoFile?.let {
+                val photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", photoFile)
+                pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                startActivityForResult(pictureIntent, IMAGE_CAPTURE_CODE)
+            }
+        }
     }
 
     override fun onDeviceConnected(deviceManager: AidlDeviceManager?, cpay: Boolean) {
@@ -201,5 +327,9 @@ open class BaseK9Activity: BaseActivity() {
     open fun printdata(textList: ArrayList<PrinterParams>) {
         printDev?.printDatas(textList, callback)
 
+    }
+
+    open fun setTagToImageView(id: String) {
+        imgView?.tag = id
     }
 }
