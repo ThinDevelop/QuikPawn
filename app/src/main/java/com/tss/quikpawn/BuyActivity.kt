@@ -287,7 +287,7 @@ class BuyActivity : BaseK9Activity() {
             printerParams1.setText("สินค้า : " + product.product_name + "\n")
             textList.add(printerParams1)
 
-            bitmap = Utility.toGrayscale(createImageBarcode(data.order_code, "Barcode")!!)
+            bitmap = Utility.toGrayscale(createImageBarcode(product.product_code, "Barcode")!!)
             printerParams1 = PrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
@@ -299,11 +299,9 @@ class BuyActivity : BaseK9Activity() {
             printerParams1.setTextSize(24)
             printerParams1.setText(product.product_code + "\n\n")
             textList.add(printerParams1)
-
-
-            printdata(textList)
-
         }
+
+        printdata(textList)
     }
 
     override fun onDestroy() {
