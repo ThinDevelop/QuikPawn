@@ -22,6 +22,7 @@ public class DialogUtil {
         final EditText input = new EditText(context);
 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.addTextChangedListener(new NumberTextWatcherForThousand(input));
         builder.setView(input);
 
 // Set up the buttons

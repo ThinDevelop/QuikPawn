@@ -4,4 +4,10 @@
     <item android:id="@+id/logout"
         app:showAsAction="never"
         android:title="Logout" />
+    <item android:id="@+id/reprint"
+        app:showAsAction="never"
+        android:title="Reprint" />
+    <item android:id="@+id/reprint_by_order"
+        app:showAsAction="never"
+        android:title="Reprint By Order" />
 </menu>

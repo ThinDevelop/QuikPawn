@@ -96,7 +96,7 @@ class ProductListActivity: BaseK9Activity() {
         return productList
     }
 
-    override fun setupView(info: ThaiIDSecurityBeen) {
+    override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         loadOrder(citizenId)
     }

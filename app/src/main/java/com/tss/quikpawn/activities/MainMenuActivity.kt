@@ -71,6 +71,11 @@ class MainMenuActivity : AppCompatActivity() {
                 this@MainMenuActivity.finish()
                 return true
             }
+            R.id.reprint_by_order-> {
+                startActivity(Intent(this@MainMenuActivity, LoginActivity::class.java))
+                this@MainMenuActivity.finish()
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
     }

@@ -62,6 +62,7 @@ class LoginActivity: AppCompatActivity() {
                     PreferencesManager.getInstance().companyBranchName = companyBranchName
                     PreferencesManager.getInstance().companyName = companyName
 
+
                     startActivity(Intent(this@LoginActivity, MainMenuActivity::class.java))
                     this@LoginActivity.finish()
                 }

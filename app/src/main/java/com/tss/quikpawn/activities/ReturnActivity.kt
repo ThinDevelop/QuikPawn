@@ -59,6 +59,9 @@ class ReturnActivity : BaseK9Activity() {
             signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             val customerId = edt_idcard.text.toString()
+            var customerAddress = address
+            var customerPhoto = customerPhoto
+            var customerPhone = edt_phonenumber.text.toString()
             val signature = Util.bitmapToBase64(signatureBitmap)
 
             if (!customerName.isEmpty() &&
@@ -76,6 +79,9 @@ class ReturnActivity : BaseK9Activity() {
                     val returnModel = ReturnParamModel(
                         customerId,
                         customerName,
+                        customerAddress,
+                        customerPhoto,
+                        customerPhone,
                         signature,
                         orderCode!!,
                         productList
@@ -115,7 +121,7 @@ class ReturnActivity : BaseK9Activity() {
         initialK9()
     }
 
-    override fun setupView(info: ThaiIDSecurityBeen) {
+    override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
@@ -172,8 +178,8 @@ class ReturnActivity : BaseK9Activity() {
 
         var printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(24)
-        printerParams1.setText("รายการ คืนสินค้า")
+        printerParams1.setTextSize(30)
+        printerParams1.setText("คืนสินค้า")
         textList.add(printerParams1)
 
         var bitmap = createImageBarcode(orderCode, "Barcode")!!

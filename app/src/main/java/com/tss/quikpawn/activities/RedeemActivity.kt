@@ -21,6 +21,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.centerm.centermposoversealib.thailand.ThaiIDSecurityBeen
+import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.google.gson.Gson
@@ -32,6 +33,7 @@ import com.tss.quikpawn.ScanActivity
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
+import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.activity_redeem.*
 import kotlinx.android.synthetic.main.item_customer_info.*
@@ -63,6 +65,9 @@ class RedeemActivity: BaseK9Activity() {
             signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             var customerId = citizenId
+            var customerAddress = address
+            var customerPhoto = customerPhoto
+            var customerPhoneNumber = edt_phonenumber.text.toString()
             val signature = Util.bitmapToBase64(signatureBitmap)
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
@@ -75,15 +80,18 @@ class RedeemActivity: BaseK9Activity() {
 
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
                 list.add(interestOrderModel!!.order_code)
-                list.add(getString(R.string.pay_interest, (cost + summary + mulctPrice).toString()))
+                list.add(getString(R.string.pay_interest, NumberTextWatcherForThousand.getDecimalFormattedString((cost + summary + mulctPrice).toString())))
 
                 val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
 
                     val x = RedeemParamModel(
                         interestOrderModel!!.order_code,
-                        interestOrderModel!!.idcard,
-                        interestOrderModel!!.customer_name,
+                        customerId,
+                        customerName,
+                        customerAddress,
+                        customerPhoto,
+                        customerPhoneNumber,
                         listInterestMonthModel,
                         cost.toString(),
                         mulctPrice.toString(),
@@ -199,7 +207,7 @@ class RedeemActivity: BaseK9Activity() {
         }
     }
 
-    override fun setupView(info: ThaiIDSecurityBeen) {
+    override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length-3) + "XXX")
@@ -343,8 +351,8 @@ class RedeemActivity: BaseK9Activity() {
 
         var printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(24)
-        printerParams1.setText("รายการ " + data.type_name)
+        printerParams1.setTextSize(30)
+        printerParams1.setText(data.type_name)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()

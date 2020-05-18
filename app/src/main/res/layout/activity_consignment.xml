@@ -51,6 +51,17 @@
                 android:textSize="20dp" />
 
             <EditText
+                android:id="@+id/edt_phonenumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:hint="@string/please_phone_number"
+                android:singleLine="true"
+                android:inputType="phone"
+                android:textSize="20dp" />
+
+            <EditText
                 android:id="@+id/edt_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -76,7 +87,7 @@
                 android:layout_marginRight="30dp"
                 android:background="@drawable/bg_radius"
                 android:hint="อัตราดอกเบี้ย %"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:paddingLeft="16dp"
                 android:paddingTop="16dp"
                 android:paddingRight="16dp"
@@ -89,7 +100,6 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <include layout="@layout/item_detail_consignment_view"/>
 
             </LinearLayout>
 

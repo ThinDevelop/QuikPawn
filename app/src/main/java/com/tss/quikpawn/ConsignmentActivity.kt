@@ -18,6 +18,7 @@ import androidx.core.view.get
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.centermposoversealib.thailand.ThaiIDSecurityBeen
+import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.google.gson.Gson
@@ -27,11 +28,9 @@ import com.tss.quikpawn.models.DialogParamModel
 import com.tss.quikpawn.models.OrderModel
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
+import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.activity_consignment.*
-import kotlinx.android.synthetic.main.activity_consignment.edt_name
-import kotlinx.android.synthetic.main.activity_consignment.layout_detail
-import kotlinx.android.synthetic.main.item_detail_consignment_view.*
 import kotlinx.android.synthetic.main.item_sign_view.*
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -42,9 +41,6 @@ class ConsignmentActivity : BaseK9Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_consignment)
         title = getString(R.string.consignment_item)
-        img_view1.setOnClickListener {
-            cameraOpen(it as ImageView, loading_photo_consignment, layout_detail.childCount)
-        }
 
         new_item.setOnClickListener{
             val inflater = LayoutInflater.from(baseContext)
@@ -52,7 +48,9 @@ class ConsignmentActivity : BaseK9Activity() {
             val delete = contentView.findViewById<ImageView>(R.id.delete_detail_btn)
             val camera = contentView.findViewById<ImageView>(R.id.img_view1)
             val loadingProgressBarConsignment = contentView.findViewById<ProgressBar>(R.id.loading_photo_consignment)
+            val edtCost = contentView.findViewById<EditText>(R.id.edt_cost)
 
+            edtCost.addTextChangedListener(NumberTextWatcherForThousand(edtCost))
             delete.visibility = View.VISIBLE
             contentView.tag = layout_detail.childCount
             delete.tag = contentView.tag
@@ -69,12 +67,15 @@ class ConsignmentActivity : BaseK9Activity() {
             signature_pad.clear()
         }
 
+
+
         btn_ok.setOnClickListener {
             var signatureBitmap = signature_pad.getSignatureBitmap()
             signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             var customerId = citizenId
             val interest = edt_interest_rate.text.toString()
+            val phoneNumber = edt_phonenumber.text.toString()
             val expire = edt_time.text.toString()
             val signature = Util.bitmapToBase64(signatureBitmap)
 
@@ -85,6 +86,7 @@ class ConsignmentActivity : BaseK9Activity() {
                 !customerId.isEmpty() &&
                 !signature.isEmpty() &&
                 !interest.isEmpty() && !interest.equals("0") &&
+                !phoneNumber.isEmpty() &&
                 !expire.isEmpty() &&
                 (loadingProgressBar != null && !loadingProgressBar!!.isShown)   ) {
                 val productList = ArrayList<ConsignmentProductModel>()
@@ -102,7 +104,7 @@ class ConsignmentActivity : BaseK9Activity() {
                         "5",
                         detail.text.toString(),
                         "0",
-                        cost.text.toString(),
+                        NumberTextWatcherForThousand.trimCommaOfString(cost.text.toString()),
                         refImg
                     )
                     productList.add(product)
@@ -112,10 +114,10 @@ class ConsignmentActivity : BaseK9Activity() {
                 var sum = 0
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ\n")
                 for (product in productList) {
-                    list.add(product.name + " : " + product.cost)
+                    list.add(product.name + " : " + NumberTextWatcherForThousand.getDecimalFormattedString(product.cost))
                     sum += Integer.parseInt(product.cost)
                 }
-                list.add("รวม " + sum + " บาท")
+                list.add("รวม " + NumberTextWatcherForThousand.getDecimalFormattedString(sum.toString()) + " บาท")
 
                 val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
@@ -124,6 +126,9 @@ class ConsignmentActivity : BaseK9Activity() {
                     val model = ConsignmentParamModel(
                         customerId,
                         customerName,
+                        address,
+                        customerPhoto,
+                        phoneNumber,
                         productList,
                         PreferencesManager.getInstance().companyId,
                         PreferencesManager.getInstance().companyBranchId,
@@ -159,11 +164,11 @@ class ConsignmentActivity : BaseK9Activity() {
                 Toast.makeText(this@ConsignmentActivity, "ข้อมูลไม่ครบถ้วน", Toast.LENGTH_LONG).show()
             }
         }
-
+        new_item.callOnClick()
         initialK9()
     }
 
-    override fun setupView(info: ThaiIDSecurityBeen) {
+    override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length-3) + "XXX")
@@ -221,8 +226,8 @@ class ConsignmentActivity : BaseK9Activity() {
 
         var printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(24)
-        printerParams1.setText("รายการ "+data.type_name)
+        printerParams1.setTextSize(30)
+        printerParams1.setText("\n"+data.type_name)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()
