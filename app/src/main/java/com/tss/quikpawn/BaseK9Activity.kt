@@ -31,6 +31,7 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
+import com.tss.quikpawn.util.Util
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -46,6 +47,7 @@ open class BaseK9Activity: BaseActivity() {
     open val IMAGE_CAPTURE_CODE = 1001
     private val PERMISSION_CODE = 1000
     var citizenId = ""
+    var address = ""
     private var printDev: AidlPrinter? = null
     private val callback = PrinterCallback()
     private var aidlIdCardTha: AidlIdCardTha? = null
@@ -59,6 +61,7 @@ open class BaseK9Activity: BaseActivity() {
     var alreadyOpen = true
     var index = 0
     var loadingProgressBar: ProgressBar? = null
+    var customerPhoto = ""
 
 
     private val size = 660
@@ -81,8 +84,29 @@ open class BaseK9Activity: BaseActivity() {
                 process = true
                 runOnUiThread { dialog?.show() }
 
-                aidlIdCardTha?.searchIDCardSecurity(6000, object : ThaiIDSecurityListerner.Stub(){
-                    override fun onFindIDCard(p0: ThaiIDSecurityBeen?) {
+//                aidlIdCardTha?.searchIDCardSecurity(6000, object : ThaiIDSecurityListerner.Stub(){
+//                    override fun onFindIDCard(p0: ThaiIDSecurityBeen?) {
+//                        runOnUiThread {
+//                            dialog?.dismiss()
+//                            p0?.let {
+//                                setupView(p0)
+//                            }
+//                        }
+//                    }
+//
+//                    override fun onTimeout() {
+//                        runOnUiThread { dialog?.dismiss() }
+//                        process = false
+//                    }
+//
+//                    override fun onError(p0: Int, p1: String?) {
+//                        runOnUiThread { dialog?.dismiss() }
+//                        process = false
+//                    }
+//                })
+                aidlIdCardTha?.searchIDCard(6000, object : AidlIdCardThaListener.Stub()  {
+
+                    override fun onFindIDCard(p0: ThiaIdInfoBeen?) {
                         runOnUiThread {
                             dialog?.dismiss()
                             p0?.let {
@@ -100,13 +124,6 @@ open class BaseK9Activity: BaseActivity() {
                         runOnUiThread { dialog?.dismiss() }
                         process = false
                     }
-                })
-                aidlIdCardTha?.searchIDCardInfo(6000, object : ThaiInfoListerner.Stub()  {
-
-                    override fun onResult(p0: Int, p1: String?) {
-                        Log.e("panya onResult : ", p1)
-                    }
-
                 })
                 // this method will be called when action is success
             }, { error ->
@@ -126,8 +143,10 @@ open class BaseK9Activity: BaseActivity() {
     }
 
     @CallSuper
-    open fun setupView(info: ThaiIDSecurityBeen) {
+    open fun setupView(info: ThiaIdInfoBeen) {
         citizenId = info.citizenId
+        address = info.address.replace("#", " ")
+        customerPhoto = Util.bitmapToBase64(info.photo)
     }
 
 
@@ -135,7 +154,7 @@ open class BaseK9Activity: BaseActivity() {
     fun createImageBarcode(message: String?, type: String?): Bitmap? {
         var bitMatrix: BitMatrix? = null
         bitMatrix = when (type) {
-            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, size, size)
+            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, 300, 300)
             "Barcode" -> MultiFormatWriter().encode(
                 message,
                 BarcodeFormat.CODE_128,

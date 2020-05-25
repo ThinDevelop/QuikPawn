@@ -27,5 +27,9 @@ class Util {
 
             return output
         }
+
+        fun productToBitmap() {
+
+        }
     }
 }

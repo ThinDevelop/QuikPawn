@@ -16,7 +16,6 @@ import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.centerm.centermposoversealib.thailand.ThaiIDSecurityBeen
 import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
@@ -25,14 +24,13 @@ import com.google.gson.reflect.TypeToken
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
+import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.activity_sell.*
 import kotlinx.android.synthetic.main.item_customer_info.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
 import java.lang.reflect.Type
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 
 class SellActivity : BaseK9Activity() {
@@ -73,15 +71,15 @@ class SellActivity : BaseK9Activity() {
             signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             var customerId = citizenId
+            var customerAddress = address
+            var customerPhoto = customerPhoto
             val signature = Util.bitmapToBase64(signatureBitmap)
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
             if (!customerName.isEmpty() &&
-                !customerId.isEmpty() &&
                 !signature.isEmpty()
             ) {
-
                 var totle_price = 0
                 for (product in productList) {
                     totle_price += product.sale_price
@@ -96,10 +94,10 @@ class SellActivity : BaseK9Activity() {
                     var sum = 0
                     val list = mutableListOf("รหัสลูกค้า : "+ customerId+"\nรายการ\n")
                     for (product in productList) {
-                        list.add(product.product_code+ " : " +product.sale_price)
+                        list.add(product.product_code+ " : " +NumberTextWatcherForThousand.getDecimalFormattedString(product.sale_price.toString()))
                         sum += product.sale_price
                     }
-                    list.add("รวม "+ sum +" บาท")
+                    list.add("รวม "+ NumberTextWatcherForThousand.getDecimalFormattedString(sum.toString()) +" บาท")
 
                     val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
                     DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
@@ -108,6 +106,9 @@ class SellActivity : BaseK9Activity() {
                     val model = SellParamModel(
                         customerId,
                         customerName,
+                        customerAddress,
+                        customerPhoto,
+                        edt_phonenumber.text.toString(),
                         productList,
                         totle_price,
                         signature
@@ -120,12 +121,8 @@ class SellActivity : BaseK9Activity() {
                             if (status == "200") {
                                 val data = response.getJSONObject("data")
                                 printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
-                                orderCode?.let {
-                                    val intent = Intent()
-                                    intent.putExtra("order_code", orderCode)
-                                    setResult(Activity.RESULT_OK, intent)
-                                }
-                                finish()
+                                showConfirmDialog(data)
+
                             }
                         }
 
@@ -160,6 +157,20 @@ class SellActivity : BaseK9Activity() {
             }
         })
         initialK9()
+    }
+
+    fun showConfirmDialog(data: JSONObject) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            orderCode?.let {
+                val intent = Intent()
+                intent.putExtra("order_code", orderCode)
+                setResult(Activity.RESULT_OK, intent)
+            }
+            finish()
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -269,11 +280,11 @@ class SellActivity : BaseK9Activity() {
                     override fun onClickConfirm(result: String?) {
                         result?.let {
                             if (it.isEmpty()) return
-                            val price = Integer.parseInt(result)
+                            val price = Integer.parseInt(result.replace(",", ""))
                             val productCode = contentView.tag as String
                             val sellProductModel = SellProductModel(productCode, price)
                             updatePrice(sellProductModel)
-                            txtsell.text = "ราคาขาย " + price + "บาท"
+                            txtsell.text = "ราคาขาย " + NumberTextWatcherForThousand.getDecimalFormattedString(price.toString()) + "บาท"
                             updateSummaryPrice()
                         }
                     }
@@ -296,10 +307,10 @@ class SellActivity : BaseK9Activity() {
         for (product in productList) {
             sumPrice += product.sale_price
         }
-        txt_summary_price.text = "ราคารวม " + sumPrice + " บาท"
+        txt_summary_price.text = "ราคารวม " + NumberTextWatcherForThousand.getDecimalFormattedString(sumPrice.toString()) + " บาท"
     }
 
-    override fun setupView(info: ThaiIDSecurityBeen) {
+    override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
@@ -313,8 +324,8 @@ class SellActivity : BaseK9Activity() {
 
         var printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(24)
-        printerParams1.setText("รายการ " + data.type_name)
+        printerParams1.setTextSize(30)
+        printerParams1.setText(data.type_name)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()

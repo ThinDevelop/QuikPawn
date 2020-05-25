@@ -30,6 +30,7 @@ import com.tss.quikpawn.ScanActivity
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
+import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.activity_borrow.*
 import kotlinx.android.synthetic.main.item_customer_info.*
@@ -88,6 +89,9 @@ class BorrowActivity: BaseK9Activity() {
             signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             var customerId = citizenId
+            var customerAddress = address
+            var customerPhoto = customerPhoto
+            var customerPhone = edt_phonenumber.text.toString()
             val txtDeadline = deadline.text.toString()
             val signature = Util.bitmapToBase64(signatureBitmap)
             if (customerId.isEmpty()) {
@@ -99,21 +103,22 @@ class BorrowActivity: BaseK9Activity() {
 
             if (!customerName.isEmpty() &&
                 !customerId.isEmpty() &&
-                !signature.isEmpty()) {
+                !signature.isEmpty() &&
+                !customerPhone.isEmpty()){
 
                 var sum = 0
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ\n")
                 for (product in productList) {
-                    list.add(product.product_code + " : " + product.sale_price)
+                    list.add(product.product_code + " : " + NumberTextWatcherForThousand.getDecimalFormattedString(product.sale_price.toString()))
                     sum ++
                 }
-                list.add("รวม " + sum + " ชิ้น")
+                list.add("รวม " + NumberTextWatcherForThousand.getDecimalFormattedString(sum.toString()) + " ชิ้น")
 
                 val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
                     val dialog = createProgressDialog(this, "Loading...")
                     dialog.show()
-                val model = LendParamModel(customerId, customerName, productList, deadline, signature)
+                val model = LendParamModel(customerId, customerName, customerAddress, customerPhoto, customerPhone, productList, deadline, signature)
                 Network.lend(model, object : JSONObjectRequestListener {
                     override fun onResponse(response: JSONObject) {
                         dialog.dismiss()
@@ -122,7 +127,7 @@ class BorrowActivity: BaseK9Activity() {
                         if (status == "200") {
                             val data = response.getJSONObject("data")
                             printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
-                            finish()
+                            showConfirmDialog(data)
                         }
                     }
 
@@ -155,7 +160,14 @@ class BorrowActivity: BaseK9Activity() {
         initialK9()
     }
 
-
+    fun showConfirmDialog(data: JSONObject) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            finish()
+        })
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -211,7 +223,9 @@ class BorrowActivity: BaseK9Activity() {
         val txtId = contentView.findViewById<TextView>(R.id.txt_item_id)
         val txtDetail = contentView.findViewById<TextView>(R.id.txt_detail)
         val txtCost = contentView.findViewById<TextView>(R.id.txt_cost)
+        val txtSell = contentView.findViewById<TextView>(R.id.txt_sell)
 
+        txtSell.visibility = View.VISIBLE
         txtId.text = productModel.product_id
         txtDetail.text = productModel.detail
         txtCost.text = productModel.cost
@@ -247,6 +261,7 @@ class BorrowActivity: BaseK9Activity() {
                         val productCode = contentView.tag as String
                         val sellProductModel = SellProductModel(productCode, price)
                         productList.add(sellProductModel)
+                        txtSell.text = NumberTextWatcherForThousand.getDecimalFormattedString(result)
                     }
 
                 }
@@ -255,7 +270,7 @@ class BorrowActivity: BaseK9Activity() {
         item_container.addView(contentView)
     }
 
-    override fun setupView(info: ThaiIDSecurityBeen) {
+    override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         edt_name.setText(info.thaiFirstName +" "+info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length-3) + "XXX")
@@ -269,8 +284,8 @@ class BorrowActivity: BaseK9Activity() {
 
         var printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(24)
-        printerParams1.setText("รายการ "+data.type_name)
+        printerParams1.setTextSize(30)
+        printerParams1.setText(data.type_name)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()
@@ -332,7 +347,7 @@ class BorrowActivity: BaseK9Activity() {
             printerParams1 = PrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
             printerParams1.setTextSize(24)
-            printerParams1.setText("*"+product.product_code + " "+product.cost+" บาท")
+            printerParams1.setText("*"+product.product_code + " "+product.sale+" บาท")
             textList.add(printerParams1)
         }
 //        printerParams1 = PrinterParams()

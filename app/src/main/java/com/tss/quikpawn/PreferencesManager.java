@@ -11,10 +11,8 @@ public class PreferencesManager {
     private static final String KEY_COMPANY_BRANCH_ID = "company_branch_id";
     private static final String KEY_COMPANY_NAME = "company_name";
     private static final String KEY_COMPANY_BRANCH_NAME = "company_branch_name";
-
-
-
-
+    private static final String KEY_COMPANY_TID = "company_tid";
+    private static final String KEY_COMPANY_SHOP = "company_shop";
 
     private static PreferencesManager sInstance;
     private final SharedPreferences mPref;
@@ -119,6 +117,36 @@ public class PreferencesManager {
 
     public void removeCompanyName() {
         remove(KEY_COMPANY_NAME);
+    }
+
+
+    public void setTID(String value) {
+        mPref.edit()
+                .putString(KEY_COMPANY_TID, value)
+                .commit();
+    }
+
+    public String getTID() {
+        return mPref.getString(KEY_COMPANY_TID, "");
+    }
+
+    public void removeTID() {
+        remove(KEY_COMPANY_TID);
+    }
+
+
+    public void setShop(String value) {
+        mPref.edit()
+                .putString(KEY_COMPANY_SHOP, value)
+                .commit();
+    }
+
+    public String getShop() {
+        return mPref.getString(KEY_COMPANY_SHOP, "");
+    }
+
+    public void removeShop() {
+        remove(KEY_COMPANY_SHOP);
     }
 
     public void remove(String key) {

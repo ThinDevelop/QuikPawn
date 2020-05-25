@@ -19,6 +19,7 @@ class LoginActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         logout()
+        Log.e("panya", "SERIAL : "+ android.os.Build.SERIAL)
     }
 
     fun logout() {
@@ -55,12 +56,14 @@ class LoginActivity: AppCompatActivity() {
                     val companyBranchId = shop.getString("company_branch_id")
                     val companyBranchName = shop.getString("company_branch_name")
                     val companyName = shop.getString("company_name")
+                    val tid = data.getString("tid")
                     PreferencesManager.getInstance().token = response.getString("access_token")
                     PreferencesManager.getInstance().userId = id
                     PreferencesManager.getInstance().companyId = companyId
                     PreferencesManager.getInstance().companyBranchId = companyBranchId
                     PreferencesManager.getInstance().companyBranchName = companyBranchName
                     PreferencesManager.getInstance().companyName = companyName
+                    PreferencesManager.getInstance().tid = tid
 
                     startActivity(Intent(this@LoginActivity, MainMenuActivity::class.java))
                     this@LoginActivity.finish()

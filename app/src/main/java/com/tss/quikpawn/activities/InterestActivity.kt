@@ -32,6 +32,7 @@ import com.tss.quikpawn.ScanActivity
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
+import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.activity_interest.*
 import kotlinx.android.synthetic.main.item_customer_info.*
@@ -64,6 +65,9 @@ class InterestActivity: BaseK9Activity() {
             signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             var customerId = citizenId
+            var customerAddress = address
+            var customerPhoto = customerPhoto
+            var phoneNumber = edt_phonenumber.text.toString()
             val signature = Util.bitmapToBase64(signatureBitmap)
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
@@ -75,14 +79,17 @@ class InterestActivity: BaseK9Activity() {
 
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
                 list.add(interestOrderModel!!.order_code)
-                list.add("ดอกเบี้ยรวม " + summary + " บาท")
+                list.add("ดอกเบี้ยรวม " + NumberTextWatcherForThousand.getDecimalFormattedString(summary.toString()) + " บาท")
 
                 val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
                 val x = InterestParamModel(
                     interestOrderModel!!.order_code,
-                    interestOrderModel!!.idcard,
-                    interestOrderModel!!.customer_name,
+                    customerId,
+                    customerName,
+                    customerAddress,
+                    customerPhoto,
+                    phoneNumber,
                     listInterestMonthModel,
                     "0",
                     signature,
@@ -97,7 +104,7 @@ class InterestActivity: BaseK9Activity() {
                             Log.e("panya", dataJsonObj.toString())
 
                             printSlip(Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java))
-                            finish()
+                            showConfirmDialog(dataJsonObj)
                         }
                     }
 
@@ -132,7 +139,16 @@ class InterestActivity: BaseK9Activity() {
 
     }
 
-    override fun setupView(info: ThaiIDSecurityBeen) {
+    fun showConfirmDialog(data: JSONObject) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            finish()
+        })
+    }
+
+    override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length-3) + "XXX")
@@ -230,7 +246,7 @@ class InterestActivity: BaseK9Activity() {
                     }
                 })
         }
-        summaryInterest.text = getString(R.string.pay_interest, (summary + mulctPrice).toString())
+        summaryInterest.text = getString(R.string.pay_interest, NumberTextWatcherForThousand.getDecimalFormattedString((summary + mulctPrice).toString()))
         mulct.visibility = View.GONE
         delete.visibility = View.VISIBLE
         contentView.tag = item_container.childCount
@@ -248,11 +264,11 @@ class InterestActivity: BaseK9Activity() {
                 checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
                 Toast.makeText(this,isChecked.toString(),Toast.LENGTH_SHORT).show()
                 if (isChecked) {
-                    summary += interest.price.toLong()
+                    summary += interest.price.toFloat()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
                     listInterestMonthModel.add(interestMonth)
                 } else {
-                    summary -= interest.price.toLong()
+                    summary -= interest.price.toFloat()
                     for (monthModel in listInterestMonthModel) {
                         if (monthModel.month.equals(interest.month)) {
                             listInterestMonthModel.remove(monthModel)
@@ -294,8 +310,8 @@ class InterestActivity: BaseK9Activity() {
 
         var printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(24)
-        printerParams1.setText("รายการ " + data.type_name)
+        printerParams1.setTextSize(30)
+        printerParams1.setText(data.type_name)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()

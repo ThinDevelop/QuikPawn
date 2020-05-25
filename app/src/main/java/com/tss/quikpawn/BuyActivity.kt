@@ -19,6 +19,7 @@ import androidx.core.view.get
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.centermposoversealib.thailand.ThaiIDSecurityBeen
+import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.google.gson.Gson
@@ -29,10 +30,9 @@ import com.tss.quikpawn.models.OrderModel
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.FileUtil
+import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.activity_buy.*
-import kotlinx.android.synthetic.main.activity_buy.layout_detail
-import kotlinx.android.synthetic.main.item_detail_view.*
 import kotlinx.android.synthetic.main.item_sign_view.*
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -43,16 +43,16 @@ class BuyActivity : BaseK9Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_buy)
         title = getString(R.string.buy_item)
-        img_view1.setOnClickListener {
-            cameraOpen(it as ImageView, loading,  0)
-        }
+
         new_item.setOnClickListener {
             val inflater = LayoutInflater.from(baseContext)
             val contentView: View = inflater.inflate(R.layout.item_detail_view, null, false)
             val delete = contentView.findViewById<ImageView>(R.id.delete_detail_btn)
             val camera = contentView.findViewById<ImageView>(R.id.img_view1)
             val loading = contentView.findViewById<ProgressBar>(R.id.loading)
+            val edtCost = contentView.findViewById<EditText>(R.id.edt_cost)
 
+            edtCost.addTextChangedListener(NumberTextWatcherForThousand(edtCost))
             delete.visibility = View.VISIBLE
             contentView.tag = layout_detail.childCount
             delete.tag = contentView.tag
@@ -78,16 +78,19 @@ class BuyActivity : BaseK9Activity() {
             signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             var customerId = citizenId
+            var customerAddress = address
+            var customerPhoto = customerPhoto
+            var customerPhone = edt_phonenumber.text.toString()
             val signature = Util.bitmapToBase64(signatureBitmap)
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
             if (!customerName.isEmpty() &&
-                !customerId.isEmpty() &&
                 !signature.isEmpty() &&
-                (loadingProgressBar != null && !loadingProgressBar!!.isShown)   ) {
+                (loadingProgressBar != null && !loadingProgressBar!!.isShown)
+            ) {
                 val productList = ArrayList<BuyProductModel>()
-                for (i in 0..layout_detail.childCount-1) {
+                for (i in 0..layout_detail.childCount - 1) {
                     val contentView = layout_detail.get(i)
                     val camera = contentView.findViewById<ImageView>(R.id.img_view1)
                     val detail = contentView.findViewById<EditText>(R.id.edt_detail)
@@ -96,22 +99,44 @@ class BuyActivity : BaseK9Activity() {
 
                     val refImg = camera.tag as String
 
-                    val product = BuyProductModel(productName.text.toString(), "5", detail.text.toString(), cost.text.toString(), refImg)
+                    val product = BuyProductModel(
+                        productName.text.toString(),
+                        "5",
+                        detail.text.toString(),
+                        NumberTextWatcherForThousand.trimCommaOfString(cost.text.toString()),
+                        refImg
+                    )
                     productList.add(product)
                 }
                 var sum = 0
-                val list = mutableListOf("รหัสลูกค้า : "+ customerId+"\nรายการ")
+                val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
-                    list.add(product.name+ " : " +product.cost)
+                    list.add(
+                        product.name + " : " + NumberTextWatcherForThousand.getDecimalFormattedString(
+                            product.cost
+                        )
+                    )
                     sum += Integer.parseInt(product.cost)
                 }
-                list.add("รวม "+ sum +" บาท")
+                list.add("รวม " + NumberTextWatcherForThousand.getDecimalFormattedString(sum.toString()) + " บาท")
 
-                val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
+                val param =
+                    DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
                     val dialog = createProgressDialog(this, "Loading...")
                     dialog.show()
-                    val model = BuyParamModel(customerId, customerName, productList, PreferencesManager.getInstance().companyId, PreferencesManager.getInstance().companyBranchId, signature, PreferencesManager.getInstance().userId)
+                    val model = BuyParamModel(
+                        customerId,
+                        customerName,
+                        customerAddress,
+                        customerPhoto,
+                        customerPhone,
+                        productList,
+                        PreferencesManager.getInstance().companyId,
+                        PreferencesManager.getInstance().companyBranchId,
+                        signature,
+                        PreferencesManager.getInstance().userId
+                    )
                     Network.buyItem(model, object : JSONObjectRequestListener {
                         override fun onResponse(response: JSONObject) {
                             dialog.dismiss()
@@ -119,18 +144,20 @@ class BuyActivity : BaseK9Activity() {
                             val status = response.getString("status_code")
                             if (status == "200") {
                                 val data = response.getJSONObject("data")
-                                printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
-                                finish()
+                                printSlip(Gson().fromJson(data.toString(), OrderModel::class.java), false)
+                                showConfirmDialog(data)
                             }
-
                         }
 
                         override fun onError(error: ANError) {
                             dialog.dismiss()
                             error.printStackTrace()
-                            Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
+                            Log.e(
+                                "panya",
+                                "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                            )
                         }
-                    } )
+                    })
                 })
 
 
@@ -139,11 +166,19 @@ class BuyActivity : BaseK9Activity() {
             }
         }
 
+        new_item.callOnClick()
         initialK9()
 
     }
 
-
+    fun showConfirmDialog(data: JSONObject) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java), true)
+            finish()
+        })
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -166,7 +201,10 @@ class BuyActivity : BaseK9Activity() {
                 override fun onError(error: ANError) {
                     loadingProgressBar?.visibility = View.GONE
                     error.printStackTrace()
-                    Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
+                    Log.e(
+                        "panya",
+                        "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                    )
                 }
             })
         }
@@ -189,13 +227,14 @@ class BuyActivity : BaseK9Activity() {
         return encodeString
     }
 
-    override fun setupView(info: ThaiIDSecurityBeen) {
+    override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
+        Log.e("panya", "address : " + info.address)
         edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
     }
 
-    fun printSlip(data: OrderModel) {
+    fun printSlip(data: OrderModel, printList: Boolean) {
         val textList = ArrayList<PrinterParams>()
 
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
@@ -203,8 +242,8 @@ class BuyActivity : BaseK9Activity() {
 
         var printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(24)
-        printerParams1.setText("รายการ "+data.type_name)
+        printerParams1.setTextSize(30)
+        printerParams1.setText(data.type_name)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()
@@ -213,13 +252,13 @@ class BuyActivity : BaseK9Activity() {
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-         printerParams1 = PrinterParams()
+        printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-         printerParams1 = PrinterParams()
+        printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
@@ -229,12 +268,12 @@ class BuyActivity : BaseK9Activity() {
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ร้าน "+PreferencesManager.getInstance().companyName)
+        printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("สาขา "+PreferencesManager.getInstance().companyBranchName)
+        printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()
@@ -246,13 +285,13 @@ class BuyActivity : BaseK9Activity() {
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ลูกค้า "+data.customer_name)
+        printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("รหัสปชช. "+data.idcard)
+        printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()
@@ -261,54 +300,59 @@ class BuyActivity : BaseK9Activity() {
         printerParams1.setText("รายการสินค้า\n")
         textList.add(printerParams1)
 
+        var i = 0
         for (product in data.products) {
+            i++
+            val item = "" + i + ". " + product.product_code + " " + product.cost + " บาท"
             printerParams1 = PrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
             printerParams1.setTextSize(24)
-            printerParams1.setText("*"+product.product_code + " "+product.cost+" บาท")
+            printerParams1.setText(item)
             textList.add(printerParams1)
         }
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ชำระเงิน "+data.price+" บาท")
+        printerParams1.setText("ชำระเงิน " + data.price + " บาท")
         textList.add(printerParams1)
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
-        printdata(textList)
-        textList.clear()
-        for (product in data.products) {
-            printerParams1 = PrinterParams()
-            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-            printerParams1.setTextSize(24)
-            printerParams1.setText("สินค้า : " + product.product_name + "\n")
-            textList.add(printerParams1)
+//        printdata(textList)
+//        textList.clear()
+        if (printList) {
+            i = 0
+            for (product in data.products) {
+                i++
+                printerParams1 = PrinterParams()
+                printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+                printerParams1.setTextSize(24)
+                printerParams1.setText("" + i + ". " + product.product_name + "\n")
+                textList.add(printerParams1)
 
-            bitmap = Utility.toGrayscale(createImageBarcode(data.order_code, "Barcode")!!)
-            printerParams1 = PrinterParams()
-            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-            printerParams1.setBitmap(bitmap)
-            textList.add(printerParams1)
+                bitmap = Utility.toGrayscale(createImageBarcode(product.product_code, "Barcode")!!)
+                printerParams1 = PrinterParams()
+                printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+                printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+                printerParams1.setBitmap(bitmap)
+                textList.add(printerParams1)
 
-            printerParams1 = PrinterParams()
-            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-            printerParams1.setTextSize(24)
-            printerParams1.setText(product.product_code + "\n\n")
-            textList.add(printerParams1)
-
-
-            printdata(textList)
-
+                printerParams1 = PrinterParams()
+                printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+                printerParams1.setTextSize(24)
+                printerParams1.setText(product.product_code + "\n\n")
+                textList.add(printerParams1)
+            }
         }
+
+        printdata(textList)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES+ "/quikpawn")
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/quikpawn")
         FileUtil.deleteRecursive(storageDir)
     }
 }
