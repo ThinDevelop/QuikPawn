@@ -127,7 +127,7 @@ class BorrowActivity: BaseK9Activity() {
                         if (status == "200") {
                             val data = response.getJSONObject("data")
                             printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
-                            finish()
+                            showConfirmDialog(data)
                         }
                     }
 
@@ -160,7 +160,14 @@ class BorrowActivity: BaseK9Activity() {
         initialK9()
     }
 
-
+    fun showConfirmDialog(data: JSONObject) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            finish()
+        })
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

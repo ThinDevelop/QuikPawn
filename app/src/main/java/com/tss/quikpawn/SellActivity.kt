@@ -121,12 +121,8 @@ class SellActivity : BaseK9Activity() {
                             if (status == "200") {
                                 val data = response.getJSONObject("data")
                                 printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
-                                orderCode?.let {
-                                    val intent = Intent()
-                                    intent.putExtra("order_code", orderCode)
-                                    setResult(Activity.RESULT_OK, intent)
-                                }
-                                finish()
+                                showConfirmDialog(data)
+
                             }
                         }
 
@@ -161,6 +157,20 @@ class SellActivity : BaseK9Activity() {
             }
         })
         initialK9()
+    }
+
+    fun showConfirmDialog(data: JSONObject) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            orderCode?.let {
+                val intent = Intent()
+                intent.putExtra("order_code", orderCode)
+                setResult(Activity.RESULT_OK, intent)
+            }
+            finish()
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -270,7 +280,7 @@ class SellActivity : BaseK9Activity() {
                     override fun onClickConfirm(result: String?) {
                         result?.let {
                             if (it.isEmpty()) return
-                            val price = Integer.parseInt(result)
+                            val price = Integer.parseInt(result.replace(",", ""))
                             val productCode = contentView.tag as String
                             val sellProductModel = SellProductModel(productCode, price)
                             updatePrice(sellProductModel)

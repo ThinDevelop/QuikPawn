@@ -1,14 +1,11 @@
 package com.tss.quikpawn.networks
 
-import android.util.Log
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.common.Priority
-import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.google.gson.Gson
 import com.tss.quikpawn.PreferencesManager
 import com.tss.quikpawn.models.*
-import org.json.JSONObject
 import java.io.File
 
 class Network {
@@ -34,7 +31,7 @@ class Network {
             AndroidNetworking.post(URL_LOGIN)
                 .addBodyParameter("username","tss")
                 .addBodyParameter("password","123456789")
-                .addBodyParameter("serial_number","1234567890")
+                .addBodyParameter("serial_number", android.os.Build.SERIAL)//"1234567890"
                 .setTag("login")
                 .setPriority(Priority.MEDIUM)
                 .build()
@@ -77,6 +74,7 @@ class Network {
                 .addBodyParameter("product", Gson().toJson(buyModel.product))
                 .addBodyParameter("company_id", buyModel.company_id)
                 .addBodyParameter("company_branch_id", buyModel.company_branch_id)
+                .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .addBodyParameter("signature", buyModel.signature)
                 .addBodyParameter("user_id", buyModel.user_id)
                 .setTag("buyItem")
@@ -123,6 +121,7 @@ class Network {
                 .addBodyParameter("company_id", consignmentParamModel.company_id)
                 .addBodyParameter("company_branch_id", consignmentParamModel.company_branch_id)
                 .addBodyParameter("signature", consignmentParamModel.signature)
+                .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .addBodyParameter("user_id", consignmentParamModel.user_id)
                 .setTag("orderConsignment")
                 .setPriority(Priority.HIGH)
@@ -198,6 +197,7 @@ class Network {
                 .addBodyParameter("total_price", sellParamModel.total_price.toString())
                 .addBodyParameter("signature", sellParamModel.signature)
                 .addBodyParameter("user_id", PreferencesManager.getInstance().userId)
+                .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("sellItem")
                 .setPriority(Priority.HIGH)
                 .build()
@@ -218,6 +218,7 @@ class Network {
                 .addBodyParameter("interest", Gson().toJson(interestParamModel.interest))
                 .addBodyParameter("signature", interestParamModel.signature)
                 .addBodyParameter("user_id", interestParamModel.user_id)
+                .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("interest")
                 .setPriority(Priority.HIGH)
                 .build()
@@ -240,6 +241,7 @@ class Network {
                 .addBodyParameter("mulct_price", redeemParamModel.mulct_price)
                 .addBodyParameter("signature", redeemParamModel.signature)
                 .addBodyParameter("user_id", redeemParamModel.user_id)
+                .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("interest")
                 .setPriority(Priority.HIGH)
                 .build()
@@ -260,6 +262,7 @@ class Network {
                 .addBodyParameter("deadline", lendParamModel.deadline)
                 .addBodyParameter("signature", lendParamModel.signature)
                 .addBodyParameter("user_id", PreferencesManager.getInstance().userId)
+                .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("sellItem")
                 .setPriority(Priority.HIGH)
                 .build()
@@ -280,6 +283,7 @@ class Network {
                 .addBodyParameter("signature", returnParamModel.signature)
                 .addBodyParameter("product", Gson().toJson(returnParamModel.product))
                 .addBodyParameter("user_id", PreferencesManager.getInstance().userId)
+                .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("category")
                 .setPriority(Priority.MEDIUM)
                 .build()

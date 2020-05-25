@@ -104,7 +104,7 @@ class InterestActivity: BaseK9Activity() {
                             Log.e("panya", dataJsonObj.toString())
 
                             printSlip(Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java))
-                            finish()
+                            showConfirmDialog(dataJsonObj)
                         }
                     }
 
@@ -137,6 +137,15 @@ class InterestActivity: BaseK9Activity() {
         })
         initialK9()
 
+    }
+
+    fun showConfirmDialog(data: JSONObject) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            finish()
+        })
     }
 
     override fun setupView(info: ThiaIdInfoBeen) {
@@ -255,11 +264,11 @@ class InterestActivity: BaseK9Activity() {
                 checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
                 Toast.makeText(this,isChecked.toString(),Toast.LENGTH_SHORT).show()
                 if (isChecked) {
-                    summary += interest.price.toLong()
+                    summary += interest.price.toFloat()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
                     listInterestMonthModel.add(interestMonth)
                 } else {
-                    summary -= interest.price.toLong()
+                    summary -= interest.price.toFloat()
                     for (monthModel in listInterestMonthModel) {
                         if (monthModel.month.equals(interest.month)) {
                             listInterestMonthModel.remove(monthModel)

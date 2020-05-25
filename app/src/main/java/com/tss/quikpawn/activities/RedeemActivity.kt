@@ -41,7 +41,7 @@ import kotlinx.android.synthetic.main.item_redeem_detail.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
 
-class RedeemActivity: BaseK9Activity() {
+class RedeemActivity : BaseK9Activity() {
     var summary = 0.0f
     var mulctPrice = 0.0f
     var cost = 0
@@ -56,7 +56,7 @@ class RedeemActivity: BaseK9Activity() {
             val intent = Intent(this@RedeemActivity, ScanActivity::class.java)
             startActivityForResult(intent, SCAN_REQUEST_CODE)
         }
-        btn_clearsign.setOnClickListener{
+        btn_clearsign.setOnClickListener {
             signature_pad.clear()
         }
 
@@ -80,9 +80,15 @@ class RedeemActivity: BaseK9Activity() {
 
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
                 list.add(interestOrderModel!!.order_code)
-                list.add(getString(R.string.pay_interest, NumberTextWatcherForThousand.getDecimalFormattedString((cost + summary + mulctPrice).toString())))
+                list.add(
+                    getString(
+                        R.string.pay_interest,
+                        NumberTextWatcherForThousand.getDecimalFormattedString((cost + summary + mulctPrice).toString())
+                    )
+                )
 
-                val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
+                val param =
+                    DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
 
                     val x = RedeemParamModel(
@@ -111,8 +117,9 @@ class RedeemActivity: BaseK9Activity() {
                                         dataJsonObj.toString(),
                                         OrderModel::class.java
                                     )
+
                                 )
-                                finish()
+                                showConfirmDialog(dataJsonObj)
                             }
                         }
 
@@ -145,6 +152,15 @@ class RedeemActivity: BaseK9Activity() {
         initialK9()
     }
 
+    fun showConfirmDialog(data: JSONObject) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            finish()
+        })
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -161,23 +177,29 @@ class RedeemActivity: BaseK9Activity() {
 
     fun loadOrder(key: String) {
         if (key.length == 13) {
-            Network.searchOrderByIdCardAndType(key, OrderType.CONSIGNMENT.typeId, object : JSONObjectRequestListener {
-                override fun onResponse(response: JSONObject) {
-                    Log.e("panya", "onResponse : $response")
-                    val status = response.getString("status_code")
-                    if (status == "200") {
-                        val dataJsonArray = response.getJSONArray("data")
-                        val intent = Intent(this@RedeemActivity, OrderListActivity::class.java)
-                        intent.putExtra("order_list", dataJsonArray.toString())
-                        startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+            Network.searchOrderByIdCardAndType(
+                key,
+                OrderType.CONSIGNMENT.typeId,
+                object : JSONObjectRequestListener {
+                    override fun onResponse(response: JSONObject) {
+                        Log.e("panya", "onResponse : $response")
+                        val status = response.getString("status_code")
+                        if (status == "200") {
+                            val dataJsonArray = response.getJSONArray("data")
+                            val intent = Intent(this@RedeemActivity, OrderListActivity::class.java)
+                            intent.putExtra("order_list", dataJsonArray.toString())
+                            startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                        }
                     }
-                }
 
-                override fun onError(error: ANError) {
-                    error.printStackTrace()
-                    Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
-                }
-            } )
+                    override fun onError(error: ANError) {
+                        error.printStackTrace()
+                        Log.e(
+                            "panya",
+                            "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                        )
+                    }
+                })
         } else {
             Network.searchOrder(
                 key,
@@ -210,7 +232,7 @@ class RedeemActivity: BaseK9Activity() {
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
-        edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length-3) + "XXX")
+        edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
         if (interestOrderModel == null) {
             loadOrder(citizenId)
         }
@@ -224,7 +246,9 @@ class RedeemActivity: BaseK9Activity() {
         contentView.tag = item_container.childCount
         delete.tag = contentView.tag
         delete.setOnClickListener {
-            (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(item_container.findViewWithTag<View>(it.tag))
+            (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
+                item_container.findViewWithTag<View>(it.tag)
+            )
         }
 
         item_container.addView(contentView)
@@ -267,23 +291,26 @@ class RedeemActivity: BaseK9Activity() {
                 })
         }
 
-        summaryInterest.text = getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
+        summaryInterest.text =
+            getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
 
         delete.visibility = View.VISIBLE
         contentView.tag = item_container.childCount
         delete.tag = contentView.tag
         delete.setOnClickListener {
-            (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(item_container.findViewWithTag<View>(it.tag))
+            (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
+                item_container.findViewWithTag<View>(it.tag)
+            )
             interestOrderModel = null
         }
 
         for (interest in interestOrder.interest) {
             val checkBox = CheckBox(this)
-            checkBox.text = "เดือนที่ : "+ interest.month
+            checkBox.text = "เดือนที่ : " + interest.month
             checkBox.isEnabled = !interest.status
             checkBox.isChecked = interest.status
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
-                Toast.makeText(this,isChecked.toString(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
                 if (isChecked) {
                     summary += interest.price.toLong()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
@@ -297,12 +324,23 @@ class RedeemActivity: BaseK9Activity() {
                         }
                     }
                 }
-                summaryInterest.text = getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
+                summaryInterest.text =
+                    getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
             }
             layout.addView(checkBox)
         }
-        insertCheckbox(layout, (interestOrder.interest[0].price.toLong()/2).toString(), "ดอกเบี้ยครึ่งเดือน", summaryInterest)
-        insertCheckbox(layout, interestOrder.interest[0].price, "ดอกเบี้ยเต็มเดือน", summaryInterest)
+        insertCheckbox(
+            layout,
+            (interestOrder.interest[0].price.toLong() / 2).toString(),
+            "ดอกเบี้ยครึ่งเดือน",
+            summaryInterest
+        )
+        insertCheckbox(
+            layout,
+            interestOrder.interest[0].price,
+            "ดอกเบี้ยเต็มเดือน",
+            summaryInterest
+        )
 
         mulct.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
@@ -315,11 +353,12 @@ class RedeemActivity: BaseK9Activity() {
                 p0?.let {
                     if (p0.isEmpty()) {
                         mulctPrice = 0.0f
-                    }else {
+                    } else {
                         mulctPrice = p0.toString().toFloat()
                     }
                 }
-                summaryInterest.text = getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
+                summaryInterest.text =
+                    getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
             }
         })
 
@@ -332,13 +371,14 @@ class RedeemActivity: BaseK9Activity() {
         checkBox.isEnabled = true
         checkBox.isChecked = false
         checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
-            Toast.makeText(this,isChecked.toString(), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
             if (isChecked) {
                 mulctPrice += price.toLong()
             } else {
                 mulctPrice -= price.toLong()
             }
-            sumText.text = getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
+            sumText.text =
+                getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
         }
         linearLayout.addView(checkBox)
     }
@@ -377,12 +417,12 @@ class RedeemActivity: BaseK9Activity() {
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ร้าน "+ PreferencesManager.getInstance().companyName)
+        printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
+        printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()

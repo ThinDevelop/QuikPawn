@@ -247,10 +247,11 @@ class FormDetailActivity : BaseActivity() {
         printerParams1.setText("ได้ทำหนังสือขายฝากนี้ให้แก่ นายสุรศักดิ์ ขจิตธรรมกุล ดังมีข้อความดังต่อไปนี้\n" + "   ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้\n\n")
         textList.add(printerParams1)
 
+
         printerParams1 = PrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-        printerParams1.setBitmap(imageicon)
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(22)
+        printerParams1.setText("\n 1. ")
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()

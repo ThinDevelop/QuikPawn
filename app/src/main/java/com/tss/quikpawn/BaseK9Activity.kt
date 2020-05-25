@@ -154,7 +154,7 @@ open class BaseK9Activity: BaseActivity() {
     fun createImageBarcode(message: String?, type: String?): Bitmap? {
         var bitMatrix: BitMatrix? = null
         bitMatrix = when (type) {
-            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, size, size)
+            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, 300, 300)
             "Barcode" -> MultiFormatWriter().encode(
                 message,
                 BarcodeFormat.CODE_128,
@@ -200,8 +200,8 @@ open class BaseK9Activity: BaseActivity() {
                 }
             }
         }
-        val bitmap = Bitmap.createBitmap(width, height/2, Bitmap.Config.ARGB_8888)
-        bitmap.setPixels(pixels, 0, width, 0, 0, width, height/2)
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
         return bitmap
     }
 

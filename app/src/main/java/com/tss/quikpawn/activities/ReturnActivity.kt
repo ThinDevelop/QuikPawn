@@ -22,10 +22,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tss.quikpawn.BaseK9Activity
 import com.tss.quikpawn.R
-import com.tss.quikpawn.models.DialogParamModel
-import com.tss.quikpawn.models.ProductCodeModel
-import com.tss.quikpawn.models.ProductModel
-import com.tss.quikpawn.models.ReturnParamModel
+import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.Util
@@ -99,10 +96,7 @@ class ReturnActivity : BaseK9Activity() {
                                 val productArray: ArrayList<ProductModel> =
                                     Gson().fromJson(products.toString(), productListType)
                                 printSlip(returnOrderCode, productArray)
-                                val intent = Intent()
-                                intent.putExtra("order_code", orderCode)
-                                setResult(Activity.RESULT_OK, intent)
-                                finish()
+                                showConfirmDialog(returnOrderCode, productArray)
                             }
                         }
 
@@ -119,6 +113,18 @@ class ReturnActivity : BaseK9Activity() {
             }
         }
         initialK9()
+    }
+
+    fun showConfirmDialog(orderCode: String, productModel: List<ProductModel>) {
+        val list = listOf("สำหรับร้านค้า")
+        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+            printSlip(orderCode, productModel)
+            val intent = Intent()
+            intent.putExtra("order_code", orderCode)
+            setResult(Activity.RESULT_OK, intent)
+            finish()
+        })
     }
 
     override fun setupView(info: ThiaIdInfoBeen) {

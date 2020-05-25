@@ -40,15 +40,8 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:background="#a5a5a5">
+                        android:background="@drawable/bg_buy">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="ซื้อ"
-                            android:textSize="40dp"
-                            android:textColor="#ffffff"/>
 
                     </FrameLayout>
 
@@ -61,15 +54,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:background="#a5a5a5">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="ขาย"
-                            android:textSize="40dp"
-                            android:textColor="#ffffff"/>
+                        android:background="@drawable/bg_sell">
 
                     </FrameLayout>
                 </TableRow>
@@ -86,15 +71,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:background="#a5a5a5">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="ฝากขาย"
-                            android:textSize="40dp"
-                            android:textColor="#ffffff"/>
+                        android:background="@drawable/bg_consignment">
 
                     </FrameLayout>
 
@@ -106,15 +83,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:background="#a5a5a5">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="ต่อดอก"
-                            android:textSize="40dp"
-                            android:textColor="#ffffff"/>
+                        android:background="@drawable/bg_interest">
 
                     </FrameLayout>
                 </TableRow>
@@ -131,15 +100,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:background="#a5a5a5">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="ไถ่ถอน"
-                            android:textSize="40dp"
-                            android:textColor="#ffffff"/>
+                        android:background="@drawable/bg_redeem">
 
                     </FrameLayout>
 
@@ -151,15 +112,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:background="#a5a5a5">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="ยืมสินค้า"
-                            android:textSize="40dp"
-                            android:textColor="#ffffff"/>
+                        android:background="@drawable/bg_borrow">
 
                     </FrameLayout>
 
@@ -177,15 +130,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:background="#a5a5a5">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="คืนสินค้า"
-                            android:textSize="40dp"
-                            android:textColor="#ffffff"/>
+                        android:background="@drawable/bg_return">
 
                     </FrameLayout>
 
