@@ -25,10 +25,32 @@
     <string name="text_status">สถานะ %s</string>
 
     <string name="text_order_code">Order: %s</string>
-    <string name="list_order">รายการสินค้า</string>
+    <string name="list_order">รายการ</string>
+    <string name="text_skip">ข้าม</string>
+    <string name="text_cancel">ยกเลิก</string>
+    <string name="text_ok">ตกลง</string>
+    <string name="text_confirm">ยืนยัน</string>
+    <string name="dialog_msg_for_shop">สำหรับร้านค้า</string>
+
+    <string name="title_reprint">พิมพ์ซ้ำ</string>
+    <string name="please_back_again">กรุณากดอีกครั้งเพื่ออกจากหน้านี้</string>
+    <string name="data_missing">ข้อมูลไม่ครบถ้วน</string>
+    <string name="please_add_price">กรุณาระบุราคาสินค้า</string>
+    <string name="please_add_name">กรุณาระบุชื่อสินค้า</string>
+    <string name="please_add_signature">กรุณาระบุลายเซ็น</string>
+    <string name="please_add_pay_per_month">กรุณาเลือกเดือนที่ต้องการจ่าย</string>
+    <string name="please_add_item">กรุณาเพิ่มสินค้า</string>
+    <string name="please_add_photo">กรุณาถ่ายรูปสินค้า</string>
+    <string name="please_add_sale_price">กรุณาตั้งราคาขายก่อนทำรายการ</string>
 
 
+    <string name="title_error">เกิดข้อผิดพลาด</string>
+    <string name="search_error_please_research">การค้นหาล้มเหลว กรุณาทำรายการใหม่</string>
+    <string name="connect_error_please_reorder">การเชื่อมต่อล้มเหลว กรุณาทำรายการใหม่</string>
+    <string name="connect_error">การเชื่อมต่อล้มเหลว</string>
+    <string name="order_not_found">ไม่พบรายการ</string>
 
+    <string name="upload_error_please_upload_again">การอัพโหลดข้อมูลผิดพลาด กรุณาทำถ่ายรูปใหม่อีกครั้ง</string>
     <string name="delete_tag_key">delete_key</string>
 
 

@@ -7,6 +7,7 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.tss.quikpawn.R;
 import com.tss.quikpawn.models.DialogParamModel;
 
 import java.util.ArrayList;
@@ -14,6 +15,8 @@ import java.util.List;
 
 public class DialogUtil {
 
+    public static String CONFIRM = "confirm";
+    public static String CANCEL = "cancel";
     public static void showInputDialog(Context context, final InputTextBackListerner inputTextBackListerner) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("ปรับปรุงราคาขาย");
@@ -42,6 +45,20 @@ public class DialogUtil {
         builder.show();
     }
 
+    public static void showNotiDialog(Context context, String title, String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        builder.setMessage(msg);
+        builder.setNegativeButton(context.getString(R.string.text_ok), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
     public static void showConfirmDialog(DialogParamModel dialogParamModel, Context context, final InputTextBackListerner inputTextBackListerner) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(dialogParamModel.getTitle());
@@ -50,19 +67,20 @@ public class DialogUtil {
             message.append(msg+"\n");
         }
         builder.setMessage(message);
-        builder.setPositiveButton(dialogParamModel.getActionMsg(), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(dialogParamModel.getActionMsgP(), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                inputTextBackListerner.onClickConfirm("confirm");
+                inputTextBackListerner.onClickConfirm(CONFIRM);
             }
         });
-        builder.setCancelable(true);
-//        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                dialog.cancel();
-//            }
-//        });
+        builder.setCancelable(false);
+        builder.setNegativeButton(dialogParamModel.getActionMsgN(), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                inputTextBackListerner.onClickConfirm(CANCEL);
+                dialog.cancel();
+            }
+        });
 
         builder.show();
     }

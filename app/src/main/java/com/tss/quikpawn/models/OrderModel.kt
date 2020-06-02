@@ -15,6 +15,7 @@ data class OrderModel(var order_code: String,
                       var status_id: String,
                       var status_name: String,
                       var date_create: String,
-                      var order_parent_id: String,
+                      var order_code_parent: String,
                       var products: List<ProductModel>,
-                      var interest: List<InterestModel>)
+                      var interest: List<InterestModel>,
+                      var mulct_price: String)

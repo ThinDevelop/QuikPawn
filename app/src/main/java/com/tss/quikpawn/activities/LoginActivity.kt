@@ -39,7 +39,7 @@ class LoginActivity: AppCompatActivity() {
         login_btn.isClickable = false
         user_name.isClickable = false
         password.isClickable = false
-        Network.login(object : JSONObjectRequestListener {
+        Network.login(user_name.text.toString(), password.text.toString(),  object : JSONObjectRequestListener {
             override fun onResponse(response: JSONObject) {
                 loading.visibility = View.GONE
                 login_btn.isClickable = true

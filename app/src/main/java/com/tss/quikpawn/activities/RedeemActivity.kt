@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -40,14 +41,16 @@ import kotlinx.android.synthetic.main.item_customer_info.*
 import kotlinx.android.synthetic.main.item_redeem_detail.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
+import kotlin.math.roundToInt
 
 class RedeemActivity : BaseK9Activity() {
     var summary = 0.0f
     var mulctPrice = 0.0f
-    var cost = 0
+    var cost = 0.0f
     val SELECT_ORDER_REQUEST_CODE = 2015
     var interestOrderModel: OrderModel? = null
     var listInterestMonthModel = mutableListOf<InterestMonthModel>()
+    var orderList = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_redeem)
@@ -61,25 +64,21 @@ class RedeemActivity : BaseK9Activity() {
         }
 
         btn_ok.setOnClickListener {
-            var signatureBitmap = signature_pad.getSignatureBitmap()
-            signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             var customerId = citizenId
             var customerAddress = address
             var customerPhoto = customerPhoto
             var customerPhoneNumber = edt_phonenumber.text.toString()
-            val signature = Util.bitmapToBase64(signatureBitmap)
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
             if (!customerName.isEmpty() &&
                 !customerId.isEmpty() &&
-                !signature.isEmpty() &&
                 interestOrderModel != null
             ) {
 
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
-                list.add(interestOrderModel!!.order_code)
+                list.add("รายการเลขที่ " + interestOrderModel!!.order_code)
                 list.add(
                     getString(
                         R.string.pay_interest,
@@ -87,50 +86,86 @@ class RedeemActivity : BaseK9Activity() {
                     )
                 )
 
-                val param =
-                    DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
-                DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
-
-                    val x = RedeemParamModel(
-                        interestOrderModel!!.order_code,
-                        customerId,
-                        customerName,
-                        customerAddress,
-                        customerPhoto,
-                        customerPhoneNumber,
-                        listInterestMonthModel,
-                        cost.toString(),
-                        mulctPrice.toString(),
-                        signature,
-                        PreferencesManager.getInstance().userId
+                if ((cost + summary + mulctPrice) == 0f) {
+                    DialogUtil.showNotiDialog(
+                        this@RedeemActivity,
+                        getString(R.string.data_missing),
+                        getString(R.string.please_add_pay_per_month)
                     )
-                    Network.redeem(x, object : JSONObjectRequestListener {
-                        override fun onResponse(response: JSONObject) {
-                            Log.e("panya", "onResponse : $response")
-                            val status = response.getString("status_code")
-                            if (status == "200") {
-                                val dataJsonObj = response.getJSONObject("data")
-                                Log.e("panya", dataJsonObj.toString())
+                    return@setOnClickListener
+                } else if (signature_pad.isEmpty) {
+                    DialogUtil.showNotiDialog(
+                        this@RedeemActivity,
+                        getString(R.string.data_missing),
+                        getString(R.string.please_add_signature)
+                    )
+                    return@setOnClickListener
+                }
+                var signatureBitmap = signature_pad.getSignatureBitmap()
+                signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
+                val signature = Util.bitmapToBase64(signatureBitmap)
 
-                                printSlip(
-                                    Gson().fromJson(
-                                        dataJsonObj.toString(),
-                                        OrderModel::class.java
+
+                val param =
+                    DialogParamModel(
+                        getString(R.string.msg_confirm_title_order),
+                        list,
+                        getString(R.string.text_confirm),
+                        getString(R.string.text_cancel)
+                    )
+                DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
+                    if (DialogUtil.CONFIRM.equals(it)) {
+                        val x = RedeemParamModel(
+                            interestOrderModel!!.order_code,
+                            customerId,
+                            customerName,
+                            customerAddress,
+                            customerPhoto,
+                            customerPhoneNumber,
+                            listInterestMonthModel,
+                            cost.toString(),
+                            mulctPrice.toString(),
+                            signature,
+                            PreferencesManager.getInstance().userId
+                        )
+                        Network.redeem(x, object : JSONObjectRequestListener {
+                            override fun onResponse(response: JSONObject) {
+                                Log.e("panya", "onResponse : $response")
+                                val status = response.getString("status_code")
+                                if (status == "200") {
+                                    val dataJsonObj = response.getJSONObject("data")
+                                    Log.e("panya", dataJsonObj.toString())
+                                    printSlip(
+                                        Gson().fromJson(
+                                            dataJsonObj.toString(),
+                                            OrderModel::class.java
+                                        )
+
                                     )
-
-                                )
-                                showConfirmDialog(dataJsonObj)
+                                    showConfirmDialog(dataJsonObj)
+                                } else {
+                                    DialogUtil.showNotiDialog(
+                                        this@RedeemActivity,
+                                        getString(R.string.title_error),
+                                        getString(R.string.connect_error_please_reorder)
+                                    )
+                                }
                             }
-                        }
 
-                        override fun onError(error: ANError) {
-                            error.printStackTrace()
-                            Log.e(
-                                "panya",
-                                "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
-                            )
-                        }
-                    })
+                            override fun onError(error: ANError) {
+                                error.printStackTrace()
+                                DialogUtil.showNotiDialog(
+                                    this@RedeemActivity,
+                                    getString(R.string.title_error),
+                                    getString(R.string.connect_error_please_reorder)
+                                )
+                                Log.e(
+                                    "panya",
+                                    "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                                )
+                            }
+                        })
+                    }
                 })
             }
         }
@@ -139,7 +174,15 @@ class RedeemActivity : BaseK9Activity() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     if (!query.equals("")) {
-                        loadOrder(query)
+                        if (checkContains(query)) {
+                            Toast.makeText(
+                                this@RedeemActivity,
+                                "รายการนี้มีอยู่แล้ว",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            loadOrder(query)
+                        }
                     }
                 }
                 return false
@@ -152,11 +195,22 @@ class RedeemActivity : BaseK9Activity() {
         initialK9()
     }
 
+    fun checkContains(id: String): Boolean {
+        return orderList.contains(id)
+    }
+
     fun showConfirmDialog(data: JSONObject) {
-        val list = listOf("สำหรับร้านค้า")
-        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        val list = listOf(getString(R.string.dialog_msg_for_shop))
+        val dialogParamModel = DialogParamModel(
+            "ปริ้น",
+            list,
+            getString(R.string.text_ok),
+            getString(R.string.text_skip)
+        )
         DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
-            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            if (it.equals(DialogUtil.CONFIRM)) {
+                printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            }
             finish()
         })
     }
@@ -189,17 +243,34 @@ class RedeemActivity : BaseK9Activity() {
                             val intent = Intent(this@RedeemActivity, OrderListActivity::class.java)
                             intent.putExtra("order_list", dataJsonArray.toString())
                             startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                        } else {
+                            DialogUtil.showNotiDialog(
+                                this@RedeemActivity,
+                                getString(R.string.title_error),
+                                getString(R.string.search_error_please_research)
+                            )
                         }
                     }
 
                     override fun onError(error: ANError) {
                         error.printStackTrace()
+                        DialogUtil.showNotiDialog(
+                            this@RedeemActivity,
+                            getString(R.string.title_error),
+                            getString(R.string.connect_error_please_reorder)
+                        )
                         Log.e(
                             "panya",
                             "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
                         )
                     }
                 })
+        } else if (checkContains(key)) {
+            Toast.makeText(
+                this@RedeemActivity,
+                "รายการนี้มีอยู่แล้ว",
+                Toast.LENGTH_LONG
+            ).show()
         } else {
             Network.searchOrder(
                 key,
@@ -215,11 +286,22 @@ class RedeemActivity : BaseK9Activity() {
                                 OrderModel::class.java
                             )
                             addItemView(interestOrderModel!!)
+                        } else {
+                            DialogUtil.showNotiDialog(
+                                this@RedeemActivity,
+                                getString(R.string.title_error),
+                                getString(R.string.search_error_please_research)
+                            )
                         }
                     }
 
                     override fun onError(error: ANError) {
                         error.printStackTrace()
+                        DialogUtil.showNotiDialog(
+                            this@RedeemActivity,
+                            getString(R.string.title_error),
+                            getString(R.string.connect_error_please_reorder)
+                        )
                         Log.e(
                             "panya",
                             "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -238,23 +320,8 @@ class RedeemActivity : BaseK9Activity() {
         }
     }
 
-    fun addItemView() {
-        val inflater = LayoutInflater.from(baseContext)
-        val contentView: View = inflater.inflate(R.layout.item_redeem_detail, null, false)
-        val delete = contentView.findViewById<ImageView>(R.id.btn_delete)
-        delete.visibility = View.VISIBLE
-        contentView.tag = item_container.childCount
-        delete.tag = contentView.tag
-        delete.setOnClickListener {
-            (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
-                item_container.findViewWithTag<View>(it.tag)
-            )
-        }
-
-        item_container.addView(contentView)
-    }
-
     fun addItemView(interestOrder: OrderModel) {
+        orderList.add(interestOrder.order_code)
         val inflater = LayoutInflater.from(baseContext)
         val contentView: View = inflater.inflate(R.layout.item_redeem_detail, null, false)
         val delete = contentView.findViewById<ImageView>(R.id.btn_delete)
@@ -267,7 +334,7 @@ class RedeemActivity : BaseK9Activity() {
         imgProduct.shape = MultiImageView.Shape.RECTANGLE
         imgProduct.rectCorners = 10
         orderId.text = interestOrder.order_code
-        cost = Integer.parseInt(interestOrder.total)
+        cost = interestOrder.total.toFloat()
         for (product in interestOrder.products) {
             Glide.with(this) //1
                 .asBitmap()
@@ -310,13 +377,13 @@ class RedeemActivity : BaseK9Activity() {
             checkBox.isEnabled = !interest.status
             checkBox.isChecked = interest.status
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
-                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
                 if (isChecked) {
-                    summary += interest.price.toLong()
+                    summary += interest.price.toFloat()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
                     listInterestMonthModel.add(interestMonth)
                 } else {
-                    summary -= interest.price.toLong()
+                    summary -= interest.price.toFloat()
                     for (monthModel in listInterestMonthModel) {
                         if (monthModel.month.equals(interest.month)) {
                             listInterestMonthModel.remove(monthModel)
@@ -331,7 +398,7 @@ class RedeemActivity : BaseK9Activity() {
         }
         insertCheckbox(
             layout,
-            (interestOrder.interest[0].price.toLong() / 2).toString(),
+            (interestOrder.interest[0].price.toFloat() / 2).toString(),
             "ดอกเบี้ยครึ่งเดือน",
             summaryInterest
         )
@@ -371,11 +438,11 @@ class RedeemActivity : BaseK9Activity() {
         checkBox.isEnabled = true
         checkBox.isChecked = false
         checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
-            Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
             if (isChecked) {
-                mulctPrice += price.toLong()
+                mulctPrice += price.toFloat()
             } else {
-                mulctPrice -= price.toLong()
+                mulctPrice -= price.toFloat()
             }
             sumText.text =
                 getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
@@ -444,19 +511,47 @@ class RedeemActivity : BaseK9Activity() {
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
-//        printerParams1 = PrinterParams()
-//        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-//        printerParams1.setTextSize(18)
-//        printerParams1.setText("รายการสินค้า")
-//        textList.add(printerParams1)
-//
-//        for (product in data.products) {
-//            printerParams1 = PrinterParams()
-//            printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
-//            printerParams1.setTextSize(22)
-//            printerParams1.setText("*" + product.product_code + " " + product.cost + " บาท")
-//            textList.add(printerParams1)
-//        }
+        printerParams1 = PrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(18)
+        printerParams1.setText("รายการสินค้า")
+        textList.add(printerParams1)
+
+        val list = Util.productListToProductList2Cost(data.products)
+        val listBitmap = Util.productListToBitmap(list)
+        printerParams1 = PrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(listBitmap)
+        textList.add(printerParams1)
+        val list2 = arrayListOf<ProductModel2>()
+        if (data.interest.isNotEmpty()) {
+            printerParams1 = PrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(18)
+            printerParams1.setText("รายการดอกเบี้ย")
+            textList.add(printerParams1)
+
+            for (interest in data.interest) {
+                list2.add(ProductModel2("เดือนที่ : " + interest.month, interest.price + " บาท"))
+            }
+            list2.add(ProductModel2("ค่าปรับ", data.mulct_price + " บาท"))
+            val listBitmap = Util.productListToBitmap(list2)
+            printerParams1 = PrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+        } else {
+            list2.add(ProductModel2("ค่าปรับ", data.mulct_price + " บาท"))
+            val listBitmap = Util.productListToBitmap(list2)
+            printerParams1 = PrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+        }
+
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
@@ -468,5 +563,17 @@ class RedeemActivity : BaseK9Activity() {
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
         printdata(textList)
+    }
+
+    private var doubleBackToExitPressedOnce = false
+    override fun onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            return
+        }
+        this.doubleBackToExitPressedOnce = true
+        Toast.makeText(this, getString(R.string.please_back_again), Toast.LENGTH_SHORT).show()
+
+        Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 }

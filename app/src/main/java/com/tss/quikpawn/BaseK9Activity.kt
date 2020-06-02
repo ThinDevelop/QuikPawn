@@ -7,10 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.os.IBinder
-import android.os.RemoteException
+import android.os.*
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.ImageView
@@ -27,10 +24,12 @@ import com.centerm.smartpos.aidl.printer.AidlPrinterStateChangeListener
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager
 import com.centerm.smartpos.constant.Constant
+import com.google.gson.Gson
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
+import com.tss.quikpawn.models.OrderModel
 import com.tss.quikpawn.util.Util
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -83,27 +82,6 @@ open class BaseK9Activity: BaseActivity() {
             .subscribe({
                 process = true
                 runOnUiThread { dialog?.show() }
-
-//                aidlIdCardTha?.searchIDCardSecurity(6000, object : ThaiIDSecurityListerner.Stub(){
-//                    override fun onFindIDCard(p0: ThaiIDSecurityBeen?) {
-//                        runOnUiThread {
-//                            dialog?.dismiss()
-//                            p0?.let {
-//                                setupView(p0)
-//                            }
-//                        }
-//                    }
-//
-//                    override fun onTimeout() {
-//                        runOnUiThread { dialog?.dismiss() }
-//                        process = false
-//                    }
-//
-//                    override fun onError(p0: Int, p1: String?) {
-//                        runOnUiThread { dialog?.dismiss() }
-//                        process = false
-//                    }
-//                })
                 aidlIdCardTha?.searchIDCard(6000, object : AidlIdCardThaListener.Stub()  {
 
                     override fun onFindIDCard(p0: ThiaIdInfoBeen?) {
@@ -111,6 +89,49 @@ open class BaseK9Activity: BaseActivity() {
                             dialog?.dismiss()
                             p0?.let {
                                 setupView(p0)
+                            }
+                        }
+                    }
+
+                    override fun onTimeout() {
+                        runOnUiThread { dialog?.dismiss() }
+                        process = false
+                    }
+
+                    override fun onError(p0: Int, p1: String?) {
+                        runOnUiThread { dialog?.dismiss() }
+                        process = false
+                    }
+                })
+                // this method will be called when action is success
+            }, { error ->
+                runOnUiThread { dialog?.dismiss() }
+                process = false
+            })
+    }
+
+    open fun initialK9Fast() {
+        val dialog = createProgressDialog(this, "Loading...")
+        disposable = Observable.interval(1, TimeUnit.SECONDS)
+            .filter {
+                aidlIcCard?.open()
+                if (aidlIcCard?.status()?.toInt() != 1) {
+                    process = false
+                }
+                aidlIdCardTha != null && !process && aidlIcCard?.status()?.toInt() == 1
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                process = true
+                runOnUiThread { dialog?.show() }
+
+                aidlIdCardTha?.searchIDCardSecurity(6000, object : ThaiIDSecurityListerner.Stub(){
+                    override fun onFindIDCard(p0: ThaiIDSecurityBeen?) {
+                        runOnUiThread {
+                            dialog?.dismiss()
+                            p0?.let {
+                                setupViewFast(p0)
                             }
                         }
                     }
@@ -149,17 +170,24 @@ open class BaseK9Activity: BaseActivity() {
         customerPhoto = Util.bitmapToBase64(info.photo)
     }
 
+    @CallSuper
+    open fun setupViewFast(info: ThaiIDSecurityBeen) {
+        citizenId = info.citizenId
+        address = info.address.replace("#", " ")
+    }
+
 
     @Throws(WriterException::class)
     fun createImageBarcode(message: String?, type: String?): Bitmap? {
         var bitMatrix: BitMatrix? = null
         bitMatrix = when (type) {
-            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, 300, 300)
+            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, 150, 150)
+            "Barcode" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, 150, 150)
             "Barcode" -> MultiFormatWriter().encode(
                 message,
                 BarcodeFormat.CODE_128,
                 size_width,
-                size_height
+                size_height/2
             )
             "Data Matrix" -> MultiFormatWriter().encode(
                 message,
