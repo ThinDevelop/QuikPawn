@@ -25,8 +25,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-
-
             <LinearLayout
                 android:id="@+id/item_container"
                 android:layout_width="match_parent"
@@ -49,7 +47,7 @@
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/btn_ok"
-                android:text="@string/pay_item"
+                android:text="@string/sell_item"
                 android:textColor="@color/cardview_light_background"
                 android:textSize="20dp" />
 

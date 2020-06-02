@@ -26,11 +26,14 @@ class Network {
         val URL_RETURN_BY_PRODUCT = "https://thequikpawn.com/api/v1/order/return/byproduct"
         val URL_SEARCH_BY_IDCARD = "https://thequikpawn.com/api/v1/search/order/byidcard"
         val URL_LOGOUT = "https://thequikpawn.com/api/v1/logout"
+        val URL_LOAD_ORDER = "https://thequikpawn.com/api/v1/search/last/print"
 
-        fun login(listener: JSONObjectRequestListener) {
+
+
+        fun login(user: String, password: String, listener: JSONObjectRequestListener) {
             AndroidNetworking.post(URL_LOGIN)
-                .addBodyParameter("username","tss")
-                .addBodyParameter("password","123456789")
+                .addBodyParameter("username", user)
+                .addBodyParameter("password", password)
                 .addBodyParameter("serial_number", android.os.Build.SERIAL)//"1234567890"
                 .setTag("login")
                 .setPriority(Priority.MEDIUM)
@@ -89,6 +92,19 @@ class Network {
                 .addHeaders("Content-type", "application/json")
                 .addHeaders("Accept", "application/json")
                 .setTag("category")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(listener)
+        }
+
+        fun getLoadOrder(listener: JSONObjectRequestListener) {
+            AndroidNetworking.get(URL_LOAD_ORDER)
+                .addHeaders("Authorization", "Bearer "+ PreferencesManager.getInstance().token)
+                .addHeaders("Content-type", "application/json")
+                .addHeaders("Accept", "application/json")
+                .addQueryParameter("tid", PreferencesManager.getInstance().tid)
+                .addQueryParameter("limit", "100")
+                .setTag("loadOrder")
                 .setPriority(Priority.MEDIUM)
                 .build()
                 .getAsJSONObject(listener)

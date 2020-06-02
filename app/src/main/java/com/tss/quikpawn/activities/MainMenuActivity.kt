@@ -1,14 +1,17 @@
 package com.tss.quikpawn.activities
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
-import com.tss.quikpawn.*
+import com.tss.quikpawn.BuyActivity
+import com.tss.quikpawn.ConsignmentActivity
+import com.tss.quikpawn.R
+import com.tss.quikpawn.SellActivity
 import com.tss.quikpawn.networks.Network
 import kotlinx.android.synthetic.main.activity_main_menu.*
 import org.json.JSONObject
@@ -18,7 +21,6 @@ class MainMenuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_menu)
-
         btn_buy.setOnClickListener {
             startActivity(Intent(this@MainMenuActivity, BuyActivity::class.java))
         }
@@ -39,6 +41,9 @@ class MainMenuActivity : AppCompatActivity() {
         }
         btn_return.setOnClickListener {
             startActivity(Intent(this@MainMenuActivity, ProductListActivity::class.java))
+        }
+        btn_reprint.setOnClickListener{
+            startActivity(Intent(this@MainMenuActivity, ReprintOrderActivity::class.java))
         }
 
         Network.getCategory(object : JSONObjectRequestListener {
@@ -67,11 +72,6 @@ class MainMenuActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.logout -> {
-                startActivity(Intent(this@MainMenuActivity, LoginActivity::class.java))
-                this@MainMenuActivity.finish()
-                return true
-            }
-            R.id.reprint_by_order-> {
                 startActivity(Intent(this@MainMenuActivity, LoginActivity::class.java))
                 this@MainMenuActivity.finish()
                 return true

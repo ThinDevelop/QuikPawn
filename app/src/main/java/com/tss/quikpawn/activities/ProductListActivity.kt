@@ -24,6 +24,7 @@ import com.tss.quikpawn.ScanActivity
 import com.tss.quikpawn.SellActivity
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
+import com.tss.quikpawn.util.DialogUtil
 import kotlinx.android.synthetic.main.activity_product_list.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
@@ -34,6 +35,7 @@ class ProductListActivity: BaseK9Activity() {
     val PAY_REQUEST_CODE = 2001
     val RETURN_REQUEST_CODE = 2002
     val SELECT_ORDER_REQUEST_CODE = 2015
+    var orderList = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
@@ -71,7 +73,15 @@ class ProductListActivity: BaseK9Activity() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     if (!query.equals("")) {
-                        loadOrder(query)
+                        if (checkContains(query)) {
+                            Toast.makeText(
+                                this@ProductListActivity,
+                                "รายการนี้มีอยู่แล้ว",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            loadOrder(query)
+                        }
                     }
                 }
                 return false
@@ -81,7 +91,11 @@ class ProductListActivity: BaseK9Activity() {
                 return false
             }
         })
-        initialK9()
+        initialK9Fast()
+    }
+
+    fun checkContains(id: String): Boolean {
+        return orderList.contains(id)
     }
 
     fun getProductModel(statusId: String): MutableList<ProductModel> {
@@ -96,9 +110,13 @@ class ProductListActivity: BaseK9Activity() {
         return productList
     }
 
-    override fun setupView(info: ThiaIdInfoBeen) {
-        super.setupView(info)
-        loadOrder(citizenId)
+    override fun setupViewFast(info: ThaiIDSecurityBeen) {
+        super.setupViewFast(info)
+        orderCode?.let {
+            if (it.isNotEmpty()) {
+                loadOrder(citizenId)
+            }
+        }
     }
 
     fun checkActionContainer() {
@@ -116,7 +134,7 @@ class ProductListActivity: BaseK9Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
-            btn_container?.visibility = View.GONE
+            orderList = ArrayList<String>()
             if (requestCode == SCAN_REQUEST_CODE) {
                 orderCode = data?.getStringExtra("barcode")
                 loadOrder(orderCode!!)
@@ -145,15 +163,33 @@ class ProductListActivity: BaseK9Activity() {
                         val intent = Intent(this@ProductListActivity, OrderListActivity::class.java)
                         intent.putExtra("order_list", dataJsonArray.toString())
                         startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                    } else {
+                        DialogUtil.showNotiDialog(
+                            this@ProductListActivity,
+                            getString(R.string.title_error),
+                            getString(R.string.search_error_please_research)
+                        )
                     }
                 }
 
                 override fun onError(error: ANError) {
                     error.printStackTrace()
+                    DialogUtil.showNotiDialog(
+                        this@ProductListActivity,
+                        getString(R.string.title_error),
+                        getString(R.string.connect_error_please_reorder)
+                    )
                     Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
                 }
             } )
+        } else if (checkContains(key)) {
+            Toast.makeText(
+                this@ProductListActivity,
+                "รายการนี้มีอยู่แล้ว",
+                Toast.LENGTH_LONG
+            ).show()
         } else {
+            btn_container?.visibility = View.GONE
             productSellList.clear()
             item_container.removeAllViews()
             Network.searchOrder(key, OrderType.BORRROWED.typeId, object :
@@ -168,11 +204,22 @@ class ProductListActivity: BaseK9Activity() {
                             Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java)
                         addItemView(orderModel!!)
                         checkActionContainer()
+                    }else {
+                        DialogUtil.showNotiDialog(
+                            this@ProductListActivity,
+                            getString(R.string.title_error),
+                            getString(R.string.search_error_please_research)
+                        )
                     }
                 }
 
                 override fun onError(error: ANError) {
                     error.printStackTrace()
+                    DialogUtil.showNotiDialog(
+                        this@ProductListActivity,
+                        getString(R.string.title_error),
+                        getString(R.string.connect_error_please_reorder)
+                    )
                     Log.e(
                         "panya",
                         "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -183,6 +230,7 @@ class ProductListActivity: BaseK9Activity() {
     }
 
     fun addItemView(orderModel: OrderModel) {
+        orderList.add(orderModel.order_code)
         for (productModel in orderModel.products) {
             productSellList.add(productModel)
             val inflater = LayoutInflater.from(baseContext)

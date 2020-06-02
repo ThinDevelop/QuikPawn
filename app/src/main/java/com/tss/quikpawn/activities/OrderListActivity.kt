@@ -17,20 +17,22 @@ class OrderListActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_order_list)
+        setContentView  (R.layout.activity_order_list)
         title = getString(R.string.select_order)
         val orders = intent.getStringExtra("order_list")
         val orderListType: Type = object : TypeToken<ArrayList<OrderModel>?>() {}.type
         val orderArray: ArrayList<OrderModel> = Gson().fromJson(orders, orderListType)
-        rv_order_list.layoutManager = LinearLayoutManager(this)
-        rv_order_list.adapter = OrderListAdapter(orderArray, this, object :
-            OrderListAdapter.OnItemClickListener{
-            override fun onItemClick(orderCode: String) {
+        val orderListAdapter = OrderListAdapter(this, object :
+            OrderListAdapter.OnItemClickListener {
+            override fun onItemClick(orderModel: OrderModel) {
                 val intent = Intent()
-                intent.putExtra("order_code", orderCode)
+                intent.putExtra("order_code", orderModel.order_code)
                 setResult(Activity.RESULT_OK, intent)
                 finish()
             }
         })
+        rv_order_list.layoutManager = LinearLayoutManager(this)
+        rv_order_list.adapter = orderListAdapter
+        orderListAdapter.updateData(orderArray)
     }
 }

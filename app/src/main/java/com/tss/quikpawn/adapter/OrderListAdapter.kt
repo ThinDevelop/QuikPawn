@@ -15,12 +15,20 @@ import com.stfalcon.multiimageview.MultiImageView
 import com.tss.quikpawn.R
 import com.tss.quikpawn.models.OrderModel
 import com.tss.quikpawn.models.OrderStatus
+import com.tss.quikpawn.models.OrderType
+import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.item_interest_detail.*
 import kotlinx.android.synthetic.main.item_order_list.view.*
 import java.lang.StringBuilder
 
-class OrderListAdapter(val items : ArrayList<OrderModel>, val context: Context, val listener: OnItemClickListener) : RecyclerView.Adapter<ViewHolder>() {
+class OrderListAdapter(val context: Context, val listener: OnItemClickListener) : RecyclerView.Adapter<ViewHolder>() {
 
+    val items = ArrayList<OrderModel>()
+
+    fun updateData(item: ArrayList<OrderModel>) {
+        items.addAll(item)
+        notifyDataSetChanged()
+    }
     // Gets the number of animals in the list
     override fun getItemCount(): Int {
         return items.size
@@ -34,11 +42,11 @@ class OrderListAdapter(val items : ArrayList<OrderModel>, val context: Context, 
     // Binds each animal in the ArrayList to a view
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val orderModel = items.get(position)
-        val orderStatus = OrderStatus.getOrderStatus(orderModel.status_id)
+        val orderType = OrderType.getOrderType(orderModel.type_id)
         holder.orderNumber?.text = orderModel.order_code
-        holder.orderCreate?.text = orderModel.date_expire
-        holder.orderType?.text = orderStatus.statusName
-        holder.orderType?.setTextColor(orderStatus.color)
+        holder.orderCreate?.text = Util.toDateFormat(orderModel.date_create)
+        holder.orderType?.text = "รายการ "+orderType.typeName
+//        holder.orderType?.setTextColor(orderStatus.color)
         holder.orderImage.shape = MultiImageView.Shape.RECTANGLE
         holder.orderImage.rectCorners = 10
         val orderName = StringBuilder()
@@ -65,18 +73,19 @@ class OrderListAdapter(val items : ArrayList<OrderModel>, val context: Context, 
                         }
                     })
         }
+        if (orderName.isNotEmpty()) {
+            holder.orderName.text = orderName.substring(0, orderName.lastIndex)
+        }
 
-
-        holder.orderName.text = orderName.substring(0, orderName.lastIndex)
         holder.orderContainer.tag = orderModel.order_code
 
         holder.orderContainer.setOnClickListener {
-            listener.onItemClick(it.tag as String)
+            listener.onItemClick(items.get(position))
         }
     }
 
     interface OnItemClickListener {
-        fun onItemClick(orderCode: String)
+        fun onItemClick(orderModel: OrderModel)
     }
 }
 

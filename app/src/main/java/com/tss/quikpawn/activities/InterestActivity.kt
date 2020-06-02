@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -41,12 +42,13 @@ import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
 
 
-class InterestActivity: BaseK9Activity() {
+class InterestActivity : BaseK9Activity() {
     var summary = 0.00f
     var mulctPrice = 0
     var interestOrderModel: OrderModel? = null
     var listInterestMonthModel = mutableListOf<InterestMonthModel>()
     val SELECT_ORDER_REQUEST_CODE = 2015
+    var orderList = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_interest)
@@ -56,66 +58,100 @@ class InterestActivity: BaseK9Activity() {
             val intent = Intent(this@InterestActivity, ScanActivity::class.java)
             startActivityForResult(intent, SCAN_REQUEST_CODE)
         }
-        btn_clearsign.setOnClickListener{
+        btn_clearsign.setOnClickListener {
             signature_pad.clear()
         }
 
         btn_ok.setOnClickListener {
-            var signatureBitmap = signature_pad.getSignatureBitmap()
-            signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
             val customerName = edt_name.text.toString()
             var customerId = citizenId
             var customerAddress = address
             var customerPhoto = customerPhoto
             var phoneNumber = edt_phonenumber.text.toString()
-            val signature = Util.bitmapToBase64(signatureBitmap)
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
             if (!customerName.isEmpty() &&
                 !customerId.isEmpty() &&
-                !signature.isEmpty() &&
-                interestOrderModel != null) {
+                interestOrderModel != null
+            ) {
 
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
-                list.add(interestOrderModel!!.order_code)
-                list.add("ดอกเบี้ยรวม " + NumberTextWatcherForThousand.getDecimalFormattedString(summary.toString()) + " บาท")
-
-                val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, "ยืนยัน")
-                DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
-                val x = InterestParamModel(
-                    interestOrderModel!!.order_code,
-                    customerId,
-                    customerName,
-                    customerAddress,
-                    customerPhoto,
-                    phoneNumber,
-                    listInterestMonthModel,
-                    "0",
-                    signature,
-                    PreferencesManager.getInstance().userId
+                list.add("รายการเลขที่ "+interestOrderModel!!.order_code)
+                list.add(
+                    "ดอกเบี้ยรวม " + NumberTextWatcherForThousand.getDecimalFormattedString(
+                        String.format("%.2f", summary)
+                    ) + " บาท"
                 )
-                Network.interest(x, object : JSONObjectRequestListener {
-                    override fun onResponse(response: JSONObject) {
-                        Log.e("panya", "onResponse : $response")
-                        val status = response.getString("status_code")
-                        if (status == "200") {
-                            val dataJsonObj = response.getJSONObject("data")
-                            Log.e("panya", dataJsonObj.toString())
+                if (summary == 0f) {
+                    DialogUtil.showNotiDialog(this@InterestActivity, getString(R.string.data_missing), getString(R.string.please_add_pay_per_month))
+                    return@setOnClickListener
+                } else if (signature_pad.isEmpty) {
+                    DialogUtil.showNotiDialog(this@InterestActivity, getString(R.string.data_missing), getString(R.string.please_add_signature))
+                    return@setOnClickListener
+                }
+                var signatureBitmap = signature_pad.getSignatureBitmap()
+                signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
+                val signature = Util.bitmapToBase64(signatureBitmap)
 
-                            printSlip(Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java))
-                            showConfirmDialog(dataJsonObj)
-                        }
-                    }
+                val param = DialogParamModel(
+                    getString(R.string.msg_confirm_title_order),
+                    list,
+                    getString(R.string.text_confirm),
+                    getString(R.string.text_cancel)
+                )
 
-                    override fun onError(error: ANError) {
-                        error.printStackTrace()
-                        Log.e(
-                            "panya",
-                            "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
+                    if (DialogUtil.CONFIRM.equals(it)) {
+                        val x = InterestParamModel(
+                            interestOrderModel!!.order_code,
+                            customerId,
+                            customerName,
+                            customerAddress,
+                            customerPhoto,
+                            phoneNumber,
+                            listInterestMonthModel,
+                            "0",
+                            signature,
+                            PreferencesManager.getInstance().userId
                         )
+                        Network.interest(x, object : JSONObjectRequestListener {
+                            override fun onResponse(response: JSONObject) {
+                                Log.e("panya", "onResponse : $response")
+                                val status = response.getString("status_code")
+                                if (status == "200") {
+                                    val dataJsonObj = response.getJSONObject("data")
+                                    Log.e("panya", dataJsonObj.toString())
+                                    printSlip(
+                                        Gson().fromJson(
+                                            dataJsonObj.toString(),
+                                            OrderModel::class.java
+                                        )
+                                    )
+                                    showConfirmDialog(dataJsonObj)
+                                } else {
+                                    DialogUtil.showNotiDialog(
+                                        this@InterestActivity,
+                                        getString(R.string.title_error),
+                                        getString(R.string.connect_error_please_reorder)
+                                    )
+                                }
+                            }
+
+                            override fun onError(error: ANError) {
+                                error.printStackTrace()
+                                DialogUtil.showNotiDialog(
+                                    this@InterestActivity,
+                                    getString(R.string.title_error),
+                                    getString(R.string.connect_error_please_reorder)
+                                )
+                                Log.e(
+                                    "panya",
+                                    "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                                )
+                            }
+                        })
                     }
-                })
                 })
             }
         }
@@ -125,7 +161,15 @@ class InterestActivity: BaseK9Activity() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     if (!query.equals("")) {
-                        loadOrder(query)
+                        if (checkContains(query)) {
+                            Toast.makeText(
+                                this@InterestActivity,
+                                "รายการนี้มีอยู่แล้ว",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            loadOrder(query)
+                        }
                     }
                 }
                 return false
@@ -139,11 +183,22 @@ class InterestActivity: BaseK9Activity() {
 
     }
 
+    fun checkContains(id: String): Boolean {
+        return orderList.contains(id)
+    }
+
     fun showConfirmDialog(data: JSONObject) {
-        val list = listOf("สำหรับร้านค้า")
-        val dialogParamModel = DialogParamModel("ปริ้น", list, "ตกลง")
+        val list = listOf(getString(R.string.dialog_msg_for_shop))
+        val dialogParamModel = DialogParamModel(
+            "ปริ้น",
+            list,
+            getString(R.string.text_ok),
+            getString(R.string.text_skip)
+        )
         DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
-            printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            if (it.equals(DialogUtil.CONFIRM)) {
+                printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
+            }
             finish()
         })
     }
@@ -151,7 +206,7 @@ class InterestActivity: BaseK9Activity() {
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
-        edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length-3) + "XXX")
+        edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
         if (interestOrderModel == null) {
             loadOrder(info.citizenId)
         }
@@ -171,46 +226,89 @@ class InterestActivity: BaseK9Activity() {
     }
 
     fun loadOrder(key: String) {
-
         if (key.length == 13) {
-            Network.searchOrderByIdCardAndType(key, OrderType.CONSIGNMENT.typeId, object : JSONObjectRequestListener {
-                override fun onResponse(response: JSONObject) {
-                    Log.e("panya", "onResponse : $response")
-                    val status = response.getString("status_code")
-                    if (status == "200") {
-                        val dataJsonArray = response.getJSONArray("data")
-                        val intent = Intent(this@InterestActivity, OrderListActivity::class.java)
-                        intent.putExtra("order_list", dataJsonArray.toString())
-                        startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+            Network.searchOrderByIdCardAndType(
+                key,
+                OrderType.CONSIGNMENT.typeId,
+                object : JSONObjectRequestListener {
+                    override fun onResponse(response: JSONObject) {
+                        Log.e("panya", "onResponse : $response")
+                        val status = response.getString("status_code")
+                        if (status == "200") {
+                            val dataJsonArray = response.getJSONArray("data")
+                            val intent =
+                                Intent(this@InterestActivity, OrderListActivity::class.java)
+                            intent.putExtra("order_list", dataJsonArray.toString())
+                            startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                        } else {
+                            DialogUtil.showNotiDialog(
+                                this@InterestActivity,
+                                getString(R.string.title_error),
+                                getString(R.string.search_error_please_research)
+                            )
+                        }
                     }
-                }
 
-                override fun onError(error: ANError) {
-                    error.printStackTrace()
-                    Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
-                }
-            } )
+                    override fun onError(error: ANError) {
+                        DialogUtil.showNotiDialog(
+                            this@InterestActivity,
+                            getString(R.string.title_error),
+                            getString(R.string.connect_error_please_reorder)
+                        )
+                        error.printStackTrace()
+                        Log.e(
+                            "panya",
+                            "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                        )
+                    }
+                })
+        } else if (checkContains(key)) {
+            Toast.makeText(
+                this@InterestActivity,
+                "รายการนี้มีอยู่แล้ว",
+                Toast.LENGTH_LONG
+            ).show()
         } else {
-            Network.searchOrder(key, OrderType.CONSIGNMENT.typeId, object : JSONObjectRequestListener {
-                override fun onResponse(response: JSONObject) {
-                    Log.e("panya", "onResponse : $response")
-                    val status = response.getString("status_code")
-                    if (status == "200") {
-                        val dataJsonObj = response.getJSONObject("data")
-                        interestOrderModel = Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java)
-                        addItemView(interestOrderModel!!)
+            Network.searchOrder(
+                key,
+                OrderType.CONSIGNMENT.typeId,
+                object : JSONObjectRequestListener {
+                    override fun onResponse(response: JSONObject) {
+                        Log.e("panya", "onResponse : $response")
+                        val status = response.getString("status_code")
+                        if (status == "200") {
+                            val dataJsonObj = response.getJSONObject("data")
+                            interestOrderModel =
+                                Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java)
+                            addItemView(interestOrderModel!!)
+                        } else {
+                            DialogUtil.showNotiDialog(
+                                this@InterestActivity,
+                                getString(R.string.title_error),
+                                getString(R.string.search_error_please_research)
+                            )
+                        }
                     }
-                }
 
-                override fun onError(error: ANError) {
-                    error.printStackTrace()
-                    Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
-                }
-            } )
+                    override fun onError(error: ANError) {
+                        DialogUtil.showNotiDialog(
+                            this@InterestActivity,
+                            getString(R.string.title_error),
+                            getString(R.string.connect_error_please_reorder)
+                        )
+                        error.printStackTrace()
+                        Log.e(
+                            "panya",
+                            "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                        )
+                    }
+                })
         }
+
     }
 
     fun addItemView(interestOrderModel: OrderModel) {
+        orderList.add(interestOrderModel.order_code)
         val inflater = LayoutInflater.from(baseContext)
         val contentView: View = inflater.inflate(R.layout.item_interest_detail, null, false)
         val delete = contentView.findViewById<ImageView>(R.id.btn_delete)
@@ -246,23 +344,28 @@ class InterestActivity: BaseK9Activity() {
                     }
                 })
         }
-        summaryInterest.text = getString(R.string.pay_interest, NumberTextWatcherForThousand.getDecimalFormattedString((summary + mulctPrice).toString()))
+        summaryInterest.text = getString(
+            R.string.pay_interest,
+            NumberTextWatcherForThousand.getDecimalFormattedString((summary + mulctPrice).toString())
+        )
         mulct.visibility = View.GONE
         delete.visibility = View.VISIBLE
         contentView.tag = item_container.childCount
         delete.tag = contentView.tag
         delete.setOnClickListener {
             this.interestOrderModel = null
-            (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(item_container.findViewWithTag<View>(it.tag))
+            (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
+                item_container.findViewWithTag<View>(it.tag)
+            )
         }
 
         for (interest in interestOrderModel.interest) {
             val checkBox = CheckBox(this)
-            checkBox.text = "เดือนที่ : "+ interest.month
+            checkBox.text = "เดือนที่ : " + interest.month
             checkBox.isEnabled = !interest.status
             checkBox.isChecked = interest.status
-                checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
-                Toast.makeText(this,isChecked.toString(),Toast.LENGTH_SHORT).show()
+            checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
+//                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
                 if (isChecked) {
                     summary += interest.price.toFloat()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
@@ -276,7 +379,8 @@ class InterestActivity: BaseK9Activity() {
                         }
                     }
                 }
-                summaryInterest.text = getString(R.string.pay_interest, (summary + mulctPrice).toString())
+                summaryInterest.text =
+                    getString(R.string.pay_interest, (summary + mulctPrice).toString())
             }
             layout.addView(checkBox)
         }
@@ -291,15 +395,28 @@ class InterestActivity: BaseK9Activity() {
                 p0?.let {
                     if (p0.isEmpty()) {
                         mulctPrice = 0
-                    }else {
+                    } else {
                         mulctPrice = Integer.parseInt(p0.toString())
                     }
                 }
-                summaryInterest.text = getString(R.string.pay_interest, (summary + mulctPrice).toString())
+                summaryInterest.text =
+                    getString(R.string.pay_interest, (summary + mulctPrice).toString())
             }
         })
 
         item_container.addView(contentView)
+    }
+
+    private var doubleBackToExitPressedOnce = false
+    override fun onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            return
+        }
+        this.doubleBackToExitPressedOnce = true
+        Toast.makeText(this, getString(R.string.please_back_again), Toast.LENGTH_SHORT).show()
+
+        Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 
     fun printSlip(data: OrderModel) {
@@ -335,12 +452,12 @@ class InterestActivity: BaseK9Activity() {
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ร้าน "+ PreferencesManager.getInstance().companyName)
+        printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
         printerParams1 = PrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
+        printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()
@@ -360,6 +477,24 @@ class InterestActivity: BaseK9Activity() {
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
+        textList.add(printerParams1)
+
+        printerParams1 = PrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(18)
+        printerParams1.setText("รายการ")
+        textList.add(printerParams1)
+
+        val list = arrayListOf<ProductModel2>()
+        for (interest in data.interest) {
+            list.add(ProductModel2("เดือนที่ : " + interest.month, interest.price+ " บาท"))
+        }
+
+        val listBitmap = Util.productListToBitmap(list)
+        printerParams1 = PrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
         printerParams1 = PrinterParams()
