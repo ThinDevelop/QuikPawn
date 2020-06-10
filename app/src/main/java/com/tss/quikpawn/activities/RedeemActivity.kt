@@ -73,7 +73,7 @@ class RedeemActivity : BaseK9Activity() {
                 customerId = edt_idcard.text.toString()
             }
             if (!customerName.isEmpty() &&
-                !customerId.isEmpty() &&
+//                !customerId.isEmpty() &&
                 interestOrderModel != null
             ) {
 
@@ -93,19 +93,7 @@ class RedeemActivity : BaseK9Activity() {
                         getString(R.string.please_add_pay_per_month)
                     )
                     return@setOnClickListener
-                } else if (signature_pad.isEmpty) {
-                    DialogUtil.showNotiDialog(
-                        this@RedeemActivity,
-                        getString(R.string.data_missing),
-                        getString(R.string.please_add_signature)
-                    )
-                    return@setOnClickListener
                 }
-                var signatureBitmap = signature_pad.getSignatureBitmap()
-                signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
-                val signature = Util.bitmapToBase64(signatureBitmap)
-
-
                 val param =
                     DialogParamModel(
                         getString(R.string.msg_confirm_title_order),
@@ -125,7 +113,6 @@ class RedeemActivity : BaseK9Activity() {
                             listInterestMonthModel,
                             cost.toString(),
                             mulctPrice.toString(),
-                            signature,
                             PreferencesManager.getInstance().userId
                         )
                         Network.redeem(x, object : JSONObjectRequestListener {
@@ -456,62 +443,63 @@ class RedeemActivity : BaseK9Activity() {
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(18)
         printerParams1.setText("รายการสินค้า")
@@ -519,14 +507,14 @@ class RedeemActivity : BaseK9Activity() {
 
         val list = Util.productListToProductList2Cost(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
         val list2 = arrayListOf<ProductModel2>()
         if (data.interest.isNotEmpty()) {
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(18)
             printerParams1.setText("รายการดอกเบี้ย")
@@ -537,7 +525,7 @@ class RedeemActivity : BaseK9Activity() {
             }
             list2.add(ProductModel2("ค่าปรับ", data.mulct_price + " บาท"))
             val listBitmap = Util.productListToBitmap(list2)
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
             printerParams1.setBitmap(listBitmap)
@@ -545,23 +533,26 @@ class RedeemActivity : BaseK9Activity() {
         } else {
             list2.add(ProductModel2("ค่าปรับ", data.mulct_price + " บาท"))
             val listBitmap = Util.productListToBitmap(list2)
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
             printerParams1.setBitmap(listBitmap)
             textList.add(printerParams1)
         }
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ยอดชำระ " + data.total + " บาท")
+        val total = data.total.replace(".00", "")
+        printerParams1.setText("ยอดชำระ " + Util.addComma(total) + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@RedeemActivity))
         printdata(textList)
     }
 

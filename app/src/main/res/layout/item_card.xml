@@ -17,12 +17,23 @@
             android:orientation="horizontal"
             android:padding="8dp">
 
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
             <ImageView
                 android:id="@+id/img_item"
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/gold_a" />
+                <CheckBox
+                    android:id="@+id/checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleX="0.90"
+                    android:scaleY="0.90"
+                    android:background="@color/WhiteSmoke"/>
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

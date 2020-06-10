@@ -23,15 +23,14 @@ import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.google.gson.Gson
-import com.tss.quikpawn.models.BuyParamModel
-import com.tss.quikpawn.models.BuyProductModel
-import com.tss.quikpawn.models.DialogParamModel
-import com.tss.quikpawn.models.OrderModel
+import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.FileUtil
 import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
+import com.tss.quikpawn.util.Util.Companion.addRectangle
+import com.tss.quikpawn.util.Util.Companion.dashLine
 import com.tss.quikpawn.util.Util.Companion.productListToBitmap
 import com.tss.quikpawn.util.Util.Companion.productListToProductList2Cost
 import kotlinx.android.synthetic.main.activity_buy.*
@@ -85,17 +84,9 @@ class BuyActivity : BaseK9Activity() {
                 customerId = edt_idcard.text.toString()
             }
             if (!customerName.isEmpty() &&
-                !customerId.isEmpty() &&
+//                !customerId.isEmpty() &&
                 (loadingProgressBar != null && !loadingProgressBar!!.isShown)
             ) {
-                if (signature_pad.isEmpty) {
-                    DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_signature))
-                    return@setOnClickListener
-                }
-
-                var signatureBitmap = signature_pad.getSignatureBitmap()
-                signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
-                val signature = Util.bitmapToBase64(signatureBitmap)
                 val productList = ArrayList<BuyProductModel>()
                 for (i in 0..layout_detail.childCount - 1) {
                     val contentView = layout_detail.get(i)
@@ -104,16 +95,29 @@ class BuyActivity : BaseK9Activity() {
                     val cost = contentView.findViewById<EditText>(R.id.edt_cost)
                     val productName = contentView.findViewById<EditText>(R.id.edt_product_name)
 
-                    val costStr= NumberTextWatcherForThousand.trimCommaOfString(cost.text.toString())
+                    val costStr =
+                        NumberTextWatcherForThousand.trimCommaOfString(cost.text.toString())
                     val name = productName.text.toString()
                     if (camera.tag == null) {
-                        DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_photo))
+                        DialogUtil.showNotiDialog(
+                            this,
+                            getString(R.string.data_missing),
+                            getString(R.string.please_add_photo)
+                        )
                         return@setOnClickListener
                     } else if (name.isEmpty()) {
-                        DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_name))
+                        DialogUtil.showNotiDialog(
+                            this,
+                            getString(R.string.data_missing),
+                            getString(R.string.please_add_name)
+                        )
                         return@setOnClickListener
                     } else if (costStr.isEmpty()) {
-                        DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_price))
+                        DialogUtil.showNotiDialog(
+                            this,
+                            getString(R.string.data_missing),
+                            getString(R.string.please_add_price)
+                        )
                         return@setOnClickListener
                     }
                     val refImg = camera.tag as String
@@ -128,7 +132,11 @@ class BuyActivity : BaseK9Activity() {
                 }
 
                 if (productList.size == 0) {
-                    DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_item))
+                    DialogUtil.showNotiDialog(
+                        this,
+                        getString(R.string.data_missing),
+                        getString(R.string.please_add_item)
+                    )
                     return@setOnClickListener
                 }
 
@@ -138,14 +146,19 @@ class BuyActivity : BaseK9Activity() {
                     list.add(
                         product.name + " : " + NumberTextWatcherForThousand.getDecimalFormattedString(
                             product.cost
-                        )+ " บาท"
+                        ) + " บาท"
                     )
                     sum += Integer.parseInt(product.cost)
                 }
                 list.add("รวม " + NumberTextWatcherForThousand.getDecimalFormattedString(sum.toString()) + " บาท")
 
                 val param =
-                    DialogParamModel(getString(R.string.msg_confirm_title_order), list, getString(R.string.text_confirm), getString(R.string.text_cancel))
+                    DialogParamModel(
+                        getString(R.string.msg_confirm_title_order),
+                        list,
+                        getString(R.string.text_confirm),
+                        getString(R.string.text_cancel)
+                    )
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
                     if (DialogUtil.CONFIRM.equals(it)) {
                         val dialog = createProgressDialog(this, "Loading...")
@@ -159,7 +172,6 @@ class BuyActivity : BaseK9Activity() {
                             productList,
                             PreferencesManager.getInstance().companyId,
                             PreferencesManager.getInstance().companyBranchId,
-                            signature,
                             PreferencesManager.getInstance().userId
                         )
                         Network.buyItem(model, object : JSONObjectRequestListener {
@@ -176,13 +188,21 @@ class BuyActivity : BaseK9Activity() {
                                     )
                                     showConfirmDialog(data)
                                 } else {
-                                    DialogUtil.showNotiDialog(this@BuyActivity, getString(R.string.title_error), getString(R.string.connect_error_please_reorder))
+                                    DialogUtil.showNotiDialog(
+                                        this@BuyActivity,
+                                        getString(R.string.title_error),
+                                        getString(R.string.connect_error_please_reorder)
+                                    )
                                 }
                             }
 
                             override fun onError(error: ANError) {
                                 dialog.dismiss()
-                                DialogUtil.showNotiDialog(this@BuyActivity, getString(R.string.title_error), getString(R.string.connect_error_please_reorder))
+                                DialogUtil.showNotiDialog(
+                                    this@BuyActivity,
+                                    getString(R.string.title_error),
+                                    getString(R.string.connect_error_please_reorder)
+                                )
                                 error.printStackTrace()
                                 Log.e(
                                     "panya",
@@ -204,7 +224,12 @@ class BuyActivity : BaseK9Activity() {
 
     fun showConfirmDialog(data: JSONObject) {
         val list = listOf(getString(R.string.dialog_msg_for_shop))
-        val dialogParamModel = DialogParamModel("ปริ้น", list, getString(R.string.text_ok), getString(R.string.text_skip))
+        val dialogParamModel = DialogParamModel(
+            "ปริ้น",
+            list,
+            getString(R.string.text_ok),
+            getString(R.string.text_skip)
+        )
         DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
             if (it.equals(DialogUtil.CONFIRM)) {
                 printSlip(Gson().fromJson(data.toString(), OrderModel::class.java), true)
@@ -229,13 +254,21 @@ class BuyActivity : BaseK9Activity() {
                         val refCode = data.getString("ref_code")
                         setTagToImageView(refCode)
                     } else {
-                        DialogUtil.showNotiDialog(this@BuyActivity, getString(R.string.title_error), getString(R.string.upload_error_please_upload_again))
+                        DialogUtil.showNotiDialog(
+                            this@BuyActivity,
+                            getString(R.string.title_error),
+                            getString(R.string.upload_error_please_upload_again)
+                        )
                     }
                 }
 
                 override fun onError(error: ANError) {
                     loadingProgressBar?.visibility = View.GONE
-                    DialogUtil.showNotiDialog(this@BuyActivity, getString(R.string.title_error), getString(R.string.upload_error_please_upload_again))
+                    DialogUtil.showNotiDialog(
+                        this@BuyActivity,
+                        getString(R.string.title_error),
+                        getString(R.string.upload_error_please_upload_again)
+                    )
                     error.printStackTrace()
                     Log.e(
                         "panya",
@@ -275,62 +308,64 @@ class BuyActivity : BaseK9Activity() {
 
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
-
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
+        printerParams1.isBold = true
         printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
+        printerParams1.isBold = true
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รายการสินค้า\n")
@@ -338,50 +373,55 @@ class BuyActivity : BaseK9Activity() {
 
         val list = productListToProductList2Cost(data.products)
         val listBitmap = productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ชำระเงิน " + data.total + " บาท")
+        val total = data.total.replace(".00", "")
+        printerParams1.setText("ชำระเงิน " + Util.addComma(total) + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(dashLine(this@BuyActivity))
         if (printList) {
             var i = 0
             for (product in data.products) {
                 i++
-                printerParams1 = PrinterParams()
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
                 printerParams1.setTextSize(24)
                 printerParams1.setText("" + i + ". " + product.product_name + "\n")
                 textList.add(printerParams1)
 
-                bitmap = Utility.toGrayscale(createImageBarcode(product.product_code, "Barcode")!!)
-                printerParams1 = PrinterParams()
+                bitmap = Utility.toGrayscale(createImageBarcode(product.product_code, "QR Code")!!)
+                bitmap = addRectangle(bitmap)
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
                 printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
                 printerParams1.setBitmap(bitmap)
                 textList.add(printerParams1)
 
-                printerParams1 = PrinterParams()
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
                 printerParams1.setTextSize(24)
                 printerParams1.setText(product.product_code + "\n\n")
                 textList.add(printerParams1)
+                textList.add(dashLine(this@BuyActivity))
             }
         }
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
-        printerParams1.setText("\n\n\n")
+        printerParams1.setText("\n\n")
         textList.add(printerParams1)
         printdata(textList)
     }

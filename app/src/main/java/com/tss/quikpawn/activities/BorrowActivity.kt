@@ -3,7 +3,6 @@ package com.tss.quikpawn.activities
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -19,7 +18,6 @@ import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.centerm.centermposoversealib.thailand.ThaiIDSecurityBeen
 import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
@@ -33,11 +31,11 @@ import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
+import com.tss.quikpawn.util.Util.Companion.dashLine
+import com.tss.quikpawn.util.Util.Companion.dashSignature
 import kotlinx.android.synthetic.main.activity_borrow.*
 import kotlinx.android.synthetic.main.item_customer_info.*
-import kotlinx.android.synthetic.main.item_customer_info.signature_pad
 import kotlinx.android.synthetic.main.item_search.*
-import kotlinx.android.synthetic.main.item_sign_view.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -103,7 +101,7 @@ class BorrowActivity: BaseK9Activity() {
             Log.e("panya", "deadline : $deadline")
 
             if (!customerName.isEmpty() &&
-                !customerId.isEmpty() &&
+//                !customerId.isEmpty() &&
                 !customerPhone.isEmpty()){
 
                 if (productList.isEmpty()) {
@@ -125,21 +123,13 @@ class BorrowActivity: BaseK9Activity() {
                     sum ++
                 }
                 list.add("รวม " + sum.toString() + " ชิ้น")
-                if (signature_pad.isEmpty) {
-                    DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_signature))
-                    return@setOnClickListener
-                }
-
-                var signatureBitmap = signature_pad.getSignatureBitmap()
-                signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
-                val signature = Util.bitmapToBase64(signatureBitmap)
 
                 val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, getString(R.string.text_confirm), getString(R.string.text_cancel))
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
                     if (it.equals(DialogUtil.CONFIRM)) {
                         val dialog = createProgressDialog(this, "Loading...")
                         dialog.show()
-                        val model = LendParamModel(customerId, customerName, customerAddress, customerPhoto, customerPhone, productList, deadline, signature)
+                        val model = LendParamModel(customerId, customerName, customerAddress, customerPhoto, customerPhone, productList, deadline)
                         Network.lend(model, object : JSONObjectRequestListener {
                             override fun onResponse(response: JSONObject) {
                                 dialog.dismiss()
@@ -358,62 +348,63 @@ class BorrowActivity: BaseK9Activity() {
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน "+ PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า "+data.customer_name)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. "+data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รายการสินค้า\n")
@@ -421,17 +412,18 @@ class BorrowActivity: BaseK9Activity() {
 
         val list = Util.productListToProductList2Sell(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
-
-        printerParams1 = PrinterParams()
+        textList.add(dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@BorrowActivity))
         printdata(textList)
     }
 }

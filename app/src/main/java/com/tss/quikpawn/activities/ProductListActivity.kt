@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewManager
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -29,9 +30,10 @@ import kotlinx.android.synthetic.main.activity_product_list.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
 
-class ProductListActivity: BaseK9Activity() {
-    var orderCode: String? = ""
-    var productSellList = mutableListOf<ProductModel>()
+class ProductListActivity : BaseK9Activity() {
+    var orderCode: String? = null
+    var productList = mutableListOf<ProductModel>()
+    var selectProductList = mutableListOf<ProductModel>()
     val PAY_REQUEST_CODE = 2001
     val RETURN_REQUEST_CODE = 2002
     val SELECT_ORDER_REQUEST_CODE = 2015
@@ -47,24 +49,27 @@ class ProductListActivity: BaseK9Activity() {
         }
 
         btn_pay.setOnClickListener {
-            val list = getProductModel(ProductStatus.BORRROWED.statusId)
-            if (list.isEmpty()) {
-                Toast.makeText(this@ProductListActivity, "ไม่พบสินค้าที่ชำระเงินได้", Toast.LENGTH_LONG).show()
+            if (selectProductList.isEmpty()) {
+                Toast.makeText(
+                    this@ProductListActivity,
+                    "ไม่พบสินค้าที่ชำระเงินได้",
+                    Toast.LENGTH_LONG
+                ).show()
             } else {
                 val intent = Intent(this@ProductListActivity, SellActivity::class.java)
-                intent.putExtra("product_list", Gson().toJson(list))
+                intent.putExtra("product_list", Gson().toJson(selectProductList))
                 intent.putExtra("order_code", orderCode)
                 startActivityForResult(intent, PAY_REQUEST_CODE)
             }
         }
 
         btn_return.setOnClickListener {
-            val list = getProductModel(ProductStatus.BORRROWED.statusId)
-            if (list.isEmpty()) {
-                Toast.makeText(this@ProductListActivity, "ไม่พบสินค้าที่คืนได้", Toast.LENGTH_LONG).show()
+            if (selectProductList.isEmpty()) {
+                Toast.makeText(this@ProductListActivity, "ไม่พบสินค้าที่คืนได้", Toast.LENGTH_LONG)
+                    .show()
             } else {
                 val intent = Intent(this@ProductListActivity, ReturnActivity::class.java)
-                intent.putExtra("product_list", Gson().toJson(list))
+                intent.putExtra("product_list", Gson().toJson(selectProductList))
                 intent.putExtra("order_code", orderCode)
                 startActivityForResult(intent, RETURN_REQUEST_CODE)
             }
@@ -99,9 +104,9 @@ class ProductListActivity: BaseK9Activity() {
     }
 
     fun getProductModel(statusId: String): MutableList<ProductModel> {
-        val productList = mutableListOf<ProductModel>()
-        if (productSellList.isNotEmpty()) {
-            for (product in productSellList) {
+//        val productList = mutableListOf<ProductModel>()
+        if (productList.isNotEmpty()) {
+            for (product in productList) {
                 if (statusId.equals(product.status_id)) {
                     productList.add(product)
                 }
@@ -112,23 +117,14 @@ class ProductListActivity: BaseK9Activity() {
 
     override fun setupViewFast(info: ThaiIDSecurityBeen) {
         super.setupViewFast(info)
-        orderCode?.let {
-            if (it.isNotEmpty()) {
-                loadOrder(citizenId)
-            }
+        if (orderCode == null || "".equals(orderCode)) {
+            loadOrder(citizenId)
         }
     }
 
     fun checkActionContainer() {
-        btn_container?.visibility = View.GONE
-        if (productSellList.isNotEmpty()) {
-            for (product in productSellList) {
-                if (ProductStatus.BORRROWED.statusId.equals(product.status_id)) {
-                    btn_container?.visibility = View.VISIBLE
-                    break
-                }
-            }
-        }
+        btn_pay.isEnabled = selectProductList.isNotEmpty()
+        btn_return.isEnabled = selectProductList.isNotEmpty()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -154,34 +150,41 @@ class ProductListActivity: BaseK9Activity() {
 
     fun loadOrder(key: String) {
         if (key.length == 13) {
-            Network.searchOrderByIdCardAndType(key, OrderType.BORRROWED.typeId, object : JSONObjectRequestListener {
-                override fun onResponse(response: JSONObject) {
-                    Log.e("panya", "onResponse : $response")
-                    val status = response.getString("status_code")
-                    if (status == "200") {
-                        val dataJsonArray = response.getJSONArray("data")
-                        val intent = Intent(this@ProductListActivity, OrderListActivity::class.java)
-                        intent.putExtra("order_list", dataJsonArray.toString())
-                        startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
-                    } else {
+            Network.searchOrderByIdCardAndType(
+                key,
+                OrderType.BORRROWED.typeId,
+                object : JSONObjectRequestListener {
+                    override fun onResponse(response: JSONObject) {
+                        Log.e("panya", "onResponse : $response")
+                        val status = response.getString("status_code")
+                        if (status == "200") {
+                            val dataJsonArray = response.getJSONArray("data")
+                            val intent =
+                                Intent(this@ProductListActivity, OrderListActivity::class.java)
+                            intent.putExtra("order_list", dataJsonArray.toString())
+                            startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                        } else {
+                            DialogUtil.showNotiDialog(
+                                this@ProductListActivity,
+                                getString(R.string.title_error),
+                                getString(R.string.search_error_please_research)
+                            )
+                        }
+                    }
+
+                    override fun onError(error: ANError) {
+                        error.printStackTrace()
                         DialogUtil.showNotiDialog(
                             this@ProductListActivity,
                             getString(R.string.title_error),
-                            getString(R.string.search_error_please_research)
+                            getString(R.string.connect_error_please_reorder)
+                        )
+                        Log.e(
+                            "panya",
+                            "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
                         )
                     }
-                }
-
-                override fun onError(error: ANError) {
-                    error.printStackTrace()
-                    DialogUtil.showNotiDialog(
-                        this@ProductListActivity,
-                        getString(R.string.title_error),
-                        getString(R.string.connect_error_please_reorder)
-                    )
-                    Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
-                }
-            } )
+                })
         } else if (checkContains(key)) {
             Toast.makeText(
                 this@ProductListActivity,
@@ -189,8 +192,9 @@ class ProductListActivity: BaseK9Activity() {
                 Toast.LENGTH_LONG
             ).show()
         } else {
+            selectProductList.clear()
             btn_container?.visibility = View.GONE
-            productSellList.clear()
+            productList.clear()
             item_container.removeAllViews()
             Network.searchOrder(key, OrderType.BORRROWED.typeId, object :
                 JSONObjectRequestListener {
@@ -203,8 +207,7 @@ class ProductListActivity: BaseK9Activity() {
                         val orderModel =
                             Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java)
                         addItemView(orderModel!!)
-                        checkActionContainer()
-                    }else {
+                    } else {
                         DialogUtil.showNotiDialog(
                             this@ProductListActivity,
                             getString(R.string.title_error),
@@ -231,8 +234,12 @@ class ProductListActivity: BaseK9Activity() {
 
     fun addItemView(orderModel: OrderModel) {
         orderList.add(orderModel.order_code)
+        btn_container?.visibility = View.GONE
         for (productModel in orderModel.products) {
-            productSellList.add(productModel)
+            if (!btn_container.isShown && ProductStatus.BORRROWED.statusId.equals(productModel.status_id)) {
+                btn_container?.visibility = View.VISIBLE
+            }
+            productList.add(productModel)
             val inflater = LayoutInflater.from(baseContext)
             val contentView: View = inflater.inflate(R.layout.item_card, null, false)
             val txtStatus = contentView.findViewById<TextView>(R.id.txt_status)
@@ -240,10 +247,23 @@ class ProductListActivity: BaseK9Activity() {
             val txtId = contentView.findViewById<TextView>(R.id.txt_item_id)
             val txtDetail = contentView.findViewById<TextView>(R.id.txt_detail)
             val txtCost = contentView.findViewById<TextView>(R.id.txt_cost)
+            val checkBox = contentView.findViewById<CheckBox>(R.id.checkbox)
+
+            checkBox.isEnabled = ProductStatus.BORRROWED.statusId == productModel.status_id
+            checkBox.setTag(productModel.product_id)
+            checkBox.setOnCheckedChangeListener { compoundButton, b ->
+                val productId = compoundButton.tag as String
+                if (b) {
+                    selectProductList.add(getProductById(productId)!!)
+                } else {
+                    selectProductList.remove(getProductById(productId)!!)
+                }
+                checkActionContainer()
+            }
             txtStatus.text = getString(R.string.text_status, productModel.status_name)
             val productStatus = ProductStatus.getProductStatus(productModel.status_id)
             txtStatus.setTextColor(productStatus.color)
-            txtId.text = productModel.product_id
+            txtId.text = productModel.product_name
             txtDetail.text = productModel.detail
             txtCost.text = productModel.cost
 
@@ -260,4 +280,14 @@ class ProductListActivity: BaseK9Activity() {
             item_container.addView(contentView)
         }
     }
+
+    fun getProductById(id: String): ProductModel? {
+        for (product in productList) {
+            if (product.product_id == id) {
+                return product
+            }
+        }
+        return null
+    }
+
 }

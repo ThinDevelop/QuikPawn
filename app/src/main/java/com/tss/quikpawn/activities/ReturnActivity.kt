@@ -66,8 +66,7 @@ class ReturnActivity : BaseK9Activity() {
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
-            if (!customerName.isEmpty() &&
-                !customerId.isEmpty()) {
+            if (!customerName.isEmpty()) {
 
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
                 list.add("รหัสรายการ "+orderCode!!+ "\nรายการ")
@@ -84,14 +83,6 @@ class ReturnActivity : BaseK9Activity() {
                         getString(R.string.data_missing)
                     )
                 }
-                if (signature_pad.isEmpty) {
-                    DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_signature))
-                    return@setOnClickListener
-                }
-
-                var signatureBitmap = signature_pad.getSignatureBitmap()
-                signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
-                val signature = Util.bitmapToBase64(signatureBitmap)
 
                 val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, getString(R.string.text_confirm), getString(R.string.text_cancel))
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
@@ -102,7 +93,6 @@ class ReturnActivity : BaseK9Activity() {
                             customerAddress,
                             customerPhoto,
                             customerPhone,
-                            signature,
                             orderCode!!,
                             productList
                         )
@@ -249,59 +239,66 @@ class ReturnActivity : BaseK9Activity() {
     fun printSlip(data: OrderModel) {
         val textList = ArrayList<PrinterParams>()
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap("คืนสินค้า")
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText("คืนสินค้า\n\n")
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(24)
+        printerParams1.setText("\n")
         textList.add(printerParams1)
 
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน "+ PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า "+data.customer_name)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. "+data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รายการสินค้า\n")
@@ -309,17 +306,18 @@ class ReturnActivity : BaseK9Activity() {
 
         val list = Util.productListToProductList2Sell(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
-
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@ReturnActivity))
         printdata(textList)
     }
 }

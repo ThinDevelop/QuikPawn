@@ -12,7 +12,7 @@ public enum OrderStatus {
     BUY("1", "ซื้อ", R.color.Gold),
     SELL("2", "ขาย", R.color.Green),
     PAWN("3", "จำนำ", R.color.Blue),
-    CONSIGNMENT("4", "ฝากขาย", R.color.OrangeRed),
+    CONSIGNMENT("4", "ขายฝาก", R.color.OrangeRed),
     REDEEM("5", "ไถ่ถอน", R.color.Silver),
     PAWN_OUT("6", "หลุดจำนำ", R.color.Blue),
     BORRROWED("7", "ยืม", R.color.DarkOrange),

@@ -7,13 +7,15 @@
 
     <string name="pay_interest">ยอดชำระ %s บาท</string>
     <string name="calendar">กำหนดคืน</string>
-    <string name="please_phone_number">กรุณากรอกเบอร์โทร</string>
+    <string name="please_phone_number">กรุณาระบุเบอร์โทร</string>
+    <string name="please_address">กรุณาระบุที่อยู่</string>
+
 
     <string name="return_item">คืนสินค้า</string>
-    <string name="pay_item">ชำระเงิน</string>
+    <string name="pay_item">ขาย</string>
     <string name="buy_item">ซื้อสินค้า</string>
     <string name="sell_item">ขายสินค้า</string>
-    <string name="consignment_item">ฝากขาย</string>
+    <string name="consignment_item">ขายฝาก</string>
     <string name="interest_item">ต่อดอกเบี้ย</string>
     <string name="redeem_item">ไถ่ถอน</string>
     <string name="borrow_item">ยืมสินค้า</string>

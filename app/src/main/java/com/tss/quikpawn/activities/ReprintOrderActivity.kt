@@ -16,17 +16,17 @@ import com.tss.quikpawn.BaseK9Activity
 import com.tss.quikpawn.PreferencesManager
 import com.tss.quikpawn.R
 import com.tss.quikpawn.adapter.OrderListAdapter
-import com.tss.quikpawn.models.DialogParamModel
-import com.tss.quikpawn.models.OrderModel
-import com.tss.quikpawn.models.OrderType
+import com.tss.quikpawn.models.*
 import com.tss.quikpawn.models.OrderType.getOrderType
-import com.tss.quikpawn.models.ProductModel2
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.activity_reprint_order.*
 import org.json.JSONObject
 import java.lang.reflect.Type
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.math.roundToInt
 
 class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListener {
     lateinit var orderList: OrderListAdapter
@@ -55,6 +55,11 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             override fun onError(anError: ANError?) {
                 progress.visibility = View.GONE
                 no_data.visibility = View.VISIBLE
+                DialogUtil.showNotiDialog(
+                    this@ReprintOrderActivity,
+                    getString(R.string.title_error),
+                    getString(R.string.connect_error)
+                )
                 Log.e("panya", "error code :" + anError?.errorCode + " body :" + anError?.errorBody)
             }
         })
@@ -108,64 +113,67 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
     fun printBuySlip(data: OrderModel, printList: Boolean) {
         val textList = ArrayList<PrinterParams>()
 
-        var bitmap = createImageBarcode(data.order_code, "QR Code")!!
+        var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setDataType(PrinterParams.DATATYPE.TEXT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รายการสินค้า\n")
@@ -173,44 +181,48 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
         val list = Util.productListToProductList2Cost(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ชำระเงิน " + data.total + " บาท")
+        printerParams1.setText("\nชำระเงิน " + data.total + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@ReprintOrderActivity))
         if (printList) {
             var i = 0
             for (product in data.products) {
                 i++
-                printerParams1 = PrinterParams()
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
                 printerParams1.setTextSize(24)
                 printerParams1.setText("" + i + ". " + product.product_name + "\n")
                 textList.add(printerParams1)
 
                 bitmap = Utility.toGrayscale(createImageBarcode(product.product_code, "QR Code")!!)
-                printerParams1 = PrinterParams()
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
                 printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
                 printerParams1.setBitmap(bitmap)
                 textList.add(printerParams1)
 
-                printerParams1 = PrinterParams()
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
                 printerParams1.setTextSize(24)
                 printerParams1.setText(product.product_code + "\n\n")
                 textList.add(printerParams1)
+
+                textList.add(Util.dashLine(this@ReprintOrderActivity))
             }
         }
 
@@ -236,61 +248,62 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(25)
         printerParams1.isBold = true
         printerParams1.setText("ร้าน "+ PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รายการสินค้า\n")
@@ -298,22 +311,25 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
         val list = Util.productListToProductList2Sell(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ชำระเงิน " + data.total + " บาท")
+        val total = data.total.replace(".00", "")
+        printerParams1.setText("\nชำระเงิน " + Util.addComma(total) + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@ReprintOrderActivity))
         printdata(textList)
     }
 
@@ -323,54 +339,55 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             var bitmap = createImageBarcode(data.order_code, "Barcode")!!
             bitmap = Utility.toGrayscale(bitmap)
 
-            var printerParams1 = PrinterParams()
+            val title = Util.textToBitmap("ใบรับประกัน")
+            var printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-            printerParams1.setTextSize(30)
-            printerParams1.setText("ใบรับประกัน")
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(title)
             textList.add(printerParams1)
 
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(24)
             printerParams1.setText("\n")
             textList.add(printerParams1)
 
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
             printerParams1.setBitmap(bitmap)
             textList.add(printerParams1)
 
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setTextSize(24)
             printerParams1.setText(data.order_code)
             textList.add(printerParams1)
 
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
             printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
             textList.add(printerParams1)
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
             printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
             textList.add(printerParams1)
 
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
             printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
             textList.add(printerParams1)
 
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
             printerParams1.setText("ลูกค้า " + data.customer_name)
             textList.add(printerParams1)
 
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
             printerParams1.setText("รหัสปชช. " + data.idcard)
@@ -378,30 +395,19 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
             val list = Util.productListToProductList2Certificate(product)
             val listBitmap = Util.productListToBitmap(list)
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
             printerParams1.setBitmap(listBitmap)
             textList.add(printerParams1)
+            textList.add(Util.dashSignature())
 
-            printerParams1 = PrinterParams()
-            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-            printerParams1.setTextSize(22)
-            printerParams1.setText("\n\n\n\n___________________\n")
-            textList.add(printerParams1)
-
-            printerParams1 = PrinterParams()
-            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-            printerParams1.setTextSize(22)
-            printerParams1.setText("ผู้ขาย")
-            textList.add(printerParams1)
-
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(22)
-            printerParams1.setText("\n\n\n\n")
+            printerParams1.setText("\n\n\n")
             textList.add(printerParams1)
-
+            textList.add(Util.dashLine(this@ReprintOrderActivity))
         }
         printdata(textList)
     }
@@ -410,7 +416,6 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printConsignSlip1(orderModel)
         Handler().postDelayed({
             printConsignSlip1(orderModel)
-            printConsignSlip(orderModel, false)
         }, 3000)
         val list = listOf(getString(R.string.dialog_msg_for_shop))
         val dialogParamModel = DialogParamModel("ปริ้น", list, getString(R.string.text_ok), getString(R.string.text_skip))
@@ -424,31 +429,39 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
     fun printConsignSlip1(data: OrderModel) {
 
         val textList = java.util.ArrayList<PrinterParams>()
-        var printerParams1 = PrinterParams()
+
+        val title = Util.textToBitmap("ใบขายฝาก")
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(22)
-        printerParams1.setText("หนังสือขายฝาก\n")
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(24)
+        printerParams1.setText("\n")
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("เลขที่ "+data.order_code)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(22)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("ข้าพเจ้า"+data.customer_name+" \nบัตรประชาชน "+data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("ได้ทำหนังสือขายฝากนี้ให้แก่ นายสุรศักดิ์ ขจิตธรรมกุล ดังมีข้อความดังต่อไปนี้\n" + "   ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้\n\n")
@@ -460,73 +473,77 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         }
         val list = Util.productListToProductList2Cost(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
-
-        printerParams1 = PrinterParams()
+        val calendar = Util.stringToCalendar(data.date_expire)
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน "+ sum +" บาท\nและได้รับเงินไปเสร็จเรียบร้อยแล้ว จึงลงลายมือชื่อไว้เป็นหลักฐาน")
+        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+  Util.addComma(sum.roundToInt()) +".00 บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
+                " นับตั้งแต่วันทำหนังสือนี้เป็นต้นไป\n จนกว่าจะมาไถ่ถอนคืน\nในวันที่ "+ calendar.get(
+            Calendar.DATE) +" เดือน "+ Util.getMonth(calendar) +" พ.ศ."+ (calendar.get(Calendar.YEAR)+543)+"\n" +
+                "ข้อ 3. ผู้ขายฝากยืนยันว่าผู้ขายฝาก\nเป็นผู้มีกรรมสิทธิ์ในทรัพย์สินที่มา\nขายฝากแต่เพียงผู้เดียวและไม่มีคู่สมรสแต่อย่างใด\n" +
+                "ข้อ 4. คู่กรณีได้อ่านหนีงสือนี้เข้าใจ\nรับว่าถูกต้องเป็นความจริงแล้วจึง\nลงลายมือชื่อไว้เป็นหลักฐาน\n ")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n\n\n___________________")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
         printerParams1.setText("ผู้ขายฝาก")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n\n\n___________________")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
         printerParams1.setText("ผู้รับซื้อฝาก")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n\n\n___________________")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
         printerParams1.setText("พยาน")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n\n\n___________________")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
         printerParams1.setText("พยาน/ผู้พิมพ์")
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n\n\n\n")
         textList.add(printerParams1)
-
+        textList.add(Util.dashLine(this@ReprintOrderActivity))
         printdata(textList)
 
     }
@@ -537,80 +554,85 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var bitmap2 = createImageBarcode(data.order_code, "QR Code")!!
-        bitmap2 = Utility.toGrayscale(bitmap2)
-
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText("\n"+data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน "+PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา "+PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า "+data.customer_name)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. "+data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ครบกำหนด "+Util.toDateFormat(data.date_expire))
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ราคา "+data.price)
+        val total = data.price.replace(".00", "")
+        printerParams1.setText("ราคา " + Util.addComma(total) + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ดอกเบี้ย "+data.interest_price)
+        printerParams1.setText("ดอกเบี้ย "+data.interest_month + "%")
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
+        printerParams1.setText("ระยะเวลา "+data.num_expire + "เดือน")
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รายการสินค้า\n")
@@ -618,45 +640,48 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
         val list = Util.productListToProductList2Cost(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ชำระเงิน "+data.price+" บาท")
+
+        val sumPrice = data.price.replace(".00", "")
+        printerParams1.setText("\nชำระเงิน " + Util.addComma(sumPrice) + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@ReprintOrderActivity))
         if (printList) {
-            textList.clear()
             for (product in data.products) {
 
-                printerParams1 = PrinterParams()
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
                 printerParams1.setTextSize(24)
                 printerParams1.setText("สินค้า : " + product.product_name + "\n")
                 textList.add(printerParams1)
 
-                bitmap = Utility.toGrayscale(createImageBarcode(product.product_code, "Barcode")!!)
-                printerParams1 = PrinterParams()
+                bitmap = Utility.toGrayscale(createImageBarcode(product.product_code, "QR Code")!!)
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
                 printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
                 printerParams1.setBitmap(bitmap)
                 textList.add(printerParams1)
 
-                printerParams1 = PrinterParams()
+                printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
                 printerParams1.setTextSize(24)
                 printerParams1.setText(product.product_code + "\n\n")
                 textList.add(printerParams1)
-
+                textList.add(Util.dashLine(this@ReprintOrderActivity))
             }
         }
         printdata(textList)
@@ -679,60 +704,61 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน "+ PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(18)
         printerParams1.setText("รายการ")
@@ -744,22 +770,25 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         }
 
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ยอดชำระ " + data.total + " บาท")
+        val total = data.total.replace(".00", "")
+        printerParams1.setText("ยอดชำระ " + Util.addComma(total) + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@ReprintOrderActivity))
         printdata(textList)
     }
 
@@ -780,62 +809,63 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(18)
         printerParams1.setText("รายการสินค้า")
@@ -843,7 +873,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
         val list = Util.productListToProductList2Sell(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
@@ -851,7 +881,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
         val list2 = arrayListOf<ProductModel2>()
         if (data.interest.isNotEmpty()) {
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(18)
             printerParams1.setText("รายการดอกเบี้ย")
@@ -862,7 +892,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             }
             list2.add(ProductModel2("ค่าปรับ", data.mulct_price+" บาท"))
             val listBitmap = Util.productListToBitmap(list2)
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
             printerParams1.setBitmap(listBitmap)
@@ -870,23 +900,26 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         } else {
             list2.add(ProductModel2("ค่าปรับ", data.mulct_price+" บาท"))
             val listBitmap = Util.productListToBitmap(list2)
-            printerParams1 = PrinterParams()
+            printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
             printerParams1.setBitmap(listBitmap)
             textList.add(printerParams1)
         }
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ยอดชำระ " + data.total + " บาท")
+        val total = data.total.replace(".00", "")
+        printerParams1.setText("ยอดชำระ " + Util.addComma(total) + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@ReprintOrderActivity))
         printdata(textList)
     }
 
@@ -907,62 +940,63 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน "+ PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า "+data.customer_name)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. "+data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รายการสินค้า\n")
@@ -970,17 +1004,19 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
         val list = Util.productListToProductList2Sell(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@ReprintOrderActivity))
         printdata(textList)
     }
 
@@ -998,58 +1034,65 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
     fun printReturnSlip(data: OrderModel) {
         val textList = ArrayList<PrinterParams>()
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap("คืนสินค้า")
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText("คืนสินค้า\n\n")
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(24)
+        printerParams1.setText("\n")
         textList.add(printerParams1)
 
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รายการสินค้า\n")
@@ -1057,17 +1100,20 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
         val list = Util.productListToProductList2Sell(data.products)
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@ReprintOrderActivity))
         printdata(textList)
     }
 

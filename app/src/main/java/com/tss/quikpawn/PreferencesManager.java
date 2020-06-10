@@ -13,6 +13,9 @@ public class PreferencesManager {
     private static final String KEY_COMPANY_BRANCH_NAME = "company_branch_name";
     private static final String KEY_COMPANY_TID = "company_tid";
     private static final String KEY_COMPANY_SHOP = "company_shop";
+    private static final String KEY_CONTACT = "contact";
+    private static final String KEY_CONTACT_PHONE = "contact_phone";
+    private static final String KEY_CONTACT_EMAIL = "contact_email";
 
     private static PreferencesManager sInstance;
     private final SharedPreferences mPref;
@@ -98,7 +101,7 @@ public class PreferencesManager {
     }
 
     public String getCompanyBranchName() {
-        return mPref.getString(KEY_COMPANY_BRANCH_NAME, "");
+        return mPref.getString(KEY_COMPANY_BRANCH_NAME, "").toUpperCase();
     }
 
     public void removeCompanyBranchName() {
@@ -112,7 +115,7 @@ public class PreferencesManager {
     }
 
     public String getCompanyName() {
-        return mPref.getString(KEY_COMPANY_NAME, "");
+        return mPref.getString(KEY_COMPANY_NAME, "").toUpperCase();
     }
 
     public void removeCompanyName() {
