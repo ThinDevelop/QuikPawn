@@ -18,6 +18,11 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
+import com.tss.quikpawn.activities.LoginActivity;
+import com.tss.quikpawn.models.DialogParamModel;
+import com.tss.quikpawn.util.DialogUtil;
+
+import java.util.ArrayList;
 
 public abstract class BaseActivity extends AppCompatActivity {
 	public static final int SHOW_MSG = 0;
@@ -33,6 +38,57 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 	public AidlDeviceManager manager = null;
 
+
+	public void showResponse(String status, final Context context) {
+		if (status.equals( "401")) {
+            ArrayList<String> msg = new ArrayList<>();
+            msg.add("การยืนยันตัวตนล้มเหลว");
+			DialogParamModel param = new DialogParamModel("ปัญหายืนยันตัวตน", msg,
+							getString(R.string.text_ok),"");
+			DialogUtil.showConfirmDialog(param, context, new DialogUtil.InputTextBackListerner() {
+                @Override
+                public void onClickConfirm(String result) {
+                    if (DialogUtil.CONFIRM.equals(result)) {
+                        finish();
+                        Intent intent = new Intent(context, LoginActivity.class);
+                        startActivity(intent);
+                    }
+                }
+            });
+		} else if (status.equals("201")) {
+            ArrayList<String> msg = new ArrayList<>();
+            msg.add("กรุณาเพิ่มอุปกรณ์ในระบบ");
+            DialogParamModel param = new DialogParamModel("ไม่พบอุปกรณ์ในระบบ", msg,
+                    getString(R.string.text_ok),"");
+            DialogUtil.showConfirmDialog(param, context, new DialogUtil.InputTextBackListerner() {
+                @Override
+                public void onClickConfirm(String result) {
+                    if (DialogUtil.CONFIRM.equals(result)) {
+                        finish();
+                        Intent intent = new Intent(context, LoginActivity.class);
+                        startActivity(intent);
+                    }
+                }
+            });
+		} else if (status.equals("202")) {
+            ArrayList<String> msg = new ArrayList<>();
+            msg.add("แพ็คเกจหมดอายุ");
+            DialogParamModel param = new DialogParamModel("กรุณาติดต่อผู้ดูแลระบบ", msg,
+                    getString(R.string.text_ok),"");
+            DialogUtil.showConfirmDialog(param, context, new DialogUtil.InputTextBackListerner() {
+                @Override
+                public void onClickConfirm(String result) {
+                    if (DialogUtil.CONFIRM.equals(result)) {
+                        finish();
+                        Intent intent = new Intent(context, LoginActivity.class);
+                        startActivity(intent);
+                    }
+                }
+            });
+		} else {
+			DialogUtil.showNotiDialog(context, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder));
+		}
+	}
 
 	private Handler handler = new Handler() {
 		@Override

@@ -51,21 +51,27 @@ class Util {
         }
         fun rotageBitmap(filePath: String?): Bitmap {
             val bitmap = BitmapFactory.decodeFile(filePath)
-            val ei = ExifInterface(filePath)
-            val orientation: Int = ei.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_UNDEFINED
-            )
-
-            var rotatedBitmap = bitmap
-            when (orientation) {
-                ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
-                ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
-                ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
-                ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
-                else -> rotatedBitmap = bitmap
+            val bitmap2: Bitmap
+            if (bitmap.width > bitmap.height) {
+                bitmap2 = rotateImage(bitmap, 90f)!!
+            } else {
+                bitmap2 = bitmap
             }
-            return rotatedBitmap
+//            val ei = ExifInterface(filePath)
+//            val orientation: Int = ei.getAttributeInt(
+//                ExifInterface.TAG_ORIENTATION,
+//                ExifInterface.ORIENTATION_UNDEFINED
+//            )
+//
+//            var rotatedBitmap = bitmap
+//            when (orientation) {
+//                ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
+//                ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
+//                ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
+//                ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
+//                else -> rotatedBitmap = bitmap
+//            }
+            return bitmap2
         }
 
         private fun rotateImage(source: Bitmap, angle: Float): Bitmap? {
@@ -125,13 +131,13 @@ class Util {
 
         fun productListToBitmap(productList: List<ProductModel2>): Bitmap {
             val bitmap =
-                Bitmap.createBitmap(600, (productList.size * 32) + 10, Bitmap.Config.ARGB_8888)
+                Bitmap.createBitmap(600, (productList.size * 34) + 10, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             // new antialised Paint
             val paint = Paint(Paint.ANTI_ALIAS_FLAG)
             paint.color = Color.rgb(0, 0, 0)
             // text size in pixels
-            paint.textSize = 35f
+            paint.textSize = 38f
             paint.isFakeBoldText = true
             //custom fonts
 //            val fontFace = ResourcesCompat.getFont(context, R.font.acrobat)
@@ -162,14 +168,14 @@ class Util {
                 i++
                 var name = "" + i + ". " + product.product_name
                 name.replace(" "," ")
-                if (name.length > 15) {
-                    name = name.substring(0, 14).plus("... ")
+                if (name.length > 17) {
+                    name = name.substring(0, 16).plus("... ")
                 }
                 listProduct.add(
                     ProductModel2(
                         name,
                         NumberTextWatcherForThousand.getDecimalFormattedString(product.cost) + " บาท"
-                    )
+                    ).setDetail(product.detail)
                 )
             }
             return listProduct
@@ -182,8 +188,8 @@ class Util {
                 i++
                 var name = "" + i + ". " + product.product_name
                 name.replace(" "," ")
-                if (name.length > 15) {
-                    name = name.substring(0, 14).plus("... ")
+                if (name.length > 17) {
+                    name = name.substring(0, 16).plus("... ")
                 }
                 listProduct.add(
                     ProductModel2(
@@ -199,8 +205,8 @@ class Util {
             val listProduct = arrayListOf<ProductModel2>()
             var name = productModel.product_name
             name.replace(" "," ")
-            if (name.length > 15) {
-                name = name.substring(0, 14).plus("... ")
+            if (name.length > 17) {
+                name = name.substring(0, 16).plus("... ")
             }
             listProduct.add(
                 ProductModel2(

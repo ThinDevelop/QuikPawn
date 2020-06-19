@@ -47,7 +47,8 @@
         <activity android:name=".activities.ProductListActivity"/>
         <activity android:name=".activities.OrderListActivity"/>
         <activity android:name=".activities.ReprintOrderActivity"/>
-        <activity android:name=".activities.LoginActivity" >
+        <activity android:name=".activities.LoginActivity"
+            android:theme="@style/AppTheme">
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 

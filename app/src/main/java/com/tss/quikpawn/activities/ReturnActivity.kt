@@ -29,8 +29,13 @@ import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.Util
+import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_return.*
 import kotlinx.android.synthetic.main.item_customer_info.*
+import kotlinx.android.synthetic.main.item_customer_info.btn_ok
+import kotlinx.android.synthetic.main.item_customer_info.edt_idcard
+import kotlinx.android.synthetic.main.item_customer_info.edt_name
+import kotlinx.android.synthetic.main.item_customer_info.edt_phonenumber
 import kotlinx.android.synthetic.main.item_customer_info.signature_pad
 import kotlinx.android.synthetic.main.item_sign_view.*
 import org.json.JSONObject
@@ -109,21 +114,17 @@ class ReturnActivity : BaseK9Activity() {
                                     printSlip(orderModel)
                                     showConfirmDialog(orderModel)
                                 } else {
-                                    DialogUtil.showNotiDialog(
-                                        this@ReturnActivity,
-                                        getString(R.string.title_error),
-                                        getString(R.string.connect_error_please_reorder)
-                                    )
+                                    showResponse(status, this@ReturnActivity)
                                 }
                             }
 
                             override fun onError(error: ANError) {
                                 error.printStackTrace()
-                                DialogUtil.showNotiDialog(
-                                    this@ReturnActivity,
-                                    getString(R.string.title_error),
-                                    getString(R.string.connect_error_please_reorder)
-                                )
+                                error.errorBody?.let {
+                                    val jObj = JSONObject(it)
+                                    val status = jObj.getString("status_code")
+                                    showResponse(status, this@ReturnActivity)
+                                }
                                 Log.e(
                                     "panya",
                                     "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -166,7 +167,7 @@ class ReturnActivity : BaseK9Activity() {
 
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
-        edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
+        edt_name.setText(info.thaiTitle +" "+info.thaiFirstName + "  " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
     }
 

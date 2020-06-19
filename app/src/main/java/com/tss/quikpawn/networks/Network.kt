@@ -1,11 +1,16 @@
 package com.tss.quikpawn.networks
 
+import android.widget.Toast
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.common.Priority
+import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.google.gson.Gson
 import com.tss.quikpawn.PreferencesManager
+import com.tss.quikpawn.R
+import com.tss.quikpawn.app.QuikPawnApplication
 import com.tss.quikpawn.models.*
+import org.json.JSONObject
 import java.io.File
 
 class Network {
@@ -28,15 +33,13 @@ class Network {
         val URL_LOGOUT = "https://thequikpawn.com/api/v1/logout"
         val URL_LOAD_ORDER = "https://thequikpawn.com/api/v1/search/last/print"
 
-
-
         fun login(user: String, password: String, listener: JSONObjectRequestListener) {
             AndroidNetworking.post(URL_LOGIN)
                 .addBodyParameter("username", user)
                 .addBodyParameter("password", password)
-                .addBodyParameter("serial_number", android.os.Build.SERIAL)//"1234567890"
+                .addBodyParameter("serial_number", android.os.Build.SERIAL)
                 .setTag("login")
-                .setPriority(Priority.MEDIUM)
+                .setPriority(Priority.HIGH)
                 .build()
                 .getAsJSONObject(listener)
         }

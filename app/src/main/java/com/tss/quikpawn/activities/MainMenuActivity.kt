@@ -42,7 +42,7 @@ class MainMenuActivity : AppCompatActivity() {
         btn_return.setOnClickListener {
             startActivity(Intent(this@MainMenuActivity, ProductListActivity::class.java))
         }
-        btn_reprint.setOnClickListener{
+        btn_reprint.setOnClickListener {
             startActivity(Intent(this@MainMenuActivity, ReprintOrderActivity::class.java))
         }
 

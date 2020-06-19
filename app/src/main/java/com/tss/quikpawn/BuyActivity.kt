@@ -33,6 +33,7 @@ import com.tss.quikpawn.util.Util.Companion.addRectangle
 import com.tss.quikpawn.util.Util.Companion.dashLine
 import com.tss.quikpawn.util.Util.Companion.productListToBitmap
 import com.tss.quikpawn.util.Util.Companion.productListToProductList2Cost
+import com.tss.quikpawn.util.Util.Companion.rotageBitmap
 import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.item_sign_view.*
 import org.json.JSONObject
@@ -188,21 +189,17 @@ class BuyActivity : BaseK9Activity() {
                                     )
                                     showConfirmDialog(data)
                                 } else {
-                                    DialogUtil.showNotiDialog(
-                                        this@BuyActivity,
-                                        getString(R.string.title_error),
-                                        getString(R.string.connect_error_please_reorder)
-                                    )
+                                    showResponse(status, this@BuyActivity)
                                 }
                             }
 
                             override fun onError(error: ANError) {
                                 dialog.dismiss()
-                                DialogUtil.showNotiDialog(
-                                    this@BuyActivity,
-                                    getString(R.string.title_error),
-                                    getString(R.string.connect_error_please_reorder)
-                                )
+                                error.errorBody?.let {
+                                    val jObj = JSONObject(it)
+                                    val status = jObj.getString("status_code")
+                                    showResponse(status, this@BuyActivity)
+                                }
                                 error.printStackTrace()
                                 Log.e(
                                     "panya",
@@ -254,21 +251,17 @@ class BuyActivity : BaseK9Activity() {
                         val refCode = data.getString("ref_code")
                         setTagToImageView(refCode)
                     } else {
-                        DialogUtil.showNotiDialog(
-                            this@BuyActivity,
-                            getString(R.string.title_error),
-                            getString(R.string.upload_error_please_upload_again)
-                        )
+                        showResponse(status, this@BuyActivity)
                     }
                 }
 
                 override fun onError(error: ANError) {
                     loadingProgressBar?.visibility = View.GONE
-                    DialogUtil.showNotiDialog(
-                        this@BuyActivity,
-                        getString(R.string.title_error),
-                        getString(R.string.upload_error_please_upload_again)
-                    )
+                    error.errorBody?.let {
+                        val jObj = JSONObject(it)
+                        val status = jObj.getString("status_code")
+                        showResponse(status, this@BuyActivity)
+                    }
                     error.printStackTrace()
                     Log.e(
                         "panya",
@@ -285,7 +278,7 @@ class BuyActivity : BaseK9Activity() {
         var bt: ByteArray? = null
         var encodeString: String = ""
         try {
-            bmp = BitmapFactory.decodeFile(filePath)
+            bmp = rotageBitmap(filePath)
             bos = ByteArrayOutputStream()
             bmp.compress(Bitmap.CompressFormat.JPEG, 30, bos)
             bt = bos.toByteArray()
@@ -299,7 +292,7 @@ class BuyActivity : BaseK9Activity() {
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
         Log.e("panya", "address : " + info.address)
-        edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
+        edt_name.setText(info.thaiTitle +" "+info.thaiFirstName + "  " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
     }
 
@@ -371,13 +364,32 @@ class BuyActivity : BaseK9Activity() {
         printerParams1.setText("รายการสินค้า\n")
         textList.add(printerParams1)
 
-        val list = productListToProductList2Cost(data.products)
-        val listBitmap = productListToBitmap(list)
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-        printerParams1.setBitmap(listBitmap)
-        textList.add(printerParams1)
+//        val list = productListToProductList2Cost(data.products)
+//        val listBitmap = productListToBitmap(list)
+//        printerParams1 = TssPrinterParams()
+//        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+//        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+//        printerParams1.setBitmap(listBitmap)
+//        textList.add(printerParams1)
+
+        for (product in data.products) {
+            val listProduct = arrayListOf<ProductModel>()
+            listProduct.add(product)
+            val list = productListToProductList2Cost(listProduct)
+            val listBitmap = productListToBitmap(list)
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText(product.detail+"\n")
+            textList.add(printerParams1)
+        }
+
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)

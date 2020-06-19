@@ -159,26 +159,30 @@ class ProductListActivity : BaseK9Activity() {
                         val status = response.getString("status_code")
                         if (status == "200") {
                             val dataJsonArray = response.getJSONArray("data")
-                            val intent =
-                                Intent(this@ProductListActivity, OrderListActivity::class.java)
-                            intent.putExtra("order_list", dataJsonArray.toString())
-                            startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                            if  (dataJsonArray.length() == 0) {
+                                DialogUtil.showNotiDialog(
+                                    this@ProductListActivity,
+                                    getString(R.string.order_not_found),
+                                    getString(R.string.order_not_found)
+                                )
+                            } else {
+                                val intent =
+                                    Intent(this@ProductListActivity, OrderListActivity::class.java)
+                                intent.putExtra("order_list", dataJsonArray.toString())
+                                startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                            }
                         } else {
-                            DialogUtil.showNotiDialog(
-                                this@ProductListActivity,
-                                getString(R.string.title_error),
-                                getString(R.string.search_error_please_research)
-                            )
+                            showResponse(status, this@ProductListActivity)
                         }
                     }
 
                     override fun onError(error: ANError) {
                         error.printStackTrace()
-                        DialogUtil.showNotiDialog(
-                            this@ProductListActivity,
-                            getString(R.string.title_error),
-                            getString(R.string.connect_error_please_reorder)
-                        )
+                        error.errorBody?.let {
+                            val jObj = JSONObject(it)
+                            val status = jObj.getString("status_code")
+                            showResponse(status, this@ProductListActivity)
+                        }
                         Log.e(
                             "panya",
                             "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -208,21 +212,17 @@ class ProductListActivity : BaseK9Activity() {
                             Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java)
                         addItemView(orderModel!!)
                     } else {
-                        DialogUtil.showNotiDialog(
-                            this@ProductListActivity,
-                            getString(R.string.title_error),
-                            getString(R.string.search_error_please_research)
-                        )
+                        showResponse(status, this@ProductListActivity)
                     }
                 }
 
                 override fun onError(error: ANError) {
                     error.printStackTrace()
-                    DialogUtil.showNotiDialog(
-                        this@ProductListActivity,
-                        getString(R.string.title_error),
-                        getString(R.string.connect_error_please_reorder)
-                    )
+                    error.errorBody?.let {
+                        val jObj = JSONObject(it)
+                        val status = jObj.getString("status_code")
+                        showResponse(status, this@ProductListActivity)
+                    }
                     Log.e(
                         "panya",
                         "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody

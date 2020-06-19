@@ -27,8 +27,13 @@ import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
+import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_sell.*
 import kotlinx.android.synthetic.main.item_customer_info.*
+import kotlinx.android.synthetic.main.item_customer_info.btn_ok
+import kotlinx.android.synthetic.main.item_customer_info.edt_idcard
+import kotlinx.android.synthetic.main.item_customer_info.edt_name
+import kotlinx.android.synthetic.main.item_customer_info.edt_phonenumber
 import kotlinx.android.synthetic.main.item_customer_info.signature_pad
 import kotlinx.android.synthetic.main.item_search.*
 import kotlinx.android.synthetic.main.item_sign_view.*
@@ -138,21 +143,17 @@ class SellActivity : BaseK9Activity() {
                                             showConfirmDialog(data)
                                         }, 2000)
                                     } else {
-                                        DialogUtil.showNotiDialog(
-                                            this@SellActivity,
-                                            getString(R.string.title_error),
-                                            getString(R.string.connect_error_please_reorder)
-                                        )
+                                        showResponse(status, this@SellActivity)
                                     }
                                 }
 
                                 override fun onError(error: ANError) {
                                     dialog.dismiss()
-                                    DialogUtil.showNotiDialog(
-                                        this@SellActivity,
-                                        getString(R.string.title_error),
-                                        getString(R.string.connect_error_please_reorder)
-                                    )
+                                    error.errorBody?.let {
+                                        val jObj = JSONObject(it)
+                                        val status = jObj.getString("status_code")
+                                        showResponse(status, this@SellActivity)
+                                    }
                                     error.printStackTrace()
                                     Log.e(
                                         "panya",
@@ -252,13 +253,17 @@ class SellActivity : BaseK9Activity() {
                             .show()
                     }
                 } else {
-                    DialogUtil.showNotiDialog(this@SellActivity, getString(R.string.title_error), getString(R.string.search_error_please_research))
+                    showResponse(status, this@SellActivity)
                 }
             }
 
             override fun onError(error: ANError) {
                 dialog.dismiss()
-                DialogUtil.showNotiDialog(this@SellActivity, getString(R.string.title_error), getString(R.string.connect_error))
+                error.errorBody?.let {
+                    val jObj = JSONObject(it)
+                    val status = jObj.getString("status_code")
+                    showResponse(status, this@SellActivity)
+                }
                 error.printStackTrace()
                 Log.e(
                     "panya",
@@ -281,7 +286,7 @@ class SellActivity : BaseK9Activity() {
         txtId.text = productModel.product_name
         txtDetail.text = productModel.detail
         txtCost.text = Util.addComma(productModel.cost) + "บาท"
-        txtsell.text = Util.addComma(productModel.sale) + "บาท"
+        txtsell.text = "0 บาท"//Util.addComma(productModel.sale) + "0 บาท"
         delete.visibility = View.VISIBLE
         contentView.tag = productModel.product_code
         delete.tag = contentView.tag
@@ -347,7 +352,7 @@ class SellActivity : BaseK9Activity() {
 
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
-        edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
+        edt_name.setText(info.thaiTitle +" "+info.thaiFirstName + "  " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
     }
 

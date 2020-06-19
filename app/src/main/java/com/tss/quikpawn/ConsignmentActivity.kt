@@ -38,7 +38,14 @@ import com.tss.quikpawn.util.Util.Companion.addRectangle
 import com.tss.quikpawn.util.Util.Companion.getMonth
 import com.tss.quikpawn.util.Util.Companion.rotageBitmap
 import com.tss.quikpawn.util.Util.Companion.stringToCalendar
+import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_consignment.*
+import kotlinx.android.synthetic.main.activity_consignment.btn_ok
+import kotlinx.android.synthetic.main.activity_consignment.edt_idcard
+import kotlinx.android.synthetic.main.activity_consignment.edt_name
+import kotlinx.android.synthetic.main.activity_consignment.edt_phonenumber
+import kotlinx.android.synthetic.main.activity_consignment.layout_detail
+import kotlinx.android.synthetic.main.activity_consignment.new_item
 import kotlinx.android.synthetic.main.item_sign_view.*
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -182,13 +189,17 @@ class ConsignmentActivity : BaseK9Activity() {
                                 }, 3000)
                                 showConfirmDialog(data)
                             } else {
-                                DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.title_error), getString(R.string.connect_error_please_reorder))
+                                showResponse(status, this@ConsignmentActivity)
                             }
                         }
 
                         override fun onError(error: ANError) {
                             dialog.dismiss()
-                            DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.title_error), getString(R.string.connect_error_please_reorder))
+                            error.errorBody?.let {
+                                val jObj = JSONObject(it)
+                                val status = jObj.getString("status_code")
+                                showResponse(status, this@ConsignmentActivity)
+                            }
                             error.printStackTrace()
                             Log.e(
                                 "panya",
@@ -269,7 +280,7 @@ class ConsignmentActivity : BaseK9Activity() {
 
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
-        edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
+        edt_name.setText(info.thaiTitle +" "+info.thaiFirstName + "  " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length-3) + "XXX")
         edt_address.setText(address)
     }
@@ -298,13 +309,17 @@ class ConsignmentActivity : BaseK9Activity() {
                         val refCode = data.getString("ref_code")
                         setTagToImageView(refCode)
                     } else {
-                        DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.title_error), getString(R.string.upload_error_please_upload_again))
+                        showResponse(status, this@ConsignmentActivity)
                     }
                 }
 
                 override fun onError(error: ANError) {
                     loadingProgressBar?.visibility = View.GONE
-                    DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.title_error), getString(R.string.upload_error_please_upload_again))
+                    error.errorBody?.let {
+                        val jObj = JSONObject(it)
+                        val status = jObj.getString("status_code")
+                        showResponse(status, this@ConsignmentActivity)
+                    }
                     error.printStackTrace()
                     Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
                 }
@@ -393,6 +408,18 @@ class ConsignmentActivity : BaseK9Activity() {
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
+        printerParams1.setText("เลขที่ "+PreferencesManager.getInstance().address)
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(22)
+        printerParams1.setText("เบอร์โทร " + PreferencesManager.getInstance().contactPhone)
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(22)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
@@ -408,7 +435,7 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("ได้ทำหนังสือขายฝากนี้ให้แก่ \nนายสุรศักดิ์ ขจิตธรรมกุล ดังมีข้อความดังต่อไปนี้\n" + "ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้\n\n")
+        printerParams1.setText("ได้ทำหนังสือขายฝากนี้ให้แก่ \nนาย"+PreferencesManager.getInstance().contact+" ดังมีข้อความดังต่อไปนี้\n" + "ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้\n\n")
         textList.add(printerParams1)
 
         var sum = 0.00
@@ -416,13 +443,31 @@ class ConsignmentActivity : BaseK9Activity() {
             sum += productModel.cost.toDouble()
         }
 
-        val list = Util.productListToProductList2Cost(data.products)
-        val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-        printerParams1.setBitmap(listBitmap)
-        textList.add(printerParams1)
+//        val list = Util.productListToProductList2Cost(data.products)
+//        val listBitmap = Util.productListToBitmap(list)
+//        printerParams1 = TssPrinterParams()
+//        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+//        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+//        printerParams1.setBitmap(listBitmap)
+//        textList.add(printerParams1)
+
+        for (product in data.products) {
+            val listProduct = arrayListOf<ProductModel>()
+            listProduct.add(product)
+            val list = Util.productListToProductList2Cost(listProduct)
+            val listBitmap = Util.productListToBitmap(list)
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText(product.detail+"\n")
+            textList.add(printerParams1)
+        }
         val calendar = stringToCalendar(data.date_expire)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
@@ -446,7 +491,7 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ดอกเบี้ย "+ interest +"% \nระยะเวลา "+ expire+ " เดือน")//data.interest_price
+        printerParams1.setText("ดอกเบี้ย "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ expire+ " เดือน")//data.interest_price
         textList.add(printerParams1)
 
 
@@ -498,6 +543,17 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1.setText("พยาน/ผู้พิมพ์")
         textList.add(printerParams1)
 
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(22)
+        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n___________________มาไถ่ถอนทรัพย์แทนข้าพเจ้าลงชื่อ")
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+        printerParams1.setTextSize(22)
+        printerParams1.setText("\n\n___________________\nผู้ขายฝาก")
+        textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)

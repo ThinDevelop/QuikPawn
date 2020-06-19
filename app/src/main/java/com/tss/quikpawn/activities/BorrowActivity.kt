@@ -34,7 +34,12 @@ import com.tss.quikpawn.util.Util
 import com.tss.quikpawn.util.Util.Companion.dashLine
 import com.tss.quikpawn.util.Util.Companion.dashSignature
 import kotlinx.android.synthetic.main.activity_borrow.*
+import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.item_customer_info.*
+import kotlinx.android.synthetic.main.item_customer_info.btn_ok
+import kotlinx.android.synthetic.main.item_customer_info.edt_idcard
+import kotlinx.android.synthetic.main.item_customer_info.edt_name
+import kotlinx.android.synthetic.main.item_customer_info.edt_phonenumber
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -140,13 +145,17 @@ class BorrowActivity: BaseK9Activity() {
                                     printSlip(Gson().fromJson(data.toString(), OrderModel::class.java))
                                     showConfirmDialog(data)
                                 } else {
-                                    DialogUtil.showNotiDialog(this@BorrowActivity, getString(R.string.title_error), getString(R.string.connect_error_please_reorder))
+                                    showResponse(status, this@BorrowActivity)
                                 }
                             }
 
                             override fun onError(error: ANError) {
                                 dialog.dismiss()
-                                DialogUtil.showNotiDialog(this@BorrowActivity, getString(R.string.title_error), getString(R.string.title_error))
+                                error.errorBody?.let {
+                                    val jObj = JSONObject(it)
+                                    val status = jObj.getString("status_code")
+                                    showResponse(status, this@BorrowActivity)
+                                }
                                 error.printStackTrace()
                                 Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
                             }
@@ -238,13 +247,17 @@ class BorrowActivity: BaseK9Activity() {
                     productList.add(product)
                     addItemView(data)
                 } else {
-                    DialogUtil.showNotiDialog(this@BorrowActivity, getString(R.string.title_error), getString(R.string.order_not_found))
+                    showResponse(status, this@BorrowActivity)
                 }
             }
 
             override fun onError(error: ANError) {
                 error.printStackTrace()
-                DialogUtil.showNotiDialog(this@BorrowActivity, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder))
+                error.errorBody?.let {
+                    val jObj = JSONObject(it)
+                    val status = jObj.getString("status_code")
+                    showResponse(status, this@BorrowActivity)
+                }
                 Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
             }
         } )
@@ -338,7 +351,7 @@ class BorrowActivity: BaseK9Activity() {
 
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
-        edt_name.setText(info.thaiFirstName +" "+info.thaiLastName)
+        edt_name.setText(info.thaiTitle +" "+info.thaiFirstName + "  " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length-3) + "XXX")
     }
 

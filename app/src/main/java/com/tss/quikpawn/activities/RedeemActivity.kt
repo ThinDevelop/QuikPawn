@@ -36,8 +36,13 @@ import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
+import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_redeem.*
 import kotlinx.android.synthetic.main.item_customer_info.*
+import kotlinx.android.synthetic.main.item_customer_info.btn_ok
+import kotlinx.android.synthetic.main.item_customer_info.edt_idcard
+import kotlinx.android.synthetic.main.item_customer_info.edt_name
+import kotlinx.android.synthetic.main.item_customer_info.edt_phonenumber
 import kotlinx.android.synthetic.main.item_redeem_detail.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
@@ -131,21 +136,17 @@ class RedeemActivity : BaseK9Activity() {
                                     )
                                     showConfirmDialog(dataJsonObj)
                                 } else {
-                                    DialogUtil.showNotiDialog(
-                                        this@RedeemActivity,
-                                        getString(R.string.title_error),
-                                        getString(R.string.connect_error_please_reorder)
-                                    )
+                                    showResponse(status, this@RedeemActivity)
                                 }
                             }
 
                             override fun onError(error: ANError) {
                                 error.printStackTrace()
-                                DialogUtil.showNotiDialog(
-                                    this@RedeemActivity,
-                                    getString(R.string.title_error),
-                                    getString(R.string.connect_error_please_reorder)
-                                )
+                                error.errorBody?.let {
+                                    val jObj = JSONObject(it)
+                                    val status = jObj.getString("status_code")
+                                    showResponse(status, this@RedeemActivity)
+                                }
                                 Log.e(
                                     "panya",
                                     "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -227,25 +228,30 @@ class RedeemActivity : BaseK9Activity() {
                         val status = response.getString("status_code")
                         if (status == "200") {
                             val dataJsonArray = response.getJSONArray("data")
-                            val intent = Intent(this@RedeemActivity, OrderListActivity::class.java)
-                            intent.putExtra("order_list", dataJsonArray.toString())
-                            startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                            if  (dataJsonArray.length() == 0) {
+                                DialogUtil.showNotiDialog(
+                                    this@RedeemActivity,
+                                    getString(R.string.order_not_found),
+                                    getString(R.string.order_not_found)
+                                )
+                            } else {
+                                val intent =
+                                    Intent(this@RedeemActivity, OrderListActivity::class.java)
+                                intent.putExtra("order_list", dataJsonArray.toString())
+                                startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                            }
                         } else {
-                            DialogUtil.showNotiDialog(
-                                this@RedeemActivity,
-                                getString(R.string.title_error),
-                                getString(R.string.search_error_please_research)
-                            )
+                            showResponse(status, this@RedeemActivity)
                         }
                     }
 
                     override fun onError(error: ANError) {
                         error.printStackTrace()
-                        DialogUtil.showNotiDialog(
-                            this@RedeemActivity,
-                            getString(R.string.title_error),
-                            getString(R.string.connect_error_please_reorder)
-                        )
+                        error.errorBody?.let {
+                            val jObj = JSONObject(it)
+                            val status = jObj.getString("status_code")
+                            showResponse(status, this@RedeemActivity)
+                        }
                         Log.e(
                             "panya",
                             "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -274,21 +280,17 @@ class RedeemActivity : BaseK9Activity() {
                             )
                             addItemView(interestOrderModel!!)
                         } else {
-                            DialogUtil.showNotiDialog(
-                                this@RedeemActivity,
-                                getString(R.string.title_error),
-                                getString(R.string.search_error_please_research)
-                            )
+                            showResponse(status, this@RedeemActivity)
                         }
                     }
 
                     override fun onError(error: ANError) {
                         error.printStackTrace()
-                        DialogUtil.showNotiDialog(
-                            this@RedeemActivity,
-                            getString(R.string.title_error),
-                            getString(R.string.connect_error_please_reorder)
-                        )
+                        error.errorBody?.let {
+                            val jObj = JSONObject(it)
+                            val status = jObj.getString("status_code")
+                            showResponse(status, this@RedeemActivity)
+                        }
                         Log.e(
                             "panya",
                             "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -300,7 +302,7 @@ class RedeemActivity : BaseK9Activity() {
 
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
-        edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
+        edt_name.setText(info.thaiTitle +" "+info.thaiFirstName + "  " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
         if (interestOrderModel == null) {
             loadOrder(citizenId)

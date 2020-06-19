@@ -16,6 +16,176 @@ public class PreferencesManager {
     private static final String KEY_CONTACT = "contact";
     private static final String KEY_CONTACT_PHONE = "contact_phone";
     private static final String KEY_CONTACT_EMAIL = "contact_email";
+    private static final String KEY_ADDRESS = "address";
+    private static final String KEY_TAX_ID = "tax_id_number";
+    private static final String KEY_NUMBER = "number";
+    private static final String KEY_BUILDING = "building";
+    private static final String KEY_ALLEY = "alley";
+    private static final String KEY_ROAD = "road";
+    private static final String KEY_DISDRICT = "district";
+    private static final String KEY_AMPHURE = "amphure";
+    private static final String KEY_PROVINCE = "province";
+    private static final String KEY_TYPE_CODE = "type_code";
+    private static final String KEY_TYPE_NAME = "type_name";
+
+    public void setTypeName(String value) {
+        mPref.edit()
+                .putString(KEY_TYPE_NAME, value)
+                .commit();
+    }
+
+    public String getTypeName() {
+        return mPref.getString(KEY_TYPE_NAME, "");
+    }
+
+    public void removeTypeName() {
+        remove(KEY_TYPE_NAME);
+    }
+
+
+
+    public void setTypeCode(String value) {
+        mPref.edit()
+                .putString(KEY_TYPE_CODE, value)
+                .commit();
+    }
+
+    public String getTypeCode() {
+        return mPref.getString(KEY_TYPE_CODE, "");
+    }
+
+    public void removeTypeCode() {
+        remove(KEY_TYPE_CODE);
+    }
+
+
+
+
+    public void setProvince(String value) {
+        mPref.edit()
+                .putString(KEY_PROVINCE, value)
+                .commit();
+    }
+
+    public String getProvince() {
+        return mPref.getString(KEY_PROVINCE, "");
+    }
+
+    public void removeProvince() {
+        remove(KEY_PROVINCE);
+    }
+
+
+
+
+    public void setAmphure(String value) {
+        mPref.edit()
+                .putString(KEY_AMPHURE, value)
+                .commit();
+    }
+
+    public String getAmphure() {
+        return mPref.getString(KEY_AMPHURE, "");
+    }
+
+    public void removeAmphure() {
+        remove(KEY_AMPHURE);
+    }
+
+
+    public void setDistrict(String value) {
+        mPref.edit()
+                .putString(KEY_DISDRICT, value)
+                .commit();
+    }
+
+    public String getDistrict() {
+        return mPref.getString(KEY_DISDRICT, "");
+    }
+
+    public void removeDistrict() {
+        remove(KEY_DISDRICT);
+    }
+
+
+    public void setRoad(String value) {
+        mPref.edit()
+                .putString(KEY_ROAD, value)
+                .commit();
+    }
+
+    public String getRoad() {
+        return mPref.getString(KEY_ROAD, "");
+    }
+
+    public void removeRoad() {
+        remove(KEY_ROAD);
+    }
+
+
+
+
+    public void setAlley(String value) {
+        mPref.edit()
+                .putString(KEY_ALLEY, value)
+                .commit();
+    }
+
+    public String getAlley() {
+        return mPref.getString(KEY_ALLEY, "");
+    }
+
+    public void removeAlley() {
+        remove(KEY_ALLEY);
+    }
+
+
+
+    public void setBuilding(String value) {
+        mPref.edit()
+                .putString(KEY_BUILDING, value)
+                .commit();
+    }
+
+    public String getBuilding() {
+        return mPref.getString(KEY_BUILDING, "");
+    }
+
+    public void removeBuilding() {
+        remove(KEY_BUILDING);
+    }
+
+
+
+    public void setNumber(String value) {
+        mPref.edit()
+                .putString(KEY_NUMBER, value)
+                .commit();
+    }
+
+    public String getNumber() {
+        return mPref.getString(KEY_NUMBER, "");
+    }
+
+    public void removeNumber() {
+        remove(KEY_NUMBER);
+    }
+
+
+
+    public void setTaxId(String value) {
+        mPref.edit()
+                .putString(KEY_TAX_ID, value)
+                .commit();
+    }
+
+    public String getTaxId() {
+        return mPref.getString(KEY_TAX_ID, "");
+    }
+
+    public void removeTaxId() {
+        remove(KEY_TAX_ID);
+    }
 
     private static PreferencesManager sInstance;
     private final SharedPreferences mPref;
@@ -150,6 +320,85 @@ public class PreferencesManager {
 
     public void removeShop() {
         remove(KEY_COMPANY_SHOP);
+    }
+
+
+    public void setContact(String value) {
+        mPref.edit()
+                .putString(KEY_CONTACT, value)
+                .commit();
+    }
+
+    public String getContact() {
+        return mPref.getString(KEY_CONTACT, "");
+    }
+
+    public void removeContact() {
+        remove(KEY_CONTACT);
+    }
+
+
+
+    public void setContactPhone(String value) {
+        mPref.edit()
+                .putString(KEY_CONTACT_PHONE, value)
+                .commit();
+    }
+
+    public String getContactPhone() {
+        return mPref.getString(KEY_CONTACT_PHONE, "");
+    }
+
+    public void removeContactPhone() {
+        remove(KEY_CONTACT_PHONE);
+    }
+
+    public void setContactEmail(String value) {
+        mPref.edit()
+                .putString(KEY_CONTACT_EMAIL, value)
+                .commit();
+    }
+
+    public String getContactEmail() {
+        return mPref.getString(KEY_CONTACT_EMAIL, "");
+    }
+
+    public void removeContactEmail() {
+        remove(KEY_CONTACT_EMAIL);
+    }
+
+    public String getAddress() {
+        StringBuilder address = new StringBuilder();
+        String number = getNumber();
+        String building = getBuilding();
+        String alley = getAlley();
+        String road = getRoad();
+        String district = getDistrict();
+        String amphure = getAmphure();
+        String province = getProvince();
+
+        if (!number.isEmpty()) {
+            address.append(number + " ");
+        }
+        if (!building.isEmpty()) {
+            address.append(building + " ");
+        }
+        if (!road.isEmpty()) {
+            address.append(road + " ");
+        }
+        if (!alley.isEmpty()) {
+            address.append(alley + " ");
+        }
+        if (!district.isEmpty()) {
+            address.append(district + " ");
+        }
+        if (!amphure.isEmpty()) {
+            address.append(amphure + " ");
+        }
+        if (!province.isEmpty()) {
+            address.append(province + " ");
+        }
+        return address.toString();
     }
 
     public void remove(String key) {

@@ -5,13 +5,11 @@ import android.content.DialogInterface;
 import android.text.InputType;
 import android.widget.EditText;
 
+
 import androidx.appcompat.app.AlertDialog;
 
 import com.tss.quikpawn.R;
 import com.tss.quikpawn.models.DialogParamModel;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DialogUtil {
 
