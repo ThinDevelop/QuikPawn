@@ -8,15 +8,18 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
-import com.tss.quikpawn.BuyActivity
-import com.tss.quikpawn.ConsignmentActivity
-import com.tss.quikpawn.R
-import com.tss.quikpawn.SellActivity
+import com.centerm.smartpos.aidl.sys.AidlDeviceManager
+import com.tss.quikpawn.*
 import com.tss.quikpawn.networks.Network
 import kotlinx.android.synthetic.main.activity_main_menu.*
 import org.json.JSONObject
 
-class MainMenuActivity : AppCompatActivity() {
+class MainMenuActivity : BaseActivity() {
+    override fun onDeviceConnected(deviceManager: AidlDeviceManager?, capy: Boolean) {
+    }
+
+    override fun onPrintDeviceConnected(deviceManager: AidlDeviceManager?) {
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,19 +48,25 @@ class MainMenuActivity : AppCompatActivity() {
         btn_reprint.setOnClickListener {
             startActivity(Intent(this@MainMenuActivity, ReprintOrderActivity::class.java))
         }
+        btn_getall.setOnClickListener {
+            startActivity(Intent(this@MainMenuActivity, SelectItemActivity::class.java))
+        }
 
         Network.getCategory(object : JSONObjectRequestListener {
             override fun onResponse(response: JSONObject) {
                 Log.e("panya", response.toString())
             }
 
-            override fun onError(anError: ANError?) {
-                Log.e("panya", "error code :" + anError?.errorCode + " body :" + anError?.errorBody)
-                anError?.let {
-                    if (anError.errorCode == 401) {
-                        startActivity(Intent(this@MainMenuActivity, LoginActivity::class.java))
-                        this@MainMenuActivity.finish()
+            override fun onError(error: ANError?) {
+                error?.errorBody?.let {
+                    val jObj = JSONObject(it)
+                    if (jObj.has("status_code")) {
+                        val status = jObj.getString("status_code")
+                        showResponse(status, this@MainMenuActivity)
                     }
+                }
+                error?.let {
+                    showResponse(error.errorCode.toString(), this@MainMenuActivity)
                 }
             }
         })

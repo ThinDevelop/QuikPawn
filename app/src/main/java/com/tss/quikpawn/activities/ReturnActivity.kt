@@ -71,6 +71,11 @@ class ReturnActivity : BaseK9Activity() {
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
+            if (customerPhone.length != 10) {
+                DialogUtil.showNotiDialog(this, getString(R.string.data_is_wrong), getString(R.string.wrong_phone_number))
+                return@setOnClickListener
+            }
+
             if (!customerName.isEmpty()) {
 
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
@@ -120,11 +125,14 @@ class ReturnActivity : BaseK9Activity() {
 
                             override fun onError(error: ANError) {
                                 error.printStackTrace()
+                                var status = error.errorCode.toString()
                                 error.errorBody?.let {
                                     val jObj = JSONObject(it)
-                                    val status = jObj.getString("status_code")
-                                    showResponse(status, this@ReturnActivity)
+                                    if (jObj.has("status_code")) {
+                                        status = jObj.getString("status_code")
+                                    }
                                 }
+                                showResponse(status, this@ReturnActivity)
                                 Log.e(
                                     "panya",
                                     "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -289,6 +297,12 @@ class ReturnActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
+        printerParams1.setText("วันครบกำหนด " + Util.toDateFormat(data.date_expire))
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า "+data.customer_name)
         textList.add(printerParams1)
 
@@ -305,13 +319,30 @@ class ReturnActivity : BaseK9Activity() {
         printerParams1.setText("รายการสินค้า\n")
         textList.add(printerParams1)
 
-        val list = Util.productListToProductList2Sell(data.products)
-        val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-        printerParams1.setBitmap(listBitmap)
-        textList.add(printerParams1)
+        var i = 0
+        for (product in data.products) {
+            i++
+            var name = product.product_name
+            var detail = product.detail
+            detail.replace(" "," ")
+            name.replace(" "," ")
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText("\n" + i + ". " + name+"\n"+detail)
+            textList.add(printerParams1)
+
+            val listProduct = arrayListOf<ProductModel>()
+            listProduct.add(product)
+            val list = Util.productListToProductList3Sell(listProduct)
+            val listBitmap = Util.productListToBitmap2(list)
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+        }
+
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)

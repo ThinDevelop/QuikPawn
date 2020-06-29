@@ -1,16 +1,11 @@
 package com.tss.quikpawn.networks
 
-import android.widget.Toast
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.common.Priority
-import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.google.gson.Gson
 import com.tss.quikpawn.PreferencesManager
-import com.tss.quikpawn.R
-import com.tss.quikpawn.app.QuikPawnApplication
 import com.tss.quikpawn.models.*
-import org.json.JSONObject
 import java.io.File
 
 class Network {
@@ -105,6 +100,7 @@ class Network {
                 .addHeaders("Content-type", "application/json")
                 .addHeaders("Accept", "application/json")
                 .addQueryParameter("tid", PreferencesManager.getInstance().tid)
+                .addQueryParameter("user_id", PreferencesManager.getInstance().userId)
                 .addQueryParameter("limit", "100")
                 .setTag("loadOrder")
                 .setPriority(Priority.MEDIUM)

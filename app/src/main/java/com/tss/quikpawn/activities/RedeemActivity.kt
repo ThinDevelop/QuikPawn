@@ -77,6 +77,12 @@ class RedeemActivity : BaseK9Activity() {
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
+
+            if (customerPhoneNumber.length != 10) {
+                DialogUtil.showNotiDialog(this, getString(R.string.data_is_wrong), getString(R.string.wrong_phone_number))
+                return@setOnClickListener
+            }
+
             if (!customerName.isEmpty() &&
 //                !customerId.isEmpty() &&
                 interestOrderModel != null
@@ -142,11 +148,15 @@ class RedeemActivity : BaseK9Activity() {
 
                             override fun onError(error: ANError) {
                                 error.printStackTrace()
+
+                                var status = error.errorCode.toString()
                                 error.errorBody?.let {
                                     val jObj = JSONObject(it)
-                                    val status = jObj.getString("status_code")
-                                    showResponse(status, this@RedeemActivity)
+                                    if (jObj.has("status_code")) {
+                                        status = jObj.getString("status_code")
+                                    }
                                 }
+                                showResponse(status, this@RedeemActivity)
                                 Log.e(
                                     "panya",
                                     "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -247,11 +257,15 @@ class RedeemActivity : BaseK9Activity() {
 
                     override fun onError(error: ANError) {
                         error.printStackTrace()
+
+                        var status = error.errorCode.toString()
                         error.errorBody?.let {
                             val jObj = JSONObject(it)
-                            val status = jObj.getString("status_code")
-                            showResponse(status, this@RedeemActivity)
+                            if (jObj.has("status_code")) {
+                                status = jObj.getString("status_code")
+                            }
                         }
+                        showResponse(status, this@RedeemActivity)
                         Log.e(
                             "panya",
                             "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -286,11 +300,14 @@ class RedeemActivity : BaseK9Activity() {
 
                     override fun onError(error: ANError) {
                         error.printStackTrace()
+                        var status = error.errorCode.toString()
                         error.errorBody?.let {
                             val jObj = JSONObject(it)
-                            val status = jObj.getString("status_code")
-                            showResponse(status, this@RedeemActivity)
+                            if (jObj.has("status_code")) {
+                                status = jObj.getString("status_code")
+                            }
                         }
+                        showResponse(status, this@RedeemActivity)
                         Log.e(
                             "panya",
                             "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -360,7 +377,7 @@ class RedeemActivity : BaseK9Activity() {
             interestOrderModel = null
         }
 
-        for (interest in interestOrder.interest) {
+        for (interest in interestOrder.interests) {
             val checkBox = CheckBox(this)
             checkBox.text = "เดือนที่ : " + interest.month
             checkBox.isEnabled = !interest.status
@@ -387,13 +404,13 @@ class RedeemActivity : BaseK9Activity() {
         }
         insertCheckbox(
             layout,
-            (interestOrder.interest[0].price.toFloat() / 2).toString(),
+            (interestOrder.interests[0].price.toFloat() / 2).toString(),
             "ดอกเบี้ยครึ่งเดือน",
             summaryInterest
         )
         insertCheckbox(
             layout,
-            interestOrder.interest[0].price,
+            interestOrder.interests[0].price,
             "ดอกเบี้ยเต็มเดือน",
             summaryInterest
         )
@@ -507,13 +524,38 @@ class RedeemActivity : BaseK9Activity() {
         printerParams1.setText("รายการสินค้า")
         textList.add(printerParams1)
 
-        val list = Util.productListToProductList2Cost(data.products)
-        val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-        printerParams1.setBitmap(listBitmap)
-        textList.add(printerParams1)
+//        val list = Util.productListToProductList2Cost(data.products)
+//        val listBitmap = Util.productListToBitmap(list)
+//        printerParams1 = TssPrinterParams()
+//        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+//        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+//        printerParams1.setBitmap(listBitmap)
+//        textList.add(printerParams1)
+        var i = 0
+        for (product in data.products) {
+            i++
+            var name = product.product_name
+            var detail = product.detail
+            detail.replace(" "," ")
+            name.replace(" "," ")
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText("\n" + i + ". " + name+"\n"+detail)
+            textList.add(printerParams1)
+
+            val listProduct = arrayListOf<ProductModel>()
+            listProduct.add(product)
+            val list = Util.productListToProductList3Cost(listProduct)
+            val listBitmap = Util.productListToBitmap2(list)
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+
+        }
+
         val list2 = arrayListOf<ProductModel2>()
         if (data.interest.isNotEmpty()) {
             printerParams1 = TssPrinterParams()
@@ -522,7 +564,7 @@ class RedeemActivity : BaseK9Activity() {
             printerParams1.setText("รายการดอกเบี้ย")
             textList.add(printerParams1)
 
-            for (interest in data.interest) {
+            for (interest in data.interests) {
                 list2.add(ProductModel2("เดือนที่ : " + interest.month, interest.price + " บาท"))
             }
             list2.add(ProductModel2("ค่าปรับ", data.mulct_price + " บาท"))

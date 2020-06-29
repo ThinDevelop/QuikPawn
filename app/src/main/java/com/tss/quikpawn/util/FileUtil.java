@@ -1,6 +1,13 @@
 package com.tss.quikpawn.util;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
+
+import com.bumptech.glide.Glide;
+
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 
 public class FileUtil {
 

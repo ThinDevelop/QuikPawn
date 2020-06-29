@@ -3,26 +3,21 @@ package com.tss.quikpawn
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.util.Base64
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewManager
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.core.view.get
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.google.gson.Gson
+import com.tss.quikpawn.adapter.BuyListAdapter
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
@@ -31,8 +26,6 @@ import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
 import com.tss.quikpawn.util.Util.Companion.addRectangle
 import com.tss.quikpawn.util.Util.Companion.dashLine
-import com.tss.quikpawn.util.Util.Companion.productListToBitmap
-import com.tss.quikpawn.util.Util.Companion.productListToProductList2Cost
 import com.tss.quikpawn.util.Util.Companion.rotageBitmap
 import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.item_sign_view.*
@@ -40,34 +33,43 @@ import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 
 
-class BuyActivity : BaseK9Activity() {
+class BuyActivity : BaseK9Activity(), BuyListAdapter.OnItemClickListener {
+    lateinit var buyProductListAdapter: BuyListAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_buy)
         title = getString(R.string.buy_item)
-
+        buyProductListAdapter = BuyListAdapter(this, this)
+        recycler_view.setLayoutManager(LinearLayoutManager(this))
+        recycler_view.setHasFixedSize(true)
+        recycler_view.setAdapter(buyProductListAdapter)
+//        val buyProductModel = BuyProductModel("","","","","", "")
+//        buyProductModelList.add(buyProductModel)
+//        buyProductListAdapter.updateData(buyProductModelList)
         new_item.setOnClickListener {
-            val inflater = LayoutInflater.from(baseContext)
-            val contentView: View = inflater.inflate(R.layout.item_detail_view, null, false)
-            val delete = contentView.findViewById<ImageView>(R.id.delete_detail_btn)
-            val camera = contentView.findViewById<ImageView>(R.id.img_view1)
-            val loading = contentView.findViewById<ProgressBar>(R.id.loading)
-            val edtCost = contentView.findViewById<EditText>(R.id.edt_cost)
+            buyProductListAdapter.newItem()
 
-            edtCost.addTextChangedListener(NumberTextWatcherForThousand(edtCost))
-            delete.visibility = View.VISIBLE
-            contentView.tag = layout_detail.childCount
-            delete.tag = contentView.tag
-            delete.setOnClickListener {
-                (layout_detail.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
-                    layout_detail.findViewWithTag(it.tag)
-                )
-            }
-            camera.setOnClickListener {
-                cameraOpen(it as ImageView, loading, layout_detail.childCount)
-            }
-
-            layout_detail.addView(contentView)
+//            val inflater = LayoutInflater.from(baseContext)
+//            val contentView: View = inflater.inflate(R.layout.item_detail_view, null, false)
+//            val delete = contentView.findViewById<ImageView>(R.id.delete_detail_btn)
+//            val camera = contentView.findViewById<ImageView>(R.id.img_view1)
+//            val loading = contentView.findViewById<ProgressBar>(R.id.loading)
+//            val edtCost = contentView.findViewById<EditText>(R.id.edt_cost)
+//
+//            edtCost.addTextChangedListener(NumberTextWatcherForThousand(edtCost))
+//            delete.visibility = View.VISIBLE
+//            contentView.tag = layout_detail.childCount
+//            delete.tag = contentView.tag
+//            delete.setOnClickListener {
+//                (layout_detail.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
+//                    layout_detail.findViewWithTag(it.tag)
+//                )
+//            }
+//            camera.setOnClickListener {
+//                cameraOpen(it as ImageView, loading, layout_detail.childCount)
+//            }
+//
+//            layout_detail.addView(contentView)
         }
 
         //clear sign button
@@ -84,22 +86,23 @@ class BuyActivity : BaseK9Activity() {
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
-            if (!customerName.isEmpty() &&
+            if (!customerName.isEmpty()
+//                &&
 //                !customerId.isEmpty() &&
-                (loadingProgressBar != null && !loadingProgressBar!!.isShown)
+//                (loadingProgressBar != null && !loadingProgressBar!!.isShown)
             ) {
-                val productList = ArrayList<BuyProductModel>()
-                for (i in 0..layout_detail.childCount - 1) {
-                    val contentView = layout_detail.get(i)
-                    val camera = contentView.findViewById<ImageView>(R.id.img_view1)
-                    val detail = contentView.findViewById<EditText>(R.id.edt_detail)
-                    val cost = contentView.findViewById<EditText>(R.id.edt_cost)
-                    val productName = contentView.findViewById<EditText>(R.id.edt_product_name)
+                val productList = buyProductListAdapter.getBuyProductItems()
 
+                for (buyProduct in productList) {
+//                    val contentView = layout_detail.get(i)
+//                    val camera = contentView.findViewById<ImageView>(R.id.img_view1)
+                    val detail = buyProduct.detail//contentView.findViewById<EditText>(R.id.edt_detail)
+                    val cost = buyProduct.cost//contentView.findViewById<EditText>(R.id.edt_cost)
+                    val name = buyProduct.name//contentView.findViewById<EditText>(R.id.edt_product_name)
                     val costStr =
-                        NumberTextWatcherForThousand.trimCommaOfString(cost.text.toString())
-                    val name = productName.text.toString()
-                    if (camera.tag == null) {
+                        NumberTextWatcherForThousand.trimCommaOfString(cost)
+
+                    if (buyProduct.ref_image.isEmpty()) {
                         DialogUtil.showNotiDialog(
                             this,
                             getString(R.string.data_missing),
@@ -120,16 +123,10 @@ class BuyActivity : BaseK9Activity() {
                             getString(R.string.please_add_price)
                         )
                         return@setOnClickListener
+                    } else if (customerPhone.length != 10) {
+                        DialogUtil.showNotiDialog(this, getString(R.string.data_is_wrong), getString(R.string.wrong_phone_number))
+                        return@setOnClickListener
                     }
-                    val refImg = camera.tag as String
-                    val product = BuyProductModel(
-                        name,
-                        "5",
-                        detail.text.toString(),
-                        costStr,
-                        refImg
-                    )
-                    productList.add(product)
                 }
 
                 if (productList.size == 0) {
@@ -193,17 +190,20 @@ class BuyActivity : BaseK9Activity() {
                                 }
                             }
 
-                            override fun onError(error: ANError) {
+                            override fun onError(anError: ANError) {
                                 dialog.dismiss()
-                                error.errorBody?.let {
+                                var status = anError.errorCode.toString()
+                                anError.errorBody?.let {
                                     val jObj = JSONObject(it)
-                                    val status = jObj.getString("status_code")
-                                    showResponse(status, this@BuyActivity)
+                                    if (jObj.has("status_code")) {
+                                        status = jObj.getString("status_code")
+                                    }
                                 }
-                                error.printStackTrace()
+                                showResponse(status, this@BuyActivity)
+                                anError.printStackTrace()
                                 Log.e(
                                     "panya",
-                                    "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                                    "onError : " + anError.errorCode + ", detail " + anError.errorDetail + ", errorBody" + anError.errorBody
                                 )
                             }
                         })
@@ -237,10 +237,15 @@ class BuyActivity : BaseK9Activity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != Activity.RESULT_OK) return
+
         if (IMAGE_CAPTURE_CODE == requestCode) {
+            if (resultCode != Activity.RESULT_OK) {
+                buyProductListAdapter.notifyDataSetChanged()
+                recycler_view.scrollToPosition(index)
+                return
+            }
             //show loading
-            loadingProgressBar?.visibility = View.VISIBLE
+//            loadingProgressBar?.visibility = View.VISIBLE
             Network.uploadBase64(getFileToByte(imageFilePath), object : JSONObjectRequestListener {
                 override fun onResponse(response: JSONObject) {
                     Log.e("panya", "onResponse : $response")
@@ -249,23 +254,32 @@ class BuyActivity : BaseK9Activity() {
                     if (status == "200") {
                         val data = response.getJSONObject("data")
                         val refCode = data.getString("ref_code")
-                        setTagToImageView(refCode)
+                        val url = data.getString("image_small")
+
+//                        val buyProductModel = buyProductModelList.get(index)
+//                        buyProductModel.ref_image = refCode
+//                        buyProductModel.url = url
+                        buyProductListAdapter.updateImage(index, refCode, url)
+//                        setTagToImageView(refCode)
                     } else {
                         showResponse(status, this@BuyActivity)
                     }
                 }
 
-                override fun onError(error: ANError) {
+                override fun onError(anError: ANError) {
                     loadingProgressBar?.visibility = View.GONE
-                    error.errorBody?.let {
+                    var status = anError.errorCode.toString()
+                    anError.errorBody?.let {
                         val jObj = JSONObject(it)
-                        val status = jObj.getString("status_code")
-                        showResponse(status, this@BuyActivity)
+                        if (jObj.has("status_code")) {
+                            status = jObj.getString("status_code")
+                        }
                     }
-                    error.printStackTrace()
+                    showResponse(status, this@BuyActivity)
+                    anError.printStackTrace()
                     Log.e(
                         "panya",
-                        "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
+                        "onError : " + anError.errorCode + ", detail " + anError.errorDetail + ", errorBody" + anError.errorBody
                     )
                 }
             })
@@ -285,6 +299,8 @@ class BuyActivity : BaseK9Activity() {
             encodeString = Base64.encodeToString(bt, Base64.DEFAULT)
         } catch (e: Exception) {
             e.printStackTrace()
+        } finally {
+            bos?.close()
         }
         return encodeString
     }
@@ -364,32 +380,30 @@ class BuyActivity : BaseK9Activity() {
         printerParams1.setText("รายการสินค้า\n")
         textList.add(printerParams1)
 
-//        val list = productListToProductList2Cost(data.products)
-//        val listBitmap = productListToBitmap(list)
-//        printerParams1 = TssPrinterParams()
-//        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-//        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-//        printerParams1.setBitmap(listBitmap)
-//        textList.add(printerParams1)
-
+        var i = 0
         for (product in data.products) {
+            i++
+            var name = product.product_name
+            var detail = product.detail
+            detail.replace(" "," ")
+            name.replace(" "," ")
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText("\n" + i + ". " + name+"\n"+detail)
+            textList.add(printerParams1)
+
             val listProduct = arrayListOf<ProductModel>()
             listProduct.add(product)
-            val list = productListToProductList2Cost(listProduct)
-            val listBitmap = productListToBitmap(list)
+            val list = Util.productListToProductList3Cost(listProduct)
+            val listBitmap = Util.productListToBitmap2(list)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
             printerParams1.setBitmap(listBitmap)
             textList.add(printerParams1)
 
-            printerParams1 = TssPrinterParams()
-            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-            printerParams1.setTextSize(20)
-            printerParams1.setText(product.detail+"\n")
-            textList.add(printerParams1)
         }
-
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
@@ -454,5 +468,9 @@ class BuyActivity : BaseK9Activity() {
         Toast.makeText(this, getString(R.string.please_back_again), Toast.LENGTH_SHORT).show()
 
         Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
+    }
+
+    override fun onTakePhotoClick(index: Int) {
+        cameraOpen(index)
     }
 }

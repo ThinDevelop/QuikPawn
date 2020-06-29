@@ -178,11 +178,15 @@ class ProductListActivity : BaseK9Activity() {
 
                     override fun onError(error: ANError) {
                         error.printStackTrace()
+
+                        var status = error.errorCode.toString()
                         error.errorBody?.let {
                             val jObj = JSONObject(it)
-                            val status = jObj.getString("status_code")
-                            showResponse(status, this@ProductListActivity)
+                            if (jObj.has("status_code")) {
+                                status = jObj.getString("status_code")
+                            }
                         }
+                        showResponse(status, this@ProductListActivity)
                         Log.e(
                             "panya",
                             "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -218,11 +222,15 @@ class ProductListActivity : BaseK9Activity() {
 
                 override fun onError(error: ANError) {
                     error.printStackTrace()
+
+                    var status = error.errorCode.toString()
                     error.errorBody?.let {
                         val jObj = JSONObject(it)
-                        val status = jObj.getString("status_code")
-                        showResponse(status, this@ProductListActivity)
+                        if (jObj.has("status_code")) {
+                            status = jObj.getString("status_code")
+                        }
                     }
+                    showResponse(status, this@ProductListActivity)
                     Log.e(
                         "panya",
                         "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody

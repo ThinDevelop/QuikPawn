@@ -74,6 +74,12 @@ class InterestActivity : BaseK9Activity() {
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
+
+            if (phoneNumber.length != 10) {
+                DialogUtil.showNotiDialog(this, getString(R.string.data_is_wrong), getString(R.string.wrong_phone_number))
+                return@setOnClickListener
+            }
+
             if (!customerName.isEmpty() &&
 //                !customerId.isEmpty() &&
                 interestOrderModel != null
@@ -132,11 +138,14 @@ class InterestActivity : BaseK9Activity() {
 
                             override fun onError(error: ANError) {
                                 error.printStackTrace()
-                                DialogUtil.showNotiDialog(
-                                    this@InterestActivity,
-                                    getString(R.string.title_error),
-                                    getString(R.string.connect_error_please_reorder)
-                                )
+                                var status = error.errorCode.toString()
+                                error.errorBody?.let {
+                                    val jObj = JSONObject(it)
+                                    if (jObj.has("status_code")) {
+                                        status = jObj.getString("status_code")
+                                    }
+                                }
+                                showResponse(status, this@InterestActivity)
                                 Log.e(
                                     "panya",
                                     "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -246,11 +255,14 @@ class InterestActivity : BaseK9Activity() {
                     }
 
                     override fun onError(error: ANError) {
+                        var status = error.errorCode.toString()
                         error.errorBody?.let {
                             val jObj = JSONObject(it)
-                            val status = jObj.getString("status_code")
-                            showResponse(status, this@InterestActivity)
+                            if (jObj.has("status_code")) {
+                                status = jObj.getString("status_code")
+                            }
                         }
+                        showResponse(status, this@InterestActivity)
                         error.printStackTrace()
                         Log.e(
                             "panya",
@@ -283,11 +295,14 @@ class InterestActivity : BaseK9Activity() {
                     }
 
                     override fun onError(error: ANError) {
+                        var status = error.errorCode.toString()
                         error.errorBody?.let {
                             val jObj = JSONObject(it)
-                            val status = jObj.getString("status_code")
-                            showResponse(status, this@InterestActivity)
+                            if (jObj.has("status_code")) {
+                                status = jObj.getString("status_code")
+                            }
                         }
+                        showResponse(status, this@InterestActivity)
                         error.printStackTrace()
                         Log.e(
                             "panya",
@@ -351,7 +366,7 @@ class InterestActivity : BaseK9Activity() {
             )
         }
 
-        for (interest in interestOrderModel.interest) {
+        for (interest in interestOrderModel.interests) {
             val checkBox = CheckBox(this)
             checkBox.text = "เดือนที่ : " + interest.month
             checkBox.isEnabled = !interest.status
@@ -479,7 +494,7 @@ class InterestActivity : BaseK9Activity() {
         textList.add(printerParams1)
 
         val list = arrayListOf<ProductModel2>()
-        for (interest in data.interest) {
+        for (interest in data.interests) {
             list.add(ProductModel2("เดือนที่ : " + interest.month, interest.price+ " บาท"))
         }
 

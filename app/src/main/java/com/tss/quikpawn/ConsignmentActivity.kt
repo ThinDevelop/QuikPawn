@@ -4,8 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -14,21 +12,17 @@ import android.os.Handler
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewManager
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import androidx.core.view.get
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.google.gson.Gson
+import com.tss.quikpawn.adapter.ConsignListAdapter
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
@@ -38,14 +32,7 @@ import com.tss.quikpawn.util.Util.Companion.addRectangle
 import com.tss.quikpawn.util.Util.Companion.getMonth
 import com.tss.quikpawn.util.Util.Companion.rotageBitmap
 import com.tss.quikpawn.util.Util.Companion.stringToCalendar
-import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_consignment.*
-import kotlinx.android.synthetic.main.activity_consignment.btn_ok
-import kotlinx.android.synthetic.main.activity_consignment.edt_idcard
-import kotlinx.android.synthetic.main.activity_consignment.edt_name
-import kotlinx.android.synthetic.main.activity_consignment.edt_phonenumber
-import kotlinx.android.synthetic.main.activity_consignment.layout_detail
-import kotlinx.android.synthetic.main.activity_consignment.new_item
 import kotlinx.android.synthetic.main.item_sign_view.*
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -55,35 +42,24 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
-class ConsignmentActivity : BaseK9Activity() {
+class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickListener{
     var expire = "0"
     var interest = "1"
     private val PERMISSION_CODE = 2000
     var imageIdFilePath = ""
     private var IMAGE_CAPTURE_IDCARD_CODE = 2001
+    lateinit var consignListAdapter: ConsignListAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_consignment)
         title = getString(R.string.consignment_item)
+        consignListAdapter = ConsignListAdapter(this, this)
+        con_recycler_view.setLayoutManager(LinearLayoutManager(this))
+        con_recycler_view.setHasFixedSize(true)
+        con_recycler_view.setAdapter(consignListAdapter)
         new_item.setOnClickListener{
-            val inflater = LayoutInflater.from(baseContext)
-            val contentView: View = inflater.inflate(R.layout.item_detail_consignment_view, null, false)
-            val delete = contentView.findViewById<ImageView>(R.id.delete_detail_btn)
-            val camera = contentView.findViewById<ImageView>(R.id.img_view1)
-            val loadingProgressBarConsignment = contentView.findViewById<ProgressBar>(R.id.loading_photo_consignment)
-            val edtCost = contentView.findViewById<EditText>(R.id.edt_cost)
-
-            edtCost.addTextChangedListener(NumberTextWatcherForThousand(edtCost))
-            delete.visibility = View.VISIBLE
-            contentView.tag = layout_detail.childCount
-            delete.tag = contentView.tag
-            delete.setOnClickListener {
-                (layout_detail.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(layout_detail.findViewWithTag<View>(it.tag))
-            }
-            layout_detail.addView(contentView)
-            camera.setOnClickListener {
-                cameraOpen(it as ImageView, loadingProgressBarConsignment, layout_detail.childCount)
-            }
+            consignListAdapter.newItem()
         }
 
         clearsign_btn.setOnClickListener{
@@ -109,19 +85,21 @@ class ConsignmentActivity : BaseK9Activity() {
                 !interest.isEmpty() && !interest.equals("0") &&
                 !phoneNumber.isEmpty() &&
                 !expire.isEmpty() &&
-                !address.isEmpty() &&
-                (loadingProgressBar != null && !loadingProgressBar!!.isShown)   ) {
-                val productList = ArrayList<ConsignmentProductModel>()
-                for (i in 0..layout_detail.childCount - 1) {
-                    val contentView = layout_detail.get(i)
-                    val camera = contentView.findViewById<ImageView>(R.id.img_view1)
-                    val detail = contentView.findViewById<EditText>(R.id.edt_detail)
-                    val cost = contentView.findViewById<EditText>(R.id.edt_cost)
-                    val productName = contentView.findViewById<EditText>(R.id.edt_product_name)
+                !address.isEmpty()
+//                && (loadingProgressBar != null && !loadingProgressBar!!.isShown)
+            ) {
 
-                    val costStr= NumberTextWatcherForThousand.trimCommaOfString(cost.text.toString())
-                    val name = productName.text.toString()
-                    if (camera.tag == null) {
+                val productList  = consignListAdapter.getConProductItems()
+
+                for (product in productList) {
+
+                    val camera = product.ref_image
+                    val detail = product.detail
+                    val cost = product.cost
+                    val name = product.name
+
+                    val costStr= NumberTextWatcherForThousand.trimCommaOfString(cost)
+                    if (camera.isEmpty()) {
                         DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_photo))
                         return@setOnClickListener
                     } else if (name.isEmpty()) {
@@ -130,22 +108,10 @@ class ConsignmentActivity : BaseK9Activity() {
                     } else if (costStr.isEmpty()) {
                         DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_price))
                         return@setOnClickListener
+                    } else if (phoneNumber.length != 10) {
+                        DialogUtil.showNotiDialog(this, getString(R.string.data_is_wrong), getString(R.string.wrong_phone_number))
+                        return@setOnClickListener
                     }
-                    val refImg = camera.tag as String
-                    var costA = cost.text.toString()
-                    if (costA.isEmpty()) {
-                        costA = "0"
-                    }
-                        val product = ConsignmentProductModel(
-                            productName.text.toString(),
-                            "5",
-                            detail.text.toString(),
-                            "0",
-                            NumberTextWatcherForThousand.trimCommaOfString(costA),
-                            refImg
-                        )
-                        productList.add(product)
-
                 }
 
                 var sum = 0
@@ -195,11 +161,14 @@ class ConsignmentActivity : BaseK9Activity() {
 
                         override fun onError(error: ANError) {
                             dialog.dismiss()
+                            var status = error.errorCode.toString()
                             error.errorBody?.let {
                                 val jObj = JSONObject(it)
-                                val status = jObj.getString("status_code")
-                                showResponse(status, this@ConsignmentActivity)
+                                if (jObj.has("status_code")) {
+                                    status = jObj.getString("status_code")
+                                }
                             }
+                            showResponse(status, this@ConsignmentActivity)
                             error.printStackTrace()
                             Log.e(
                                 "panya",
@@ -287,8 +256,11 @@ class ConsignmentActivity : BaseK9Activity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != Activity.RESULT_OK) return
+
         if (IMAGE_CAPTURE_IDCARD_CODE == requestCode) {
+
+            if (resultCode != Activity.RESULT_OK) return
+
             //show loading
             idcard_container?.visibility = View.VISIBLE
             img_idcard?.setImageURI(Uri.parse(imageIdFilePath))
@@ -297,6 +269,12 @@ class ConsignmentActivity : BaseK9Activity() {
                 imageIdFilePath = ""
             }
         } else if (IMAGE_CAPTURE_CODE == requestCode) {
+
+            if (resultCode != Activity.RESULT_OK) {
+                consignListAdapter.notifyDataSetChanged()
+                con_recycler_view.scrollToPosition(index)
+                return
+            }
             //show loading
             loadingProgressBar?.visibility = View.VISIBLE
             Network.uploadBase64(getFileToByte(imageFilePath), object : JSONObjectRequestListener {
@@ -307,7 +285,8 @@ class ConsignmentActivity : BaseK9Activity() {
                     if (status == "200") {
                         val data = response.getJSONObject("data")
                         val refCode = data.getString("ref_code")
-                        setTagToImageView(refCode)
+                        val url = data.getString("image_small")
+                        consignListAdapter.updateImage(index, refCode, url)
                     } else {
                         showResponse(status, this@ConsignmentActivity)
                     }
@@ -315,11 +294,15 @@ class ConsignmentActivity : BaseK9Activity() {
 
                 override fun onError(error: ANError) {
                     loadingProgressBar?.visibility = View.GONE
+
+                    var status = error.errorCode.toString()
                     error.errorBody?.let {
                         val jObj = JSONObject(it)
-                        val status = jObj.getString("status_code")
-                        showResponse(status, this@ConsignmentActivity)
+                        if (jObj.has("status_code")) {
+                            status = jObj.getString("status_code")
+                        }
                     }
+                    showResponse(status, this@ConsignmentActivity)
                     error.printStackTrace()
                     Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
                 }
@@ -398,7 +381,7 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("เขียนที่ ร้าน "+PreferencesManager.getInstance().companyName)
+        printerParams1.setText("เขียนที่ ร้าน "+PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
@@ -410,7 +393,13 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("เลขที่ "+PreferencesManager.getInstance().address)
+        printerParams1.setText("เลขที่ "+PreferencesManager.getInstance().address.replace(" ", " "))
+        textList.add(printerParams1)
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
+        printerParams1.setText("รหัสไปรษณีย์ "+ PreferencesManager.getInstance().zipCode)
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
@@ -428,7 +417,7 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("ข้าพเจ้า"+data.customer_name+" \nบัตรประชาชน "+data.idcard+"\n" +
+        printerParams1.setText("ข้าพเจ้า"+data.customer_name+" \nบัตรประชาชนเลขที่ "+data.idcard+"\n" +
                 "ผู้ขายฝากอยู่บ้านเลขที่ "+address+"\n")
         textList.add(printerParams1)
 
@@ -443,31 +432,43 @@ class ConsignmentActivity : BaseK9Activity() {
             sum += productModel.cost.toDouble()
         }
 
-//        val list = Util.productListToProductList2Cost(data.products)
-//        val listBitmap = Util.productListToBitmap(list)
-//        printerParams1 = TssPrinterParams()
-//        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-//        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-//        printerParams1.setBitmap(listBitmap)
-//        textList.add(printerParams1)
-
+        var i = 0
         for (product in data.products) {
+            i++
+            var name = product.product_name
+            var detail = product.detail
+            detail.replace(" "," ")
+            name.replace(" "," ")
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText("\n" + i + ". " + name+"\n"+detail)
+            textList.add(printerParams1)
+
             val listProduct = arrayListOf<ProductModel>()
             listProduct.add(product)
-            val list = Util.productListToProductList2Cost(listProduct)
-            val listBitmap = Util.productListToBitmap(list)
+            val list = Util.productListToProductList3Cost(listProduct)
+            val listBitmap = Util.productListToBitmap2(list)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
             printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
             printerParams1.setBitmap(listBitmap)
             textList.add(printerParams1)
 
-            printerParams1 = TssPrinterParams()
-            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-            printerParams1.setTextSize(20)
-            printerParams1.setText(product.detail+"\n")
-            textList.add(printerParams1)
         }
+
+//        for (product in data.products) {
+//            val listProduct = arrayListOf<ProductModel>()
+//            listProduct.add(product)
+//            val list = Util.productListToProductList3Cost(listProduct)
+//            val listBitmap = Util.productListToBitmap(list)
+//            printerParams1 = TssPrinterParams()
+//            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+//            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+//            printerParams1.setBitmap(listBitmap)
+//            textList.add(printerParams1)
+//
+//        }
         val calendar = stringToCalendar(data.date_expire)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
@@ -480,7 +481,7 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ครบกำหนด "+Util.toDateFormat(data.date_expire))
+        printerParams1.setText("วันครบกำหนด "+Util.toDateFormat(data.date_expire))
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
@@ -491,7 +492,7 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ดอกเบี้ย "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ expire+ " เดือน")//data.interest_price
+        printerParams1.setText("ค่าธรรมเนียม "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ expire+ " เดือน")//data.interest_price
         textList.add(printerParams1)
 
 
@@ -658,13 +659,30 @@ class ConsignmentActivity : BaseK9Activity() {
         printerParams1.setText("รายการสินค้า\n")
         textList.add(printerParams1)
 
-        val list = Util.productListToProductList2Cost(data.products)
-        val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-        printerParams1.setBitmap(listBitmap)
-        textList.add(printerParams1)
+        var i = 0
+        for (product in data.products) {
+            i++
+            var name = product.product_name
+            var detail = product.detail
+            detail.replace(" "," ")
+            name.replace(" "," ")
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText("\n" + i + ". " + name+"\n"+detail)
+            textList.add(printerParams1)
+
+            val listProduct = arrayListOf<ProductModel>()
+            listProduct.add(product)
+            val list = Util.productListToProductList3Cost(listProduct)
+            val listBitmap = Util.productListToBitmap2(list)
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+
+        }
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
@@ -719,5 +737,9 @@ class ConsignmentActivity : BaseK9Activity() {
         Toast.makeText(this, getString(R.string.please_back_again), Toast.LENGTH_SHORT).show()
 
         Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
+    }
+
+    override fun onTakePhotoClick(index: Int) {
+        cameraOpen(index)
     }
 }

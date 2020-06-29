@@ -27,6 +27,21 @@ public class PreferencesManager {
     private static final String KEY_PROVINCE = "province";
     private static final String KEY_TYPE_CODE = "type_code";
     private static final String KEY_TYPE_NAME = "type_name";
+    private static final String KEY_ZIP_CODE = "zip_code";
+
+    public void setZipCode(String value) {
+        mPref.edit()
+                .putString(KEY_ZIP_CODE, value)
+                .commit();
+    }
+
+    public String getZipCode() {
+        return mPref.getString(KEY_ZIP_CODE, "");
+    }
+
+    public void removeZipCode() {
+        remove(KEY_ZIP_CODE);
+    }
 
     public void setTypeName(String value) {
         mPref.edit()

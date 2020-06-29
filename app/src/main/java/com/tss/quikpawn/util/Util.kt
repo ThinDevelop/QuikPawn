@@ -2,7 +2,6 @@ package com.tss.quikpawn.util
 
 import android.content.Context
 import android.graphics.*
-import android.media.ExifInterface
 import android.os.Build
 import android.util.Base64
 import androidx.core.content.ContextCompat
@@ -46,15 +45,23 @@ class Util {
             val parser = SimpleDateFormat("yyyy-MM-dd")
             val formatter = SimpleDateFormat("dd-MM-yyyy")
             val output: String = formatter.format(parser.parse(date))
-
-            return output
+            val date = toDateTh(output)
+            return ""+date.get(Calendar.DATE)+" "+ getMonth(date)+" "+(date.get(Calendar.YEAR)+543)
         }
+
+        fun toDateTh(date: String): Calendar {
+            val cal = Calendar.getInstance()
+            val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
+            cal.time = sdf.parse(date)
+            return cal
+        }
+
         fun rotageBitmap(filePath: String?): Bitmap {
-            val bitmap = BitmapFactory.decodeFile(filePath)
-            val bitmap2: Bitmap
+            var bitmap = BitmapFactory.decodeFile(filePath)
+            var bitmap2: Bitmap
             if (bitmap.width > bitmap.height) {
                 bitmap2 = rotateImage(bitmap, 90f)!!
-            } else {
+            }else {
                 bitmap2 = bitmap
             }
 //            val ei = ExifInterface(filePath)
@@ -129,6 +136,35 @@ class Util {
             return bitmap
         }
 
+        fun productListToBitmap2(productList: List<ProductModel2>): Bitmap {
+            val bitmap =
+                Bitmap.createBitmap(600, (productList.size * 34) + 10, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            // new antialised Paint
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+            paint.color = Color.rgb(0, 0, 0)
+            // text size in pixels
+            paint.textSize = 38f
+            paint.isFakeBoldText = true
+            //custom fonts
+
+            // draw text to the Canvas center
+            val bounds = Rect()
+            productList.forEachIndexed { index, product ->
+                //draw the first text
+                paint.getTextBounds("ราคา", 0,  "ราคา".length, bounds)
+                var x = 5f
+                var y = (index + 1) * 32f
+                canvas.drawText("ราคา", x, y, paint)
+                //draw the second text
+                val price = " "+NumberTextWatcherForThousand.getDecimalFormattedString(product.price)
+                paint.getTextBounds(price, 0, price.length, bounds)
+                x = ((bitmap.width / 4f) * 2.8f) + ((bitmap.width - ((bitmap.width / 4f) * 2.8f)) - bounds.width())
+                canvas.drawText(product.price, x, y, paint)
+            }
+            return bitmap
+        }
+
         fun productListToBitmap(productList: List<ProductModel2>): Bitmap {
             val bitmap =
                 Bitmap.createBitmap(600, (productList.size * 34) + 10, Bitmap.Config.ARGB_8888)
@@ -161,6 +197,30 @@ class Util {
             return bitmap
         }
 
+        fun getTextRect(data: String): Rect {
+            val bounds = Rect()
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+            paint.textSize = 38f
+            paint.getTextBounds(data, 0, data.length, bounds)
+            return bounds
+        }
+        fun productListToProductList3Cost(list: List<ProductModel>): List<ProductModel2> {
+            val listProduct = arrayListOf<ProductModel2>()
+            for (product in list) {
+                var name = product.product_name
+                var detail = product.detail
+                detail.replace(" "," ")
+                name.replace(" "," ")
+                listProduct.add(
+                    ProductModel2(
+                        name,
+                        NumberTextWatcherForThousand.getDecimalFormattedString(product.cost) + " บาท"
+                    ).setDetail(product.detail)
+                )
+            }
+            return listProduct
+        }
+
         fun productListToProductList2Cost(list: List<ProductModel>): List<ProductModel2> {
             var i = 0
             val listProduct = arrayListOf<ProductModel2>()
@@ -176,6 +236,23 @@ class Util {
                         name,
                         NumberTextWatcherForThousand.getDecimalFormattedString(product.cost) + " บาท"
                     ).setDetail(product.detail)
+                )
+            }
+            return listProduct
+        }
+
+        fun productListToProductList3Sell(list: List<ProductModel>): List<ProductModel2> {
+            val listProduct = arrayListOf<ProductModel2>()
+            for (product in list) {
+                var name = product.product_name
+                var detail = product.detail
+                detail.replace(" "," ")
+                name.replace(" "," ")
+                listProduct.add(
+                    ProductModel2(
+                        name,
+                        NumberTextWatcherForThousand.getDecimalFormattedString(product.sale) + " บาท"
+                    )
                 )
             }
             return listProduct

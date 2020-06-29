@@ -31,15 +31,9 @@ import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
-import com.tss.quikpawn.util.Util.Companion.dashLine
 import com.tss.quikpawn.util.Util.Companion.dashSignature
 import kotlinx.android.synthetic.main.activity_borrow.*
-import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.item_customer_info.*
-import kotlinx.android.synthetic.main.item_customer_info.btn_ok
-import kotlinx.android.synthetic.main.item_customer_info.edt_idcard
-import kotlinx.android.synthetic.main.item_customer_info.edt_name
-import kotlinx.android.synthetic.main.item_customer_info.edt_phonenumber
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -116,6 +110,11 @@ class BorrowActivity: BaseK9Activity() {
                         getString(R.string.data_missing)
                     )
                 }
+                if (customerPhone.length != 10) {
+                    DialogUtil.showNotiDialog(this, getString(R.string.data_is_wrong), getString(R.string.wrong_phone_number))
+                    return@setOnClickListener
+                }
+
                 var sum = 0
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
@@ -151,10 +150,15 @@ class BorrowActivity: BaseK9Activity() {
 
                             override fun onError(error: ANError) {
                                 dialog.dismiss()
-                                error.errorBody?.let {
+                                error?.errorBody?.let {
                                     val jObj = JSONObject(it)
-                                    val status = jObj.getString("status_code")
-                                    showResponse(status, this@BorrowActivity)
+                                    if (jObj.has("status_code")) {
+                                        val status = jObj.getString("status_code")
+                                        showResponse(status, this@BorrowActivity)
+                                    }
+                                }
+                                error?.let {
+                                    showResponse(error.errorCode.toString(), this@BorrowActivity)
                                 }
                                 error.printStackTrace()
                                 Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
@@ -241,11 +245,14 @@ class BorrowActivity: BaseK9Activity() {
                 if (status == "200") {
                     val dataJsonObj = response.getJSONObject("data")
                     val data = Gson().fromJson(dataJsonObj.toString(), ProductModel::class.java)
-
-                    val product = SellProductModel(key, 0)//Integer.parseInt(data.sale.replace(".00", "")))
-                    productModelList.add(data)
-                    productList.add(product)
-                    addItemView(data)
+                    if (data.status_id.equals(ProductStatus.READY_FOR_SALE.statusId)) {
+                        val product = SellProductModel(key, 0)//Integer.parseInt(data.sale.replace(".00", "")))
+                        productModelList.add(data)
+                        productList.add(product)
+                        addItemView(data)
+                    } else {
+                        DialogUtil.showNotiDialog(this@BorrowActivity, "สินค้าไม่พร้อมให้ยืม", "")
+                    }
                 } else {
                     showResponse(status, this@BorrowActivity)
                 }
@@ -253,11 +260,14 @@ class BorrowActivity: BaseK9Activity() {
 
             override fun onError(error: ANError) {
                 error.printStackTrace()
+                var status = error.errorCode.toString()
                 error.errorBody?.let {
                     val jObj = JSONObject(it)
-                    val status = jObj.getString("status_code")
-                    showResponse(status, this@BorrowActivity)
+                    if (jObj.has("status_code")) {
+                        status = jObj.getString("status_code")
+                    }
                 }
+                showResponse(status, this@BorrowActivity)
                 Log.e("panya", "onError : " + error.errorCode +", detail "+error.errorDetail+", errorBody"+ error.errorBody)
             }
         } )
@@ -403,7 +413,11 @@ class BorrowActivity: BaseK9Activity() {
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
-
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
+        printerParams1.setText("วันครบกำหนด "+Util.toDateFormat(data.date_expire))
+        textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
@@ -423,13 +437,39 @@ class BorrowActivity: BaseK9Activity() {
         printerParams1.setText("รายการสินค้า\n")
         textList.add(printerParams1)
 
-        val list = Util.productListToProductList2Sell(data.products)
-        val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-        printerParams1.setBitmap(listBitmap)
-        textList.add(printerParams1)
+//        val list = Util.productListToProductList2Sell(data.products)
+//        val listBitmap = Util.productListToBitmap(list)
+//        printerParams1 = TssPrinterParams()
+//        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+//        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+//        printerParams1.setBitmap(listBitmap)
+//        textList.add(printerParams1)
+
+        var i = 0
+        for (product in data.products) {
+            i++
+            var name = product.product_name
+            var detail = product.detail
+            detail.replace(" "," ")
+            name.replace(" "," ")
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText("\n" + i + ". " + name+"\n"+detail)
+            textList.add(printerParams1)
+
+            val listProduct = arrayListOf<ProductModel>()
+            listProduct.add(product)
+            val list = Util.productListToProductList3Cost(listProduct)
+            val listBitmap = Util.productListToBitmap2(list)
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+
+        }
+
         textList.add(dashSignature())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)

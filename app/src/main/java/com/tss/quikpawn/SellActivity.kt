@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewManager
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -80,10 +81,17 @@ class SellActivity : BaseK9Activity() {
             var customerId = citizenId
             var customerAddress = address
             var customerPhoto = customerPhoto
+            var customerPhone = edt_phonenumber.text.toString()
 
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
+
+            if (customerPhone.length != 10) {
+                DialogUtil.showNotiDialog(this, getString(R.string.data_is_wrong), getString(R.string.wrong_phone_number))
+                return@setOnClickListener
+            }
+
             if (!customerName.isEmpty()){
                 if (productList.size == 0) {
                     DialogUtil.showNotiDialog(this@SellActivity, getString(R.string.data_missing), getString(R.string.please_add_item))
@@ -149,11 +157,15 @@ class SellActivity : BaseK9Activity() {
 
                                 override fun onError(error: ANError) {
                                     dialog.dismiss()
+
+                                    var status = error.errorCode.toString()
                                     error.errorBody?.let {
                                         val jObj = JSONObject(it)
-                                        val status = jObj.getString("status_code")
-                                        showResponse(status, this@SellActivity)
+                                        if (jObj.has("status_code")) {
+                                            status = jObj.getString("status_code")
+                                        }
                                     }
+                                    showResponse(status, this@SellActivity)
                                     error.printStackTrace()
                                     Log.e(
                                         "panya",
@@ -249,8 +261,7 @@ class SellActivity : BaseK9Activity() {
                         addItemView(data)
                         updateSummaryPrice()
                     } else {
-                        Toast.makeText(this@SellActivity, "สินค้าไม่พร้อมขาย", Toast.LENGTH_SHORT)
-                            .show()
+                        DialogUtil.showNotiDialog(this@SellActivity, "สินค้าไม่พร้อมขาย", "")
                     }
                 } else {
                     showResponse(status, this@SellActivity)
@@ -259,11 +270,15 @@ class SellActivity : BaseK9Activity() {
 
             override fun onError(error: ANError) {
                 dialog.dismiss()
+
+                var status = error.errorCode.toString()
                 error.errorBody?.let {
                     val jObj = JSONObject(it)
-                    val status = jObj.getString("status_code")
-                    showResponse(status, this@SellActivity)
+                    if (jObj.has("status_code")) {
+                        status = jObj.getString("status_code")
+                    }
                 }
+                showResponse(status, this@SellActivity)
                 error.printStackTrace()
                 Log.e(
                     "panya",
@@ -326,6 +341,7 @@ class SellActivity : BaseK9Activity() {
                             Util.addComma(productModel.sale)
                             txtsell.text = NumberTextWatcherForThousand.getDecimalFormattedString(price.toString()) + "บาท"
                             updateSummaryPrice()
+
                         }
                     }
                 })
@@ -422,13 +438,37 @@ class SellActivity : BaseK9Activity() {
         printerParams1.setText("รายการสินค้า\n")
         textList.add(printerParams1)
 
-        val list = Util.productListToProductList2Sell(data.products)
-        val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-        printerParams1.setBitmap(listBitmap)
-        textList.add(printerParams1)
+//        val list = Util.productListToProductList2Sell(data.products)
+//        val listBitmap = Util.productListToBitmap(list)
+//        printerParams1 = TssPrinterParams()
+//        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+//        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+//        printerParams1.setBitmap(listBitmap)
+//        textList.add(printerParams1)
+
+        var i = 0
+        for (product in data.products) {
+            i++
+            var name = product.product_name
+            var detail = product.detail
+            detail.replace(" "," ")
+            name.replace(" "," ")
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText("\n" + i + ". " + name+"\n"+detail)
+            textList.add(printerParams1)
+
+            val listProduct = arrayListOf<ProductModel>()
+            listProduct.add(product)
+            val list = Util.productListToProductList3Sell(listProduct)
+            val listBitmap = Util.productListToBitmap2(list)
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+        }
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)

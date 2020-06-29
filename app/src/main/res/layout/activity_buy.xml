@@ -8,11 +8,10 @@
     android:background="#E2F0D9"
     tools:context=".BuyActivity">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/content_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/btn_ok"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,14 +50,13 @@
                 android:inputType="phone"
                 android:textSize="20dp" />
 
-            <LinearLayout
-                android:id="@+id/layout_detail"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:nestedScrollingEnabled="false"
+                android:padding="10dp" />
 
             <ImageView
                 android:id="@+id/new_item"
@@ -80,6 +78,6 @@
                 android:textSize="20dp"
                 android:layout_gravity="bottom"/>
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </RelativeLayout>
