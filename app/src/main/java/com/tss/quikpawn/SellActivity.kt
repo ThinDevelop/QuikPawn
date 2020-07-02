@@ -414,6 +414,10 @@ class SellActivity : BaseK9Activity() {
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
+
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
@@ -527,6 +531,10 @@ class SellActivity : BaseK9Activity() {
             printerParams1.setTextSize(20)
             printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
             textList.add(printerParams1)
+
+            textList.add(getAddress())
+            textList.add(getPhoneNumber())
+            textList.add(getZipCode())
 
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)

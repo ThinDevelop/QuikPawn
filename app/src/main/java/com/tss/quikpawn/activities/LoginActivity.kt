@@ -15,10 +15,7 @@ import android.widget.Toast
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager
-import com.tss.quikpawn.BaseActivity
-import com.tss.quikpawn.PreferencesManager
-import com.tss.quikpawn.PrintDialogActivity
-import com.tss.quikpawn.R
+import com.tss.quikpawn.*
 import com.tss.quikpawn.models.DialogParamModel
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
@@ -40,6 +37,7 @@ class LoginActivity: BaseActivity() {
         setContentView(R.layout.activity_login)
         logout()
         Log.e("panya", "SERIAL : "+ android.os.Build.SERIAL)
+        version.text = "version "+BuildConfig.VERSION_NAME
     }
 
     fun logout() {

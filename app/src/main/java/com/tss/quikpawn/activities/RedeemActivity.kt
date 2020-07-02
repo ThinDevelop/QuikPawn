@@ -19,9 +19,7 @@ import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
-import com.centerm.centermposoversealib.thailand.ThaiIDSecurityBeen
 import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
@@ -36,22 +34,15 @@ import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
-import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_redeem.*
 import kotlinx.android.synthetic.main.item_customer_info.*
-import kotlinx.android.synthetic.main.item_customer_info.btn_ok
-import kotlinx.android.synthetic.main.item_customer_info.edt_idcard
-import kotlinx.android.synthetic.main.item_customer_info.edt_name
-import kotlinx.android.synthetic.main.item_customer_info.edt_phonenumber
-import kotlinx.android.synthetic.main.item_redeem_detail.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
-import kotlin.math.roundToInt
 
 class RedeemActivity : BaseK9Activity() {
-    var summary = 0.0f
-    var mulctPrice = 0.0f
-    var cost = 0.0f
+    var summary = 0
+    var mulctPrice = 0
+    var cost = 0
     val SELECT_ORDER_REQUEST_CODE = 2015
     var interestOrderModel: OrderModel? = null
     var listInterestMonthModel = mutableListOf<InterestMonthModel>()
@@ -61,8 +52,16 @@ class RedeemActivity : BaseK9Activity() {
         setContentView(R.layout.activity_redeem)
         title = getString(R.string.redeem_item)
         scan.setOnClickListener {
-            val intent = Intent(this@RedeemActivity, ScanActivity::class.java)
-            startActivityForResult(intent, SCAN_REQUEST_CODE)
+            if (orderList.isNotEmpty()) {
+                DialogUtil.showNotiDialog(
+                    this@RedeemActivity,
+                    "ไม่สามารถทำการค้นหาได้",
+                    "กรุณาลบรายการก่อนหน้าออกก่อน"
+                )
+            } else {
+                val intent = Intent(this@RedeemActivity, ScanActivity::class.java)
+                startActivityForResult(intent, SCAN_REQUEST_CODE)
+            }
         }
         btn_clearsign.setOnClickListener {
             signature_pad.clear()
@@ -93,11 +92,11 @@ class RedeemActivity : BaseK9Activity() {
                 list.add(
                     getString(
                         R.string.pay_interest,
-                        NumberTextWatcherForThousand.getDecimalFormattedString((cost + summary + mulctPrice).toString())
+                        NumberTextWatcherForThousand.getDecimalFormattedString((cost + summary + mulctPrice).toString()+".00")
                     )
                 )
 
-                if ((cost + summary + mulctPrice) == 0f) {
+                if ((cost + summary + mulctPrice) == 0) {
                     DialogUtil.showNotiDialog(
                         this@RedeemActivity,
                         getString(R.string.data_missing),
@@ -168,18 +167,25 @@ class RedeemActivity : BaseK9Activity() {
             }
         }
         edt_search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    if (!query.equals("")) {
-                        if (checkContains(query)) {
-                            Toast.makeText(
-                                this@RedeemActivity,
-                                "รายการนี้มีอยู่แล้ว",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        } else {
-                            loadOrder(query)
+                if (orderList.isNotEmpty()) {
+                    DialogUtil.showNotiDialog(
+                        this@RedeemActivity,
+                        "ไม่สามารถทำการค้นหาได้",
+                        "กรุณาลบรายการก่อนหน้าออกก่อน"
+                    )
+                } else {
+                    query?.let {
+                        if (!query.equals("")) {
+                            if (checkContains(query)) {
+                                Toast.makeText(
+                                    this@RedeemActivity,
+                                    "รายการนี้มีอยู่แล้ว",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                loadOrder(query)
+                            }
                         }
                     }
                 }
@@ -340,8 +346,11 @@ class RedeemActivity : BaseK9Activity() {
         imgProduct.shape = MultiImageView.Shape.RECTANGLE
         imgProduct.rectCorners = 10
         orderId.text = interestOrder.order_code
-        cost = interestOrder.total.toFloat()
+        cost = interestOrder.total.toBigDecimal().toInt()
+        var i = 0
         for (product in interestOrder.products) {
+            i++
+            if (i>3) continue
             Glide.with(this) //1
                 .asBitmap()
                 .load(product.image_small)
@@ -365,7 +374,7 @@ class RedeemActivity : BaseK9Activity() {
         }
 
         summaryInterest.text =
-            getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
+            getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
 
         delete.visibility = View.VISIBLE
         contentView.tag = item_container.childCount
@@ -374,6 +383,7 @@ class RedeemActivity : BaseK9Activity() {
             (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
                 item_container.findViewWithTag<View>(it.tag)
             )
+            orderList.clear()
             interestOrderModel = null
         }
 
@@ -385,11 +395,11 @@ class RedeemActivity : BaseK9Activity() {
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
 //                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
                 if (isChecked) {
-                    summary += interest.price.toFloat()
+                    summary += interest.price.toBigDecimal().toInt()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
                     listInterestMonthModel.add(interestMonth)
                 } else {
-                    summary -= interest.price.toFloat()
+                    summary -= interest.price.toBigDecimal().toInt()
                     for (monthModel in listInterestMonthModel) {
                         if (monthModel.month.equals(interest.month)) {
                             listInterestMonthModel.remove(monthModel)
@@ -398,7 +408,7 @@ class RedeemActivity : BaseK9Activity() {
                     }
                 }
                 summaryInterest.text =
-                    getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
+                    getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
             }
             layout.addView(checkBox)
         }
@@ -425,13 +435,13 @@ class RedeemActivity : BaseK9Activity() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 p0?.let {
                     if (p0.isEmpty()) {
-                        mulctPrice = 0.0f
+                        mulctPrice = 0
                     } else {
-                        mulctPrice = p0.toString().toFloat()
+                        mulctPrice = p0.toString().toBigDecimal().toInt()
                     }
                 }
                 summaryInterest.text =
-                    getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
+                    getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
             }
         })
 
@@ -446,12 +456,12 @@ class RedeemActivity : BaseK9Activity() {
         checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
 //            Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
             if (isChecked) {
-                mulctPrice += price.toFloat()
+                mulctPrice += price.toBigDecimal().toInt()
             } else {
-                mulctPrice -= price.toFloat()
+                mulctPrice -= price.toBigDecimal().toInt()
             }
             sumText.text =
-                getString(R.string.pay_interest, (cost + summary + mulctPrice).toString())
+                getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
         }
         linearLayout.addView(checkBox)
     }
@@ -498,6 +508,10 @@ class RedeemActivity : BaseK9Activity() {
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
+
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
@@ -557,7 +571,7 @@ class RedeemActivity : BaseK9Activity() {
         }
 
         val list2 = arrayListOf<ProductModel2>()
-        if (data.interest.isNotEmpty()) {
+        if (data.interests.isNotEmpty()) {
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(18)
@@ -565,9 +579,9 @@ class RedeemActivity : BaseK9Activity() {
             textList.add(printerParams1)
 
             for (interest in data.interests) {
-                list2.add(ProductModel2("เดือนที่ : " + interest.month, interest.price + " บาท"))
+                list2.add(ProductModel2("เดือนที่ : " + interest.month, Util.addComma(data.interest_price) + " บาท"))
             }
-            list2.add(ProductModel2("ค่าปรับ", data.mulct_price + " บาท"))
+            list2.add(ProductModel2("ค่าปรับ", Util.addComma(data.mulct_price) + " บาท"))
             val listBitmap = Util.productListToBitmap(list2)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
@@ -575,7 +589,7 @@ class RedeemActivity : BaseK9Activity() {
             printerParams1.setBitmap(listBitmap)
             textList.add(printerParams1)
         } else {
-            list2.add(ProductModel2("ค่าปรับ", data.mulct_price + " บาท"))
+            list2.add(ProductModel2("ค่าปรับ", Util.addComma(data.mulct_price) + " บาท"))
             val listBitmap = Util.productListToBitmap(list2)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)

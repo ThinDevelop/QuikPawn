@@ -30,6 +30,7 @@ import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import com.tss.quikpawn.models.OrderModel
+import com.tss.quikpawn.models.TssPrinterParams
 import com.tss.quikpawn.util.Util
 import com.tss.quikpawn.util.Util.Companion.rotageBitmap
 import io.reactivex.Observable
@@ -393,5 +394,29 @@ open class BaseK9Activity: BaseActivity() {
 
     open fun setTagToImageView(id: String) {
         imgView?.tag = id
+    }
+
+    open fun getAddress(): TssPrinterParams {
+        var printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
+        printerParams1.setText("เลขที่ "+PreferencesManager.getInstance().address.replace(" ", " "))
+        return printerParams1
+    }
+
+    open fun getPhoneNumber(): TssPrinterParams {
+        var printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(22)
+        printerParams1.setText("เบอร์โทร " + PreferencesManager.getInstance().contactPhone)
+        return printerParams1
+    }
+
+    open fun getZipCode(): TssPrinterParams {
+        var printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
+        printerParams1.setText("รหัสไปรษณีย์ "+ PreferencesManager.getInstance().zipCode)
+        return printerParams1
     }
 }

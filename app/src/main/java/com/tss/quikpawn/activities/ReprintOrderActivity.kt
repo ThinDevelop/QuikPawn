@@ -243,6 +243,9 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
@@ -313,7 +316,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("\nชำระเงิน " + data.total + " บาท")
+        printerParams1.setText("\nชำระเงิน " + Util.addComma(data.total) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()
@@ -407,6 +410,10 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
+
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
@@ -522,6 +529,10 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
             textList.add(printerParams1)
 
+            textList.add(getAddress())
+            textList.add(getPhoneNumber())
+            textList.add(getZipCode())
+
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -622,23 +633,9 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setText("สาขา "+PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-        printerParams1.setTextSize(20)
-        printerParams1.setText("เลขที่ "+PreferencesManager.getInstance().address.replace(" ", " "))
-        textList.add(printerParams1)
-
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-        printerParams1.setTextSize(20)
-        printerParams1.setText("รหัสไปรษณีย์ "+ PreferencesManager.getInstance().zipCode)
-        textList.add(printerParams1)
-
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-        printerParams1.setTextSize(22)
-        printerParams1.setText("เบอร์โทร " + PreferencesManager.getInstance().contactPhone)
-        textList.add(printerParams1)
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
@@ -839,6 +836,9 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setText("สาขา "+PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
@@ -1005,6 +1005,9 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
@@ -1111,6 +1114,9 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
@@ -1159,7 +1165,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
             val listProduct = arrayListOf<ProductModel>()
             listProduct.add(product)
-            val list = Util.productListToProductList3Sell(listProduct)
+            val list = Util.productListToProductList3Cost(listProduct)
             val listBitmap = Util.productListToBitmap2(list)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
@@ -1180,7 +1186,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             for (interest in data.interests) {
                 list2.add(ProductModel2("เดือนที่ : " + interest.month, interest.price+" บาท"))
             }
-            list2.add(ProductModel2("ค่าปรับ", data.mulct_price+" บาท"))
+            list2.add(ProductModel2("ค่าปรับ", Util.addComma(data.mulct_price)+" บาท"))
             val listBitmap = Util.productListToBitmap(list2)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
@@ -1188,7 +1194,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             printerParams1.setBitmap(listBitmap)
             textList.add(printerParams1)
         } else {
-            list2.add(ProductModel2("ค่าปรับ", data.mulct_price+" บาท"))
+            list2.add(ProductModel2("ค่าปรับ", Util.addComma(data.mulct_price)+" บาท"))
             val listBitmap = Util.productListToBitmap(list2)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
@@ -1267,6 +1273,9 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
@@ -1393,6 +1402,9 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)

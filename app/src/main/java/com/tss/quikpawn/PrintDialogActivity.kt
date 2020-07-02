@@ -56,47 +56,6 @@ class PrintDialogActivity : BaseActivity() {
     override fun onPrintDeviceConnected(deviceManager: AidlDeviceManager?) {
     }
 
-    internal inner class PrintDialogJavaScriptInterface {
-        val type: String
-            get() = cloudPrintIntent!!.type
-
-        val title: String
-            get() = cloudPrintIntent!!.extras.getString("title")
-
-        val content: String
-            get() {
-                try {
-                    val contentResolver = contentResolver
-                    val `is` =
-                        contentResolver.openInputStream(cloudPrintIntent!!.data)
-                    val baos = ByteArrayOutputStream()
-                    val buffer = ByteArray(4096)
-                    var n = `is`.read(buffer)
-                    while (n >= 0) {
-                        baos.write(buffer, 0, n)
-                        n = `is`.read(buffer)
-                    }
-                    `is`.close()
-                    baos.flush()
-                    return Base64.encodeToString(
-                        baos.toByteArray(),
-                        Base64.DEFAULT
-                    )
-                } catch (e: FileNotFoundException) {
-                    e.printStackTrace()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-                return ""
-            }
-
-        fun onPostMessage(message: String) {
-            if (message.startsWith(CLOSE_POST_MESSAGE_NAME)) {
-                finish()
-            }
-        }
-    }
-
     private inner class PrintDialogWebClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(
             view: WebView,

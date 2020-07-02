@@ -408,6 +408,10 @@ class BorrowActivity: BaseK9Activity() {
         printerParams1.setText("สาขา "+ PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
+
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
@@ -460,7 +464,7 @@ class BorrowActivity: BaseK9Activity() {
 
             val listProduct = arrayListOf<ProductModel>()
             listProduct.add(product)
-            val list = Util.productListToProductList3Cost(listProduct)
+            val list = Util.productListToProductList3Sell(listProduct)
             val listBitmap = Util.productListToBitmap2(list)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)

@@ -387,7 +387,7 @@ class InterestActivity : BaseK9Activity() {
                     }
                 }
                 summaryInterest.text =
-                    getString(R.string.pay_interest, (summary + mulctPrice).toString())
+                    getString(R.string.pay_interest, Util.addComma((summary + mulctPrice).toString()))
             }
             layout.addView(checkBox)
         }
@@ -407,7 +407,7 @@ class InterestActivity : BaseK9Activity() {
                     }
                 }
                 summaryInterest.text =
-                    getString(R.string.pay_interest, (summary + mulctPrice).toString())
+                    getString(R.string.pay_interest, Util.addComma((summary + mulctPrice).toString()))
             }
         })
 
@@ -468,6 +468,9 @@ class InterestActivity : BaseK9Activity() {
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)

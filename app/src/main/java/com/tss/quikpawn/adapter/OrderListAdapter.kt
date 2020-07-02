@@ -54,9 +54,12 @@ class OrderListAdapter(val context: Context, val listener: OnItemClickListener) 
         holder.orderImage.setTag(orderModel.order_code)
         val orderName = StringBuilder()
         holder.orderImage.clear()
+        var i = 0
         for (product in orderModel.products) {
             Log.e("panya", "start Tag :"+ orderModel.order_code + ", size : "+orderModel.products.size)
             orderName.append(product.product_name +",")
+            i++
+            if (i>3) continue
                 Glide.with(context) //1
                     .asBitmap()
                     .load(product.image_small)

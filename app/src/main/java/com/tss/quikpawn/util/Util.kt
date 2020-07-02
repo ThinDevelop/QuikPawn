@@ -298,7 +298,7 @@ class Util {
         fun addComma(number: String): String {
             var result = number
             if (isNumberic(number)) {
-                result = String.format("%,d", number.toFloat().roundToInt())
+                result = String.format("%,d", number.toBigDecimal().toInt())
             }
             return result + ".00"
         }
