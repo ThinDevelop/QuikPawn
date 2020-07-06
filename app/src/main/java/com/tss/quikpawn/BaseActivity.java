@@ -85,7 +85,18 @@ public abstract class BaseActivity extends AppCompatActivity {
                     }
                 }
             });
-		} else {
+		} else if (status.equals("203")) {
+			ArrayList<String> msg = new ArrayList<>();
+			msg.add("ไม่พบรายการหรือสินค้านี้");
+			DialogParamModel param = new DialogParamModel("กรุณาติดต่อผู้ดูแลระบบ", msg,
+					getString(R.string.text_ok),"");
+			DialogUtil.showConfirmDialog(param, context, new DialogUtil.InputTextBackListerner() {
+				@Override
+				public void onClickConfirm(String result) {
+				}
+			});
+		}
+		else {
 			DialogUtil.showNotiDialog(context, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder));
 		}
 	}

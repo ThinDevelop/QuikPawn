@@ -40,9 +40,9 @@ import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
 
 class RedeemActivity : BaseK9Activity() {
-    var summary = 0
-    var mulctPrice = 0
-    var cost = 0
+    var summary = 0.00f
+    var mulctPrice = 0.00f
+    var cost = 0.00f
     val SELECT_ORDER_REQUEST_CODE = 2015
     var interestOrderModel: OrderModel? = null
     var listInterestMonthModel = mutableListOf<InterestMonthModel>()
@@ -96,7 +96,7 @@ class RedeemActivity : BaseK9Activity() {
                     )
                 )
 
-                if ((cost + summary + mulctPrice) == 0) {
+                if ((cost + summary + mulctPrice) == 0f) {
                     DialogUtil.showNotiDialog(
                         this@RedeemActivity,
                         getString(R.string.data_missing),
@@ -137,7 +137,6 @@ class RedeemActivity : BaseK9Activity() {
                                             dataJsonObj.toString(),
                                             OrderModel::class.java
                                         )
-
                                     )
                                     showConfirmDialog(dataJsonObj)
                                 } else {
@@ -346,7 +345,7 @@ class RedeemActivity : BaseK9Activity() {
         imgProduct.shape = MultiImageView.Shape.RECTANGLE
         imgProduct.rectCorners = 10
         orderId.text = interestOrder.order_code
-        cost = interestOrder.total.toBigDecimal().toInt()
+        cost = interestOrder.total.toFloat()
         var i = 0
         for (product in interestOrder.products) {
             i++
@@ -395,11 +394,11 @@ class RedeemActivity : BaseK9Activity() {
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
 //                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
                 if (isChecked) {
-                    summary += interest.price.toBigDecimal().toInt()
+                    summary += interest.price.toFloat()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
                     listInterestMonthModel.add(interestMonth)
                 } else {
-                    summary -= interest.price.toBigDecimal().toInt()
+                    summary -= interest.price.toFloat()
                     for (monthModel in listInterestMonthModel) {
                         if (monthModel.month.equals(interest.month)) {
                             listInterestMonthModel.remove(monthModel)
@@ -435,9 +434,9 @@ class RedeemActivity : BaseK9Activity() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 p0?.let {
                     if (p0.isEmpty()) {
-                        mulctPrice = 0
+                        mulctPrice = 0f
                     } else {
-                        mulctPrice = p0.toString().toBigDecimal().toInt()
+                        mulctPrice = p0.toString().toFloat()
                     }
                 }
                 summaryInterest.text =
@@ -456,9 +455,9 @@ class RedeemActivity : BaseK9Activity() {
         checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
 //            Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
             if (isChecked) {
-                mulctPrice += price.toBigDecimal().toInt()
+                mulctPrice += price.toFloat()
             } else {
-                mulctPrice -= price.toBigDecimal().toInt()
+                mulctPrice -= price.toFloat()
             }
             sumText.text =
                 getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
@@ -550,8 +549,8 @@ class RedeemActivity : BaseK9Activity() {
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -601,8 +600,7 @@ class RedeemActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        val total = data.total.replace(".00", "")
-        printerParams1.setText("ยอดชำระ " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ยอดชำระ " + Util.addComma(data.total) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()

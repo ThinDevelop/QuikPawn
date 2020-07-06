@@ -275,8 +275,8 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -452,8 +452,8 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -474,8 +474,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        val total = data.total.replace(".00", "")
-        printerParams1.setText("\nชำระเงิน " + Util.addComma(total) + " บาท")
+        printerParams1.setText("\nชำระเงิน " + Util.addComma(data.total) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()
@@ -663,8 +662,8 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -694,7 +693,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+  Util.addComma(sum.roundToInt()) +".00 บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
+        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+  Util.addComma(sum.toString()) +" บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
                 " นับตั้งแต่วันทำหนังสือนี้เป็นต้นไป\n จนกว่าจะมาไถ่ถอนคืน\nในวันที่ "+ calendar.get(
             Calendar.DATE) +" เดือน "+ Util.getMonth(calendar) +" พ.ศ."+ (calendar.get(Calendar.YEAR)+543)+"\n" +
                 "ข้อ 3. ผู้ขายฝากยืนยันว่าผู้ขายฝาก\nเป็นผู้มีกรรมสิทธิ์ในทรัพย์สินที่มา\nขายฝากแต่เพียงผู้เดียวและไม่มีคู่สมรสแต่อย่างใด\n" +
@@ -708,13 +707,12 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        val total = data.price.replace(".00", "")
-        printerParams1.setText("ราคา " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ราคา " + Util.addComma(data.price) + " บาท")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ค่าธรรมเนียม "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ data.num_expire+ " เดือน")//data.interest_price
+        printerParams1.setText("ค่าธรรมเนียม "+ Util.addComma(data.interest_price) +" บาท/เดือน \nระยะเวลา "+ data.num_expire+ " เดือน")//data.interest_price
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
@@ -866,8 +864,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        val total = data.price.replace(".00", "")
-        printerParams1.setText("ราคา " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ราคา " + Util.addComma(data.price) + " บาท")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
@@ -892,8 +889,8 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -915,8 +912,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
 
-        val sumPrice = data.price.replace(".00", "")
-        printerParams1.setText("\nชำระเงิน " + Util.addComma(sumPrice) + " บาท")
+        printerParams1.setText("\nชำระเงิน " + Util.addComma(data.price) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()
@@ -1034,7 +1030,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
         val list = arrayListOf<ProductModel2>()
         for (interest in data.interests) {
-            list.add(ProductModel2("เดือนที่ : "+interest.month, interest.price+ " บาท"))
+            list.add(ProductModel2("เดือนที่ : "+interest.month, Util.addComma(interest.price)+ " บาท"))
         }
 
         val listBitmap = Util.productListToBitmap(list)
@@ -1047,8 +1043,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        val total = data.total.replace(".00", "")
-        printerParams1.setText("ยอดชำระ " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ยอดชำระ " + Util.addComma(data.total) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()
@@ -1155,8 +1150,8 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -1184,7 +1179,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             textList.add(printerParams1)
 
             for (interest in data.interests) {
-                list2.add(ProductModel2("เดือนที่ : " + interest.month, interest.price+" บาท"))
+                list2.add(ProductModel2("เดือนที่ : " + interest.month, Util.addComma(interest.price)+" บาท"))
             }
             list2.add(ProductModel2("ค่าปรับ", Util.addComma(data.mulct_price)+" บาท"))
             val listBitmap = Util.productListToBitmap(list2)
@@ -1206,8 +1201,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        val total = data.total.replace(".00", "")
-        printerParams1.setText("ยอดชำระ " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ยอดชำระ " + Util.addComma(data.total) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()
@@ -1319,8 +1313,8 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -1450,8 +1444,8 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)

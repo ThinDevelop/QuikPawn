@@ -387,8 +387,8 @@ class BuyActivity : BaseK9Activity(), BuyListAdapter.OnItemClickListener {
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -410,8 +410,7 @@ class BuyActivity : BaseK9Activity(), BuyListAdapter.OnItemClickListener {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        val total = data.total.replace(".00", "")
-        printerParams1.setText("ชำระเงิน " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ชำระเงิน " + Util.addComma(data.total) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()

@@ -454,8 +454,8 @@ class BorrowActivity: BaseK9Activity() {
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)

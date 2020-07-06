@@ -209,8 +209,8 @@ class Util {
             for (product in list) {
                 var name = product.product_name
                 var detail = product.detail
-                detail.replace(" "," ")
-                name.replace(" "," ")
+                detail.replace(" "," ")
+                name.replace(" "," ")
                 listProduct.add(
                     ProductModel2(
                         name,
@@ -227,7 +227,7 @@ class Util {
             for (product in list) {
                 i++
                 var name = "" + i + ". " + product.product_name
-                name.replace(" "," ")
+                name.replace(" "," ")
                 if (name.length > 17) {
                     name = name.substring(0, 16).plus("... ")
                 }
@@ -246,8 +246,8 @@ class Util {
             for (product in list) {
                 var name = product.product_name
                 var detail = product.detail
-                detail.replace(" "," ")
-                name.replace(" "," ")
+                detail.replace(" "," ")
+                name.replace(" "," ")
                 listProduct.add(
                     ProductModel2(
                         name,
@@ -264,7 +264,7 @@ class Util {
             for (product in list) {
                 i++
                 var name = "" + i + ". " + product.product_name
-                name.replace(" "," ")
+                name.replace(" "," ")
                 if (name.length > 17) {
                     name = name.substring(0, 16).plus("... ")
                 }
@@ -281,7 +281,7 @@ class Util {
         fun productListToProductList2Certificate(productModel: ProductModel): List<ProductModel2> {
             val listProduct = arrayListOf<ProductModel2>()
             var name = productModel.product_name
-            name.replace(" "," ")
+            name.replace(" "," ")
             if (name.length > 17) {
                 name = name.substring(0, 16).plus("... ")
             }
@@ -298,9 +298,9 @@ class Util {
         fun addComma(number: String): String {
             var result = number
             if (isNumberic(number)) {
-                result = String.format("%,d", number.toBigDecimal().toInt())
+                result = NumberTextWatcherForThousand.getDecimalFormattedString(number)
             }
-            return result + ".00"
+            return result
         }
 
         fun addComma(number: Int): String {

@@ -427,9 +427,9 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1.setText("ได้ทำหนังสือขายฝากนี้ให้แก่ \nนาย"+PreferencesManager.getInstance().contact+" ดังมีข้อความดังต่อไปนี้\n" + "ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้\n\n")
         textList.add(printerParams1)
 
-        var sum = 0.00
+        var sum = 0.00f
         for (productModel in data.products) {
-            sum += productModel.cost.toDouble()
+            sum += productModel.cost.toFloat()
         }
 
         var i = 0
@@ -437,8 +437,8 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -473,7 +473,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+ Util.addComma(sum.roundToInt()) +".00 บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
+        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+ String.format("%.2f", sum) +" บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
                 " นับตั้งแต่วันทำหนังสือนี้เป็นต้นไป\n จนกว่าจะมาไถ่ถอนคืน\nในวันที่ "+ calendar.get(Calendar.DATE) +" เดือน "+ getMonth(calendar) +" พ.ศ."+ (calendar.get(Calendar.YEAR)+543)+"\n" +
                 "ข้อ 3. ผู้ขายฝากยืนยันว่าผู้ขายฝาก\nเป็นผู้มีกรรมสิทธิ์ในทรัพย์สินที่มา\nขายฝากแต่เพียงผู้เดียวและไม่มีคู่สมรสแต่อย่างใด\n" +
                 "ข้อ 4. คู่กรณีได้อ่านหนีงสือนี้เข้าใจ\nรับว่าถูกต้องเป็นความจริงแล้วจึง\nลงลายมือชื่อไว้เป็นหลักฐาน\n ")
@@ -486,8 +486,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        val total = data.price.replace(".00", "")
-        printerParams1.setText("ราคา " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ราคา " + Util.addComma(data.price) + " บาท")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
@@ -638,8 +637,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        val price = data.price.replace(".00", "")
-        printerParams1.setText("ราคา " + Util.addComma(price) + " บาท")
+        printerParams1.setText("ราคา " + Util.addComma(data.price) + " บาท")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
@@ -664,8 +662,8 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" "," ")
-            name.replace(" "," ")
+            detail.replace(" "," ")
+            name.replace(" "," ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -687,8 +685,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        val total = data.price.replace(".00", "")
-        printerParams1.setText("ชำระเงิน " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ชำระเงิน " + Util.addComma(data.price) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()

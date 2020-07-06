@@ -498,7 +498,7 @@ class InterestActivity : BaseK9Activity() {
 
         val list = arrayListOf<ProductModel2>()
         for (interest in data.interests) {
-            list.add(ProductModel2("เดือนที่ : " + interest.month, interest.price+ " บาท"))
+            list.add(ProductModel2("เดือนที่ : " + interest.month, Util.addComma(interest.price)+ " บาท"))
         }
 
         val listBitmap = Util.productListToBitmap(list)
@@ -511,8 +511,7 @@ class InterestActivity : BaseK9Activity() {
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        val total = data.total.replace(".00", "")
-        printerParams1.setText("ยอดชำระ " + Util.addComma(total) + " บาท")
+        printerParams1.setText("ยอดชำระ " + Util.addComma(data.total) + " บาท")
         textList.add(printerParams1)
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()
