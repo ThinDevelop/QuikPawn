@@ -324,12 +324,10 @@ class ReturnActivity : BaseK9Activity() {
             i++
             var name = product.product_name
             var detail = product.detail
-            detail.replace(" ", " ")
-            name.replace(" ", " ")
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
-            printerParams1.setText("\n" + i + ". " + name+"\n"+detail)
+            printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
             textList.add(printerParams1)
 
             val listProduct = arrayListOf<ProductModel>()
