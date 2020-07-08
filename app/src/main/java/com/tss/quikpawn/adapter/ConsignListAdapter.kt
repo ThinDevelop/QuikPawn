@@ -15,7 +15,10 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.tss.quikpawn.R
 import com.tss.quikpawn.models.ConsignmentProductModel
+import com.tss.quikpawn.util.NumberTextWatcherForThousand.getDecimalFormattedString
+import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.item_detail_consignment_view.view.*
+
 
 class ConsignListAdapter(val context: Context, val listener: OnItemClickListener) :
     RecyclerView.Adapter<ConsignListAdapter.ConViewHolder>() {
@@ -52,7 +55,7 @@ class ConsignListAdapter(val context: Context, val listener: OnItemClickListener
         holder.productDelete.visibility = View.VISIBLE
 
         holder.productDetail.setText(buyProductModel.detail)
-        holder.productCost.setText(buyProductModel.cost)
+        holder.productCost.setText(Util.addComma(buyProductModel.cost))
         holder.productName.setText(buyProductModel.name)
 
         holder.productDelete.setOnClickListener {
@@ -135,8 +138,32 @@ class ConsignListAdapter(val context: Context, val listener: OnItemClickListener
             })
 
             productCost.addTextChangedListener(object : TextWatcher {
-                override fun afterTextChanged(p0: Editable?) {
-
+                override fun afterTextChanged(editText: Editable?) {
+                    try {
+                        productCost.removeTextChangedListener(this)
+                        val value: String = productCost.getText().toString()
+                        if (value != null && value != "") {
+                            if (value.startsWith(".")) {
+                                productCost.setText("0.")
+                            }
+                            if (value.startsWith("0") && !value.startsWith("0.")) {
+                                productCost.setText("")
+                            }
+                            val str: String =
+                                productCost.getText().toString().replace(",", "")
+                            if (value != "") productCost.setText(
+                                getDecimalFormattedString(
+                                    str
+                                )
+                            )
+                            productCost.setSelection(productCost.getText().toString().length)
+                        }
+                        productCost.addTextChangedListener(this)
+                        return
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                        productCost.addTextChangedListener(this)
+                    }
                 }
 
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {

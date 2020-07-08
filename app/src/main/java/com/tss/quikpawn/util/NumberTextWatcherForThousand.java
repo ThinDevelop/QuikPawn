@@ -73,6 +73,11 @@ public class NumberTextWatcherForThousand implements TextWatcher {
         {
             str1 = lst.nextToken();
             str2 = lst.nextToken();
+            if (str2.length()>2) {
+                str2 = str2.substring(0, 2);
+            } else if (str2.length() == 1) {
+                str2 = str2.concat("0");
+            }
         }
         String str3 = "";
         int i = 0;

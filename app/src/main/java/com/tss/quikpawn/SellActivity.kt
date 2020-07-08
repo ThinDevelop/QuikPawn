@@ -300,7 +300,7 @@ class SellActivity : BaseK9Activity() {
         txtsell.visibility = View.VISIBLE
         txtId.text = productModel.product_name
         txtDetail.text = productModel.detail
-        txtCost.text = Util.addComma(productModel.cost) + "บาท"
+        txtCost.text = NumberTextWatcherForThousand.getDecimalFormattedString(productModel.cost) + " บาท"
         txtsell.text = "0 บาท"//Util.addComma(productModel.sale) + "0 บาท"
         delete.visibility = View.VISIBLE
         contentView.tag = productModel.product_code
@@ -548,16 +548,31 @@ class SellActivity : BaseK9Activity() {
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
-            printerParams1.setText("รหัสปชช. " + data.idcard)
+            printerParams1.setText("รหัสปชช. " + data.idcard +"\nรายการสินค้า")
             textList.add(printerParams1)
 
-            val list = Util.productListToProductList2Certificate(product)
-            val listBitmap = Util.productListToBitmap(list)
-            printerParams1 = TssPrinterParams()
-            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
-            printerParams1.setBitmap(listBitmap)
-            textList.add(printerParams1)
+            var i = 0
+            for (product in data.products) {
+                i++
+                val name = product.product_name
+                val detail = product.detail
+                printerParams1 = TssPrinterParams()
+                printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+                printerParams1.setTextSize(20)
+                printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+                textList.add(printerParams1)
+
+                val listProduct = arrayListOf<ProductModel>()
+                listProduct.add(product)
+                val list = Util.productListToProductList3Sell(listProduct)
+                val listBitmap = Util.productListToBitmap2(list)
+                printerParams1 = TssPrinterParams()
+                printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+                printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+                printerParams1.setBitmap(listBitmap)
+                textList.add(printerParams1)
+            }
+
 
             textList.add(Util.dashSignature())
 

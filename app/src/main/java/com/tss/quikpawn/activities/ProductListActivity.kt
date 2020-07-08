@@ -26,6 +26,7 @@ import com.tss.quikpawn.SellActivity
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
+import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import kotlinx.android.synthetic.main.activity_product_list.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
@@ -273,7 +274,7 @@ class ProductListActivity : BaseK9Activity() {
             txtStatus.setTextColor(productStatus.color)
             txtId.text = productModel.product_name
             txtDetail.text = productModel.detail
-            txtCost.text = productModel.cost
+            txtCost.text = NumberTextWatcherForThousand.getDecimalFormattedString(productModel.cost) +" บาท"
 
             contentView.tag = productModel.product_code
             Glide.with(this) //1

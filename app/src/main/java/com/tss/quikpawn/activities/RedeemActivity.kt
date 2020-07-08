@@ -342,6 +342,42 @@ class RedeemActivity : BaseK9Activity() {
         val imgProduct = contentView.findViewById<MultiImageView>(R.id.img_product)
         val orderId = contentView.findViewById<TextView>(R.id.order_id)
 
+        mulct.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(editText: Editable?) {
+                try {
+                    mulct.removeTextChangedListener(this)
+                    val value: String = mulct.getText().toString()
+                    if (value != null && value != "") {
+                        if (value.startsWith(".")) {
+                            mulct.setText("0.")
+                        }
+                        if (value.startsWith("0") && !value.startsWith("0.")) {
+                            mulct.setText("")
+                        }
+                        val str: String =
+                            mulct.getText().toString().replace(",", "")
+                        if (value != "") mulct.setText(
+                            NumberTextWatcherForThousand.getDecimalFormattedString(
+                                str
+                            )
+                        )
+                        mulct.setSelection(mulct.getText().toString().length)
+                    }
+                    mulct.addTextChangedListener(this)
+                    return
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    mulct.addTextChangedListener(this)
+                }
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                
+            }
+        })
         imgProduct.shape = MultiImageView.Shape.RECTANGLE
         imgProduct.rectCorners = 10
         orderId.text = interestOrder.order_code
@@ -373,7 +409,7 @@ class RedeemActivity : BaseK9Activity() {
         }
 
         summaryInterest.text =
-            getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
+            getString(R.string.pay_interest, NumberTextWatcherForThousand.getDecimalFormattedString((cost + summary + mulctPrice).toString()))
 
         delete.visibility = View.VISIBLE
         contentView.tag = item_container.childCount

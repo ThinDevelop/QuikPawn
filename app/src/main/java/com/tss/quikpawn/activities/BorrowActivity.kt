@@ -286,8 +286,7 @@ class BorrowActivity: BaseK9Activity() {
         txtSell.visibility = View.VISIBLE
         txtId.text = productModel.product_name
         txtDetail.text = productModel.detail
-        txtCost.text = productModel.cost
-
+        txtCost.text = NumberTextWatcherForThousand.getDecimalFormattedString(productModel.cost) + " บาท"
         delete.visibility = View.VISIBLE
         contentView.tag = productModel.product_code
         delete.tag = contentView.tag
@@ -320,7 +319,7 @@ class BorrowActivity: BaseK9Activity() {
                         val productCode = contentView.tag as String
                         val sellProductModel = SellProductModel(productCode, price)
                         updatePrice(sellProductModel)
-                        txtSell.text = NumberTextWatcherForThousand.getDecimalFormattedString(price.toString()) + "บาท"
+                        txtSell.text = NumberTextWatcherForThousand.getDecimalFormattedString(price.toString()+".00") + " บาท"
 
                     }
 

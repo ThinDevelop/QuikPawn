@@ -28,6 +28,7 @@ import com.tss.quikpawn.R
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
+import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_return.*
@@ -193,7 +194,7 @@ class ReturnActivity : BaseK9Activity() {
 
             txtId.text = productModel.product_name
             txtDetail.text = productModel.detail
-            txtCost.text = productModel.sale + " บาท"
+            txtCost.text = NumberTextWatcherForThousand.getDecimalFormattedString(productModel.sale) + " บาท"
 
             contentView.tag = productModel.product_code
             btnDelete.tag = contentView.tag
