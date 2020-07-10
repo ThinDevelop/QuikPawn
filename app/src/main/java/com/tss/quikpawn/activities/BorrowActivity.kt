@@ -123,7 +123,7 @@ class BorrowActivity: BaseK9Activity() {
                         return@setOnClickListener
                     }
 
-                    list.add(getProductNameByCode(product.product_code) + " : " + NumberTextWatcherForThousand.getDecimalFormattedString(product.sale_price.toString())+ " บาท")
+                    list.add(getProductNameByCode(product.product_code) + " : " + Util.addComma(product.sale_price.toString())+ " บาท")
                     sum ++
                 }
                 list.add("รวม " + sum.toString() + " ชิ้น")
@@ -286,7 +286,7 @@ class BorrowActivity: BaseK9Activity() {
         txtSell.visibility = View.VISIBLE
         txtId.text = productModel.product_name
         txtDetail.text = productModel.detail
-        txtCost.text = NumberTextWatcherForThousand.getDecimalFormattedString(productModel.cost) + " บาท"
+        txtCost.text = Util.addComma(productModel.cost) + " บาท"
         delete.visibility = View.VISIBLE
         contentView.tag = productModel.product_code
         delete.tag = contentView.tag
@@ -315,11 +315,11 @@ class BorrowActivity: BaseK9Activity() {
                 override fun onClickConfirm(result: String?) {
                     result?.let{
                         if (it.isEmpty()) return
-                        val price = Integer.parseInt(result.replace(",", ""))
+                        val price = result.replace(",", "").toInt()
                         val productCode = contentView.tag as String
                         val sellProductModel = SellProductModel(productCode, price)
                         updatePrice(sellProductModel)
-                        txtSell.text = NumberTextWatcherForThousand.getDecimalFormattedString(price.toString()+".00") + " บาท"
+                        txtSell.text = Util.addComma(price.toString()+".00") + " บาท"
 
                     }
 

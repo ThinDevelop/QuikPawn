@@ -101,7 +101,7 @@ class BuyActivity : BaseK9Activity(), BuyListAdapter.OnItemClickListener {
                     val name = buyProduct.name//contentView.findViewById<EditText>(R.id.edt_product_name)
                     val costStr =
                         NumberTextWatcherForThousand.trimCommaOfString(cost)
-
+                    buyProduct.cost = costStr
                     if (buyProduct.ref_image.isEmpty()) {
                         DialogUtil.showNotiDialog(
                             this,
@@ -142,13 +142,13 @@ class BuyActivity : BaseK9Activity(), BuyListAdapter.OnItemClickListener {
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
                     list.add(
-                        product.name + " : " + NumberTextWatcherForThousand.getDecimalFormattedString(
+                        product.name + " : " + Util.addComma(
                             product.cost
                         ) + " บาท"
                     )
-                    sum += Integer.parseInt(product.cost)
+                    sum += NumberTextWatcherForThousand.trimCommaOfString(product.cost).toInt()
                 }
-                list.add("รวม " + NumberTextWatcherForThousand.getDecimalFormattedString(sum.toString()) + " บาท")
+                list.add("รวม " + Util.addComma(sum.toString()) + " บาท")
 
                 val param =
                     DialogParamModel(

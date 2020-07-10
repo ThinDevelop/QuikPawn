@@ -11,6 +11,8 @@ import com.tss.quikpawn.R
 import com.tss.quikpawn.models.ProductModel
 import com.tss.quikpawn.models.ProductModel2
 import java.io.ByteArrayOutputStream
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -296,9 +298,11 @@ class Util {
         }
 
         fun addComma(number: String): String {
-            var result = number
-            if (isNumberic(number)) {
-                result = NumberTextWatcherForThousand.getDecimalFormattedString(number)
+            if(number.isEmpty()) return number
+
+            var result = BigDecimal(number.toDouble()).setScale(2, RoundingMode.HALF_EVEN).toString()
+            if (isNumberic(result)) {
+                result = NumberTextWatcherForThousand.getDecimalFormattedString(result)
             }
             return result
         }

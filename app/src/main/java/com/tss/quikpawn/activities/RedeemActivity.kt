@@ -38,6 +38,8 @@ import kotlinx.android.synthetic.main.activity_redeem.*
 import kotlinx.android.synthetic.main.item_customer_info.*
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class RedeemActivity : BaseK9Activity() {
     var summary = 0.00f
@@ -91,8 +93,7 @@ class RedeemActivity : BaseK9Activity() {
                 list.add("รายการเลขที่ " + interestOrderModel!!.order_code)
                 list.add(
                     getString(
-                        R.string.pay_interest,
-                        NumberTextWatcherForThousand.getDecimalFormattedString((cost + summary + mulctPrice).toString()+".00")
+                        R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString())
                     )
                 )
 
@@ -375,7 +376,15 @@ class RedeemActivity : BaseK9Activity() {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                
+                p0?.let {
+                    if (p0.isEmpty()) {
+                        mulctPrice = 0f
+                    } else {
+                        mulctPrice = NumberTextWatcherForThousand.trimCommaOfString(p0.toString()).toFloat()
+                    }
+                }
+                summaryInterest.text =
+                    getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
             }
         })
         imgProduct.shape = MultiImageView.Shape.RECTANGLE
@@ -409,7 +418,7 @@ class RedeemActivity : BaseK9Activity() {
         }
 
         summaryInterest.text =
-            getString(R.string.pay_interest, NumberTextWatcherForThousand.getDecimalFormattedString((cost + summary + mulctPrice).toString()))
+            getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
 
         delete.visibility = View.VISIBLE
         contentView.tag = item_container.childCount
@@ -459,26 +468,6 @@ class RedeemActivity : BaseK9Activity() {
             "ดอกเบี้ยเต็มเดือน",
             summaryInterest
         )
-
-        mulct.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                p0?.let {
-                    if (p0.isEmpty()) {
-                        mulctPrice = 0f
-                    } else {
-                        mulctPrice = p0.toString().toFloat()
-                    }
-                }
-                summaryInterest.text =
-                    getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
-            }
-        })
 
         item_container.addView(contentView)
     }

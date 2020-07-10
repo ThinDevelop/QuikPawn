@@ -90,15 +90,13 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
             ) {
 
                 val productList  = consignListAdapter.getConProductItems()
-
                 for (product in productList) {
-
                     val camera = product.ref_image
                     val detail = product.detail
                     val cost = product.cost
                     val name = product.name
-
                     val costStr= NumberTextWatcherForThousand.trimCommaOfString(cost)
+                    product.cost = costStr
                     if (camera.isEmpty()) {
                         DialogUtil.showNotiDialog(this, getString(R.string.data_missing), getString(R.string.please_add_photo))
                         return@setOnClickListener
@@ -114,13 +112,13 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                     }
                 }
 
-                var sum = 0
+                var sum = 0L
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
-                    list.add(product.name + " : " + NumberTextWatcherForThousand.getDecimalFormattedString(product.cost)+" บาท")
-                    sum += Integer.parseInt(product.cost)
+                    list.add(product.name + " : " + Util.addComma(product.cost)+" บาท")
+                    sum += NumberTextWatcherForThousand.trimCommaOfString(product.cost).toLong()
                 }
-                list.add("รวม " + NumberTextWatcherForThousand.getDecimalFormattedString(sum.toString()) + " บาท")
+                list.add("รวม " + Util.addComma(sum.toString()) + " บาท")
 
                 val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, getString(R.string.text_confirm), getString(R.string.text_cancel))
                 DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
@@ -484,12 +482,12 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ราคา " + Util.addComma(data.price) + " บาท")
+        printerParams1.setText("ราคา " + Util.addComma(data.price) + " บาท")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ค่าธรรมเนียม "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ expire+ " เดือน")//data.interest_price
+        printerParams1.setText("ค่าธรรมเนียม "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ expire+ " เดือน")//data.interest_price
         textList.add(printerParams1)
 
 

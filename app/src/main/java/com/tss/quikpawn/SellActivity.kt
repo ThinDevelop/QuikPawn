@@ -2,14 +2,12 @@ package com.tss.quikpawn
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewManager
-import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -28,16 +26,9 @@ import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
-import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_sell.*
 import kotlinx.android.synthetic.main.item_customer_info.*
-import kotlinx.android.synthetic.main.item_customer_info.btn_ok
-import kotlinx.android.synthetic.main.item_customer_info.edt_idcard
-import kotlinx.android.synthetic.main.item_customer_info.edt_name
-import kotlinx.android.synthetic.main.item_customer_info.edt_phonenumber
-import kotlinx.android.synthetic.main.item_customer_info.signature_pad
 import kotlinx.android.synthetic.main.item_search.*
-import kotlinx.android.synthetic.main.item_sign_view.*
 import org.json.JSONObject
 import java.lang.reflect.Type
 
@@ -61,7 +52,7 @@ class SellActivity : BaseK9Activity() {
                 productList.add(
                     SellProductModel(
                         product.product_code,
-                        Integer.parseInt(product.sale.replace(".00", ""))
+                        product.sale.replace(".00", "").toInt()
                     )
                 )
                 addItemView(product)
@@ -106,13 +97,13 @@ class SellActivity : BaseK9Activity() {
                     totle_price += product.sale_price
                 }
 
-                    var sum = 0
+                    var sum = 0L
                     val list = mutableListOf("รหัสลูกค้า : "+ customerId+"\nรายการ\n")
                     for (product in productList) {
-                        list.add(product.product_code+ " : " +NumberTextWatcherForThousand.getDecimalFormattedString(product.sale_price.toString()))
+                        list.add(product.product_code+ " : " +Util.addComma(product.sale_price.toString()))
                         sum += product.sale_price
                     }
-                    list.add("รวม "+ NumberTextWatcherForThousand.getDecimalFormattedString(sum.toString()) +" บาท")
+                    list.add("รวม "+ Util.addComma(sum.toString()) +" บาท")
 
                     val param = DialogParamModel(getString(R.string.msg_confirm_title_order), list, getString(R.string.text_confirm), getString(R.string.text_cancel))
                     DialogUtil.showConfirmDialog(param, this, DialogUtil.InputTextBackListerner {
@@ -300,7 +291,7 @@ class SellActivity : BaseK9Activity() {
         txtsell.visibility = View.VISIBLE
         txtId.text = productModel.product_name
         txtDetail.text = productModel.detail
-        txtCost.text = NumberTextWatcherForThousand.getDecimalFormattedString(productModel.cost) + " บาท"
+        txtCost.text = Util.addComma(productModel.cost) + " บาท"
         txtsell.text = "0 บาท"//Util.addComma(productModel.sale) + "0 บาท"
         delete.visibility = View.VISIBLE
         contentView.tag = productModel.product_code
@@ -334,12 +325,12 @@ class SellActivity : BaseK9Activity() {
                     override fun onClickConfirm(result: String?) {
                         result?.let {
                             if (it.isEmpty()) return
-                            val price = Integer.parseInt(result.replace(",", ""))
+                            val price = result.replace(",", "").toInt()
                             val productCode = contentView.tag as String
                             val sellProductModel = SellProductModel(productCode, price)
                             updatePrice(sellProductModel)
                             Util.addComma(productModel.sale)
-                            txtsell.text = NumberTextWatcherForThousand.getDecimalFormattedString(price.toString()) + "บาท"
+                            txtsell.text = Util.addComma(price.toString()) + "บาท"
                             updateSummaryPrice()
 
                         }
@@ -359,11 +350,11 @@ class SellActivity : BaseK9Activity() {
     }
 
     fun updateSummaryPrice() {
-        var sumPrice = 0
+        var sumPrice = 0L
         for (product in productList) {
             sumPrice += product.sale_price
         }
-        txt_summary_price.text = "ราคารวม " + NumberTextWatcherForThousand.getDecimalFormattedString(sumPrice.toString()) + " บาท"
+        txt_summary_price.text = "ราคารวม " + Util.addComma(sumPrice.toString()) + " บาท"
     }
 
     override fun setupView(info: ThiaIdInfoBeen) {

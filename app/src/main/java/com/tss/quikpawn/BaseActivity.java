@@ -85,7 +85,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                     }
                 }
             });
-		} else if (status.equals("203")) {
+		} else if (status.equals("203") || status.equals("204")) {
 			ArrayList<String> msg = new ArrayList<>();
 			msg.add("ไม่พบรายการหรือสินค้านี้");
 			DialogParamModel param = new DialogParamModel("กรุณาติดต่อผู้ดูแลระบบ", msg,

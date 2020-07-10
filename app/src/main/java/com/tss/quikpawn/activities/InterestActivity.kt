@@ -88,7 +88,7 @@ class InterestActivity : BaseK9Activity() {
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
                 list.add("รายการเลขที่ "+interestOrderModel!!.order_code)
                 list.add(
-                    "ดอกเบี้ยรวม " + NumberTextWatcherForThousand.getDecimalFormattedString(
+                    "ดอกเบี้ยรวม " + Util.addComma(
                         String.format("%.2f", summary)
                     ) + " บาท"
                 )
@@ -353,7 +353,7 @@ class InterestActivity : BaseK9Activity() {
         }
         summaryInterest.text = getString(
             R.string.pay_interest,
-            NumberTextWatcherForThousand.getDecimalFormattedString((summary + mulctPrice).toString())
+            Util.addComma((summary + mulctPrice).toString())
         )
         mulct.visibility = View.GONE
         delete.visibility = View.VISIBLE
@@ -387,7 +387,7 @@ class InterestActivity : BaseK9Activity() {
                     }
                 }
                 summaryInterest.text =
-                    getString(R.string.pay_interest, NumberTextWatcherForThousand.getDecimalFormattedString((summary + mulctPrice).toString()))
+                    getString(R.string.pay_interest, Util.addComma((summary + mulctPrice).toString()))
             }
             layout.addView(checkBox)
         }

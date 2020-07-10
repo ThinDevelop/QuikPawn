@@ -194,7 +194,7 @@ class ReturnActivity : BaseK9Activity() {
 
             txtId.text = productModel.product_name
             txtDetail.text = productModel.detail
-            txtCost.text = NumberTextWatcherForThousand.getDecimalFormattedString(productModel.sale) + " บาท"
+            txtCost.text = Util.addComma(productModel.sale) + " บาท"
 
             contentView.tag = productModel.product_code
             btnDelete.tag = contentView.tag

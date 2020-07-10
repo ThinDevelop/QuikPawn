@@ -716,12 +716,12 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ราคา " + Util.addComma(data.price) + " บาท")
+        printerParams1.setText("ราคา " + Util.addComma(data.price) + " บาท")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ค่าธรรมเนียม "+ Util.addComma(data.interest_price) +" บาท/เดือน \nระยะเวลา "+ data.num_expire+ " เดือน")//data.interest_price
+        printerParams1.setText("ค่าธรรมเนียม "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ data.num_expire+ " เดือน")//data.interest_price
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()

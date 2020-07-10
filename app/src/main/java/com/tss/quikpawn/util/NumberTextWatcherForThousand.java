@@ -49,8 +49,7 @@ public class NumberTextWatcherForThousand implements TextWatcher {
 
 
                 String str = editText.getText().toString().replaceAll(",", "");
-                if (!value.equals(""))
-                    editText.setText(getDecimalFormattedString(str));
+                editText.setText(getDecimalFormattedString(str));
                 editText.setSelection(editText.getText().toString().length());
             }
             editText.addTextChangedListener(this);
@@ -66,6 +65,7 @@ public class NumberTextWatcherForThousand implements TextWatcher {
 
     public static String getDecimalFormattedString(String value)
     {
+        value = trimCommaOfString(value);
         StringTokenizer lst = new StringTokenizer(value, ".");
         String str1 = value;
         String str2 = "";
