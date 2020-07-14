@@ -112,11 +112,11 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                     }
                 }
 
-                var sum = 0L
+                var sum = 0f
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
                     list.add(product.name + " : " + Util.addComma(product.cost)+" บาท")
-                    sum += NumberTextWatcherForThousand.trimCommaOfString(product.cost).toLong()
+                    sum += NumberTextWatcherForThousand.trimCommaOfString(product.cost).toFloat()
                 }
                 list.add("รวม " + Util.addComma(sum.toString()) + " บาท")
 
@@ -388,23 +388,9 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1.setText("สาขา "+PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-        printerParams1.setTextSize(20)
-        printerParams1.setText("เลขที่ "+PreferencesManager.getInstance().address.replace(" ", " "))
-        textList.add(printerParams1)
-
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-        printerParams1.setTextSize(20)
-        printerParams1.setText("รหัสไปรษณีย์ "+ PreferencesManager.getInstance().zipCode)
-        textList.add(printerParams1)
-
-        printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
-        printerParams1.setTextSize(22)
-        printerParams1.setText("เบอร์โทร " + PreferencesManager.getInstance().contactPhone)
-        textList.add(printerParams1)
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
@@ -416,7 +402,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("ข้าพเจ้า"+data.customer_name+" \nบัตรประชาชนเลขที่ "+data.idcard+"\n" +
-                "ผู้ขายฝากอยู่บ้านเลขที่ "+address+"\n")
+                "ผู้ขายฝากอยู่บ้านเลขที่ "+data.customer_address+"\n")
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
@@ -469,7 +455,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+ String.format("%.2f", sum) +" บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
+        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+ Util.addComma(sum.toString()) +" บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
                 " นับตั้งแต่วันทำหนังสือนี้เป็นต้นไป\n จนกว่าจะมาไถ่ถอนคืน\nในวันที่ "+ calendar.get(Calendar.DATE) +" เดือน "+ getMonth(calendar) +" พ.ศ."+ (calendar.get(Calendar.YEAR)+543)+"\n" +
                 "ข้อ 3. ผู้ขายฝากยืนยันว่าผู้ขายฝาก\nเป็นผู้มีกรรมสิทธิ์ในทรัพย์สินที่มา\nขายฝากแต่เพียงผู้เดียวและไม่มีคู่สมรสแต่อย่างใด\n" +
                 "ข้อ 4. คู่กรณีได้อ่านหนีงสือนี้เข้าใจ\nรับว่าถูกต้องเป็นความจริงแล้วจึง\nลงลายมือชื่อไว้เป็นหลักฐาน\n ")
@@ -540,9 +526,14 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
-        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n___________________มาไถ่ถอนทรัพย์แทนข้าพเจ้าลงชื่อ")
+        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n\n___________________")
+        textList.add(printerParams1)
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+        printerParams1.setTextSize(22)
+        printerParams1.setText("มาไถ่ถอนทรัพย์แทนข้าพเจ้าลงชื่อ")
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()

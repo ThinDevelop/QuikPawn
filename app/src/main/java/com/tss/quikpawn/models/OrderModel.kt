@@ -21,4 +21,5 @@ data class OrderModel(var order_code: String,
                       var interest: String,
                       var mulct_price: String,
                       var user_create: String,
-                      var device_create: String)
+                      var device_create: String,
+                      var customer_address: String)

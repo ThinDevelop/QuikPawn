@@ -657,7 +657,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("ข้าพเจ้า"+data.customer_name+" \nบัตรประชาชนเลขที่ "+data.idcard+"\n" +
-                "ผู้ขายฝากอยู่บ้านเลขที่ "+address+"\n")
+                "ผู้ขายฝากอยู่บ้านเลขที่ "+data.customer_address+"\n")
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
