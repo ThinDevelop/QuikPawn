@@ -16,6 +16,7 @@ import com.bumptech.glide.request.transition.Transition
 import com.tss.quikpawn.R
 import com.tss.quikpawn.models.ConsignmentProductModel
 import com.tss.quikpawn.util.NumberTextWatcherForThousand.getDecimalFormattedString
+import com.tss.quikpawn.util.NumberTextWatcherForThousand.getDecimalFormattedString2
 import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.item_detail_consignment_view.view.*
 
@@ -152,7 +153,7 @@ class ConsignListAdapter(val context: Context, val listener: OnItemClickListener
                             val str: String =
                                 productCost.getText().toString().replace(",", "")
                             if (value != "") productCost.setText(
-                                getDecimalFormattedString(
+                                getDecimalFormattedString2(
                                     str
                                 )
                             )

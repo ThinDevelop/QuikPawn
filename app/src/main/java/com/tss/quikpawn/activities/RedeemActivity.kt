@@ -601,7 +601,7 @@ class RedeemActivity : BaseK9Activity() {
             textList.add(printerParams1)
 
             for (interest in data.interests) {
-                list2.add(ProductModel2("เดือนที่ : " + interest.month, Util.addComma(data.interest_price) + " บาท"))
+                list2.add(ProductModel2("เดือนที่ : " + interest.month, Util.addComma(interest.price) + " บาท"))
             }
             list2.add(ProductModel2("ค่าปรับ", Util.addComma(data.mulct_price) + " บาท"))
             val listBitmap = Util.productListToBitmap(list2)

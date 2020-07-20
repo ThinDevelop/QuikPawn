@@ -299,8 +299,9 @@ class Util {
 
         fun addComma(number: String): String {
             if(number.isEmpty()) return number
+            var newNumber = NumberTextWatcherForThousand.trimCommaOfString(number)
 
-            var result = BigDecimal(number.toDouble()).setScale(2, RoundingMode.HALF_EVEN).toString()
+            var result = BigDecimal(newNumber.toDouble()).setScale(2, RoundingMode.HALF_EVEN).toString()
             if (isNumberic(result)) {
                 result = NumberTextWatcherForThousand.getDecimalFormattedString(result)
             }

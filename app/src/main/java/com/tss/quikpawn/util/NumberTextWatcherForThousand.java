@@ -63,6 +63,47 @@ public class NumberTextWatcherForThousand implements TextWatcher {
 
     }
 
+    public static String getDecimalFormattedString2(String value)
+    {
+        value = trimCommaOfString(value);
+        StringTokenizer lst = new StringTokenizer(value, ".");
+        String str1 = value;
+        String str2 = "";
+        if (lst.countTokens() > 0 && value.contains("."))
+        {
+            str1 = lst.nextToken();
+            str2 = lst.nextToken();
+            if (str2.length()>2) {
+                str2 = str2.substring(0, 2);
+            }
+        }
+        String str3 = "";
+        int i = 0;
+        int j = -1 + str1.length();
+        if (str1.charAt( -1 + str1.length()) == '.')
+        {
+            j--;
+            str3 = ".";
+        }
+        for (int k = j;; k--)
+        {
+            if (k < 0)
+            {
+                if (str2.length() > 0)
+                    str3 = str3 + "." + str2;
+                return str3;
+            }
+            if (i == 3)
+            {
+                str3 = "," + str3;
+                i = 0;
+            }
+            str3 = str1.charAt(k) + str3;
+            i++;
+        }
+
+    }
+
     public static String getDecimalFormattedString(String value)
     {
         value = trimCommaOfString(value);

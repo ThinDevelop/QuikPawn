@@ -16,6 +16,8 @@ import com.bumptech.glide.request.transition.Transition
 import com.tss.quikpawn.R
 import com.tss.quikpawn.models.BuyProductModel
 import com.tss.quikpawn.util.NumberTextWatcherForThousand.getDecimalFormattedString
+import com.tss.quikpawn.util.NumberTextWatcherForThousand.getDecimalFormattedString2
+import com.tss.quikpawn.util.Util
 import kotlinx.android.synthetic.main.item_detail_view.view.*
 
 
@@ -54,7 +56,7 @@ class BuyListAdapter(val context: Context, val listener: OnItemClickListener) :
         holder.productDelete.visibility = View.VISIBLE
 
         holder.productDetail.setText(buyProductModel.detail)
-        holder.productCost.setText(buyProductModel.cost)
+        holder.productCost.setText(Util.addComma(buyProductModel.cost))
         holder.productName.setText(buyProductModel.name)
 
         holder.productDelete.setOnClickListener {
@@ -150,7 +152,7 @@ class BuyListAdapter(val context: Context, val listener: OnItemClickListener) :
                             val str: String =
                                 productCost.getText().toString().replace(",", "")
                             if (value != "") productCost.setText(
-                                getDecimalFormattedString(
+                                getDecimalFormattedString2(
                                     str
                                 )
                             )

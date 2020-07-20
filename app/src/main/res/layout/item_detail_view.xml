@@ -88,7 +88,7 @@
             android:background="@drawable/bg_radius"
             android:enabled="true"
             android:hint="ราคาซื้อ"
-            android:maxLength="11"
+            android:maxLength="17"
             android:singleLine="true"
             android:inputType="number"
             android:paddingLeft="16dp"
