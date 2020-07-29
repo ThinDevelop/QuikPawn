@@ -42,9 +42,9 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 class RedeemActivity : BaseK9Activity() {
-    var summary = 0.00f
-    var mulctPrice = 0.00f
-    var cost = 0.00f
+    var summary = 0.00
+    var mulctPrice = 0.00
+    var cost = 0.00
     val SELECT_ORDER_REQUEST_CODE = 2015
     var interestOrderModel: OrderModel? = null
     var listInterestMonthModel = mutableListOf<InterestMonthModel>()
@@ -97,7 +97,7 @@ class RedeemActivity : BaseK9Activity() {
                     )
                 )
 
-                if ((cost + summary + mulctPrice) == 0f) {
+                if ((cost + summary + mulctPrice) == 0.0) {
                     DialogUtil.showNotiDialog(
                         this@RedeemActivity,
                         getString(R.string.data_missing),
@@ -378,9 +378,9 @@ class RedeemActivity : BaseK9Activity() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 p0?.let {
                     if (p0.isEmpty()) {
-                        mulctPrice = 0f
+                        mulctPrice = 0.0
                     } else {
-                        mulctPrice = NumberTextWatcherForThousand.trimCommaOfString(p0.toString()).toFloat()
+                        mulctPrice = NumberTextWatcherForThousand.trimCommaOfString(p0.toString()).toDouble()
                     }
                 }
                 summaryInterest.text =
@@ -390,7 +390,7 @@ class RedeemActivity : BaseK9Activity() {
         imgProduct.shape = MultiImageView.Shape.RECTANGLE
         imgProduct.rectCorners = 10
         orderId.text = interestOrder.order_code
-        cost = interestOrder.total.toFloat()
+        cost = interestOrder.total.toDouble()
         var i = 0
         for (product in interestOrder.products) {
             i++
@@ -439,11 +439,11 @@ class RedeemActivity : BaseK9Activity() {
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
 //                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
                 if (isChecked) {
-                    summary += interest.price.toFloat()
+                    summary += interest.price.toDouble()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
                     listInterestMonthModel.add(interestMonth)
                 } else {
-                    summary -= interest.price.toFloat()
+                    summary -= interest.price.toDouble()
                     for (monthModel in listInterestMonthModel) {
                         if (monthModel.month.equals(interest.month)) {
                             listInterestMonthModel.remove(monthModel)
@@ -452,13 +452,13 @@ class RedeemActivity : BaseK9Activity() {
                     }
                 }
                 summaryInterest.text =
-                    getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))
+                    getString(R.string.pay_interest, Util.addComma((cost.toDouble() + summary + mulctPrice.toDouble()).toString()))
             }
             layout.addView(checkBox)
         }
         insertCheckbox(
             layout,
-            (interestOrder.interests[0].price.toFloat() / 2).toString(),
+            (interestOrder.interests[0].price.toDouble() / 2).toString(),
             "ดอกเบี้ยครึ่งเดือน",
             summaryInterest
         )
@@ -480,9 +480,9 @@ class RedeemActivity : BaseK9Activity() {
         checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
 //            Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
             if (isChecked) {
-                mulctPrice += price.toFloat()
+                mulctPrice += price.toDouble()
             } else {
-                mulctPrice -= price.toFloat()
+                mulctPrice -= price.toDouble()
             }
             sumText.text =
                 getString(R.string.pay_interest, Util.addComma((cost + summary + mulctPrice).toString()))

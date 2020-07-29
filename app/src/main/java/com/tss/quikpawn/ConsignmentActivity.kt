@@ -112,11 +112,11 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                     }
                 }
 
-                var sum = 0f
+                var sum = 0.0
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
                     list.add(product.name + " : " + Util.addComma(product.cost)+" บาท")
-                    sum += NumberTextWatcherForThousand.trimCommaOfString(product.cost).toFloat()
+                    sum += NumberTextWatcherForThousand.trimCommaOfString(product.cost).toDouble()
                 }
                 list.add("รวม " + Util.addComma(sum.toString()) + " บาท")
 
@@ -411,9 +411,9 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1.setText("ได้ทำหนังสือขายฝากนี้ให้แก่ \nนาย"+PreferencesManager.getInstance().contact+" ดังมีข้อความดังต่อไปนี้\n" + "ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้\n\n")
         textList.add(printerParams1)
 
-        var sum = 0.00f
+        var sum = 0.00
         for (productModel in data.products) {
-            sum += productModel.cost.toFloat()
+            sum += productModel.cost.toDouble()
         }
 
         var i = 0

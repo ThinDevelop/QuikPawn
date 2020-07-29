@@ -46,7 +46,7 @@ import org.json.JSONObject
 
 
 class InterestActivity : BaseK9Activity() {
-    var summary = 0.00f
+    var summary = 0.00
     var mulctPrice = 0
     var interestOrderModel: OrderModel? = null
     var listInterestMonthModel = mutableListOf<InterestMonthModel>()
@@ -92,7 +92,7 @@ class InterestActivity : BaseK9Activity() {
                         String.format("%.2f", summary)
                     ) + " บาท"
                 )
-                if (summary == 0f) {
+                if (summary == 0.0) {
                     DialogUtil.showNotiDialog(this@InterestActivity, getString(R.string.data_missing), getString(R.string.please_add_pay_per_month))
                     return@setOnClickListener
                 }
@@ -374,11 +374,11 @@ class InterestActivity : BaseK9Activity() {
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
 //                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
                 if (isChecked) {
-                    summary += interest.price.toFloat()
+                    summary += interest.price.toDouble()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
                     listInterestMonthModel.add(interestMonth)
                 } else {
-                    summary -= interest.price.toFloat()
+                    summary -= interest.price.toDouble()
                     for (monthModel in listInterestMonthModel) {
                         if (monthModel.month.equals(interest.month)) {
                             listInterestMonthModel.remove(monthModel)
