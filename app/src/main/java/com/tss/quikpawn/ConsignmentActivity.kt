@@ -473,7 +473,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ค่าธรรมเนียม "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ expire+ " เดือน")//data.interest_price
+        printerParams1.setText("ค่าธรรมเนียม "+ Util.addComma(data.interest_price) +" บาท/เดือน \nระยะเวลา "+ expire+ " เดือน")//data.interest_price
         textList.add(printerParams1)
 
 

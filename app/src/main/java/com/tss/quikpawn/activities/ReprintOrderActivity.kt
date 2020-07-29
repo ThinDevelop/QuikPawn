@@ -721,7 +721,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("ค่าธรรมเนียม "+ data.interest_price +" บาท/เดือน \nระยะเวลา "+ data.num_expire+ " เดือน")//data.interest_price
+        printerParams1.setText("ค่าธรรมเนียม "+ Util.addComma(data.interest_price) +" บาท/เดือน \nระยะเวลา "+ data.num_expire+ " เดือน")//data.interest_price
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
@@ -1344,10 +1344,12 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 //        printerParams1.setBitmap(listBitmap)
 //        textList.add(printerParams1)
         var i = 0
+        var sumPrice = 0.0
         for (product in data.products) {
             i++
             var name = product.product_name
             var detail = product.detail
+            sumPrice += product.sale.toDouble()
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -1356,7 +1358,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 
             val listProduct = arrayListOf<ProductModel>()
             listProduct.add(product)
-            val list = Util.productListToProductList3Cost(listProduct)
+            val list = Util.productListToProductList3Sell(listProduct)
             val listBitmap = Util.productListToBitmap2(list)
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
@@ -1365,6 +1367,25 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             textList.add(printerParams1)
 
         }
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(24)
+        printerParams1.setText("\n")
+        textList.add(printerParams1)
+
+        val productModel = data.products.get(0)
+        productModel.product_name = getString(R.string.summary_price)
+        productModel.sale = sumPrice.toString()
+        val listProduct = arrayListOf<ProductModel>()
+        listProduct.add(productModel)
+        val list = Util.productListToProductList3Sell(listProduct)
+        val listBitmap = Util.productListToBitmap(list)
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(listBitmap)
+        textList.add(printerParams1)
 
         textList.add(Util.dashSignature())
         printerParams1 = TssPrinterParams()
@@ -1473,10 +1494,12 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
 //        textList.add(printerParams1)
 
         var i = 0
+        var sumPrice = 0.0
         for (product in data.products) {
             i++
             var name = product.product_name
             var detail = product.detail
+            sumPrice += product.sale.toLong()
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
@@ -1493,6 +1516,26 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             printerParams1.setBitmap(listBitmap)
             textList.add(printerParams1)
         }
+
+
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(24)
+        printerParams1.setText("\n")
+        textList.add(printerParams1)
+
+        val productModel = data.products.get(0)
+        productModel.product_name = getString(R.string.summary_price)
+        productModel.sale = sumPrice.toString()
+        val listProduct = arrayListOf<ProductModel>()
+        listProduct.add(productModel)
+        val list = Util.productListToProductList3Sell(listProduct)
+        val listBitmap = Util.productListToBitmap(list)
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(listBitmap)
+        textList.add(printerParams1)
 
         textList.add(Util.dashSignature())
 

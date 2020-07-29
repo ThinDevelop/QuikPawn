@@ -47,7 +47,7 @@
     <string name="wrong_phone_number">เบอร์โทรศัพท์ไม่ถูกต้อง</string>
     <string name="data_is_wrong">ข้อมูลไม่ถูกต้อง</string>
 
-
+    <string name="summary_price">ราคารวม</string>
 
     <string name="title_error">เกิดข้อผิดพลาด</string>
     <string name="search_error_please_research">การค้นหาล้มเหลว กรุณาทำรายการใหม่</string>
