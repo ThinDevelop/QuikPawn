@@ -329,7 +329,10 @@ class InterestActivity : BaseK9Activity() {
         imgProduct.rectCorners = 10
 
         orderId.text = interestOrderModel.order_code
+        var i = 0
         for (product in interestOrderModel.products) {
+            i++
+            if (i>3) continue
             Glide.with(this) //1
                 .asBitmap()
                 .load(product.image_small)
@@ -361,6 +364,7 @@ class InterestActivity : BaseK9Activity() {
         delete.tag = contentView.tag
         delete.setOnClickListener {
             this.interestOrderModel = null
+            orderList.clear()
             (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
                 item_container.findViewWithTag<View>(it.tag)
             )
