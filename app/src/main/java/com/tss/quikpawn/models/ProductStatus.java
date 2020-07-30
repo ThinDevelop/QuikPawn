@@ -9,7 +9,7 @@ import java.util.List;
 
 public enum ProductStatus {
     UNKNOW("0", "ไม่ระบุ", R.color.colorWhite),
-    CONSIGNMENT("1", "ฝากขาย", R.color.Gold),
+    CONSIGNMENT("1", "ขายฝาก", R.color.Gold),
     REDEEM("2", "ไถ่ถอน", R.color.Gray),
     READY_FOR_SALE("3", "พร้อมขาย", R.color.Green),
     SOLD("4", "ขายแล้ว", R.color.Gray),

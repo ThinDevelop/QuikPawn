@@ -1,161 +1,210 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MainMenuActivity"
-    android:background="#E2F0D9">
+    android:background="#E2F0D9"
+    android:orientation="vertical"
+    tools:context=".activities.MainMenuActivity">
 
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/test"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/test"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textSize="20dp"
+            android:visibility="gone" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:src="@drawable/ic_logo_quikpawn"
+            android:visibility="gone" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="20dp"
-                android:layout_marginTop="10dp"
-                android:visibility="gone"/>
+                android:orientation="vertical">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="wrap_content"
-                android:layout_height="150dp"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="50dp"
-                android:visibility="gone"
-                android:src="@drawable/ic_logo_quikpawn" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
 
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:stretchColumns="0,1">
+                        <FrameLayout
+                            android:id="@+id/btn_buy"
+                            android:layout_width="0dp"
+                            android:layout_height="130dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_buy"
+                            android:orientation="vertical">
 
-                <TableRow
-                    android:layout_width="fill_parent"
+                        </FrameLayout>
+
+
+                        <FrameLayout
+                            android:id="@+id/btn_sell"
+                            android:layout_width="0dp"
+                            android:layout_height="130dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_sell"
+                            android:orientation="vertical">
+
+                        </FrameLayout>
+                    </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
                     android:layout_gravity="center"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
-                    <FrameLayout
-                        android:id="@+id/btn_buy"
-                        android:layout_width="0dp"
-                        android:layout_height="130dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_buy">
+                        <FrameLayout
+                            android:id="@+id/btn_consignment"
+                            android:layout_width="0dp"
+                            android:layout_height="130dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_consignment"
+                            android:orientation="vertical">
 
-                    </FrameLayout>
+                        </FrameLayout>
 
+                        <FrameLayout
+                            android:id="@+id/btn_interest"
+                            android:layout_width="0dp"
+                            android:layout_height="130dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_interest"
+                            android:orientation="vertical">
 
-                    <FrameLayout
-                        android:id="@+id/btn_sell"
-                        android:layout_width="0dp"
-                        android:layout_height="130dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_sell">
+                        </FrameLayout>
+                </LinearLayout>
 
-                    </FrameLayout>
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="fill_parent"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
                     android:layout_gravity="center"
-                    android:layout_marginTop="10dp">
-                    <FrameLayout
-                        android:id="@+id/btn_consignment"
-                        android:layout_width="0dp"
-                        android:layout_height="130dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_consignment">
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
-                    </FrameLayout>
+                        <FrameLayout
+                            android:id="@+id/btn_getback"
+                            android:layout_width="0dp"
+                            android:layout_height="130dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_redeem"
+                            android:orientation="vertical">
 
-                    <FrameLayout
-                        android:id="@+id/btn_interest"
-                        android:layout_width="0dp"
-                        android:layout_height="130dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_interest">
+                        </FrameLayout>
 
-                    </FrameLayout>
-                </TableRow>
+                        <FrameLayout
+                            android:id="@+id/btn_borrow"
+                            android:layout_width="0dp"
+                            android:layout_height="130dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_borrow"
+                            android:orientation="vertical">
 
-                <TableRow
-                    android:layout_width="fill_parent"
+                        </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
                     android:layout_gravity="center"
-                    android:layout_marginTop="10dp">
-                    <FrameLayout
-                        android:id="@+id/btn_getback"
-                        android:layout_width="0dp"
-                        android:layout_height="130dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_redeem">
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
-                    </FrameLayout>
+                        <FrameLayout
+                            android:id="@+id/btn_return"
+                            android:layout_width="0dp"
+                            android:layout_height="120dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_return"
+                            android:orientation="vertical">
 
-                    <FrameLayout
-                        android:id="@+id/btn_borrow"
-                        android:layout_width="0dp"
-                        android:layout_height="130dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_borrow">
+                        </FrameLayout>
 
-                    </FrameLayout>
+                        <FrameLayout
+                            android:id="@+id/btn_reprint"
+                            android:layout_width="0dp"
+                            android:layout_height="120dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/ic_reprint"
+                            android:orientation="vertical">
+                        </FrameLayout>
 
-                </TableRow>
+                </LinearLayout>
 
-                <TableRow
-                    android:layout_width="fill_parent"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
                     android:layout_gravity="center"
-                    android:layout_marginTop="10dp">
-                    <FrameLayout
-                        android:id="@+id/btn_return"
-                        android:layout_width="0dp"
-                        android:layout_height="120dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_return">
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone"
+                    android:orientation="horizontal">
 
-                    </FrameLayout>
-                    <FrameLayout
-                        android:id="@+id/btn_reprint"
-                        android:layout_width="0dp"
-                        android:layout_height="120dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:textSize="30dp"
-                            android:text="@string/title_reprint"/>
-                    </FrameLayout>
+                        <FrameLayout
+                            android:id="@+id/btn_getall"
+                            android:layout_width="0dp"
+                            android:layout_height="120dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-                </TableRow>
-            </TableLayout>
-        </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="ขายหลอม"
+                                android:textSize="30dp" />
+                        </FrameLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                        <FrameLayout
+                            android:id="@+id/a"
+                            android:layout_width="0dp"
+                            android:layout_height="120dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                        </FrameLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+</LinearLayout>

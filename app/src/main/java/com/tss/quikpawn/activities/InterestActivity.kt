@@ -20,7 +20,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.centerm.centermposoversealib.thailand.ThaiIDSecurityBeen
 import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
@@ -35,15 +34,19 @@ import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
 import com.tss.quikpawn.util.NumberTextWatcherForThousand
 import com.tss.quikpawn.util.Util
+import kotlinx.android.synthetic.main.activity_buy.*
 import kotlinx.android.synthetic.main.activity_interest.*
 import kotlinx.android.synthetic.main.item_customer_info.*
-import kotlinx.android.synthetic.main.item_interest_detail.*
+import kotlinx.android.synthetic.main.item_customer_info.btn_ok
+import kotlinx.android.synthetic.main.item_customer_info.edt_idcard
+import kotlinx.android.synthetic.main.item_customer_info.edt_name
+import kotlinx.android.synthetic.main.item_customer_info.edt_phonenumber
 import kotlinx.android.synthetic.main.item_search.*
 import org.json.JSONObject
 
 
 class InterestActivity : BaseK9Activity() {
-    var summary = 0.00f
+    var summary = 0.00
     var mulctPrice = 0
     var interestOrderModel: OrderModel? = null
     var listInterestMonthModel = mutableListOf<InterestMonthModel>()
@@ -71,28 +74,28 @@ class InterestActivity : BaseK9Activity() {
             if (customerId.isEmpty()) {
                 customerId = edt_idcard.text.toString()
             }
+
+            if (phoneNumber.length != 10) {
+                DialogUtil.showNotiDialog(this, getString(R.string.data_is_wrong), getString(R.string.wrong_phone_number))
+                return@setOnClickListener
+            }
+
             if (!customerName.isEmpty() &&
-                !customerId.isEmpty() &&
+//                !customerId.isEmpty() &&
                 interestOrderModel != null
             ) {
 
                 val list = mutableListOf("รหัสลูกค้า : " + customerId)
                 list.add("รายการเลขที่ "+interestOrderModel!!.order_code)
                 list.add(
-                    "ดอกเบี้ยรวม " + NumberTextWatcherForThousand.getDecimalFormattedString(
+                    "ดอกเบี้ยรวม " + Util.addComma(
                         String.format("%.2f", summary)
                     ) + " บาท"
                 )
-                if (summary == 0f) {
+                if (summary == 0.0) {
                     DialogUtil.showNotiDialog(this@InterestActivity, getString(R.string.data_missing), getString(R.string.please_add_pay_per_month))
                     return@setOnClickListener
-                } else if (signature_pad.isEmpty) {
-                    DialogUtil.showNotiDialog(this@InterestActivity, getString(R.string.data_missing), getString(R.string.please_add_signature))
-                    return@setOnClickListener
                 }
-                var signatureBitmap = signature_pad.getSignatureBitmap()
-                signatureBitmap = Bitmap.createScaledBitmap(signatureBitmap, 130, 130, false)
-                val signature = Util.bitmapToBase64(signatureBitmap)
 
                 val param = DialogParamModel(
                     getString(R.string.msg_confirm_title_order),
@@ -112,7 +115,6 @@ class InterestActivity : BaseK9Activity() {
                             phoneNumber,
                             listInterestMonthModel,
                             "0",
-                            signature,
                             PreferencesManager.getInstance().userId
                         )
                         Network.interest(x, object : JSONObjectRequestListener {
@@ -130,21 +132,20 @@ class InterestActivity : BaseK9Activity() {
                                     )
                                     showConfirmDialog(dataJsonObj)
                                 } else {
-                                    DialogUtil.showNotiDialog(
-                                        this@InterestActivity,
-                                        getString(R.string.title_error),
-                                        getString(R.string.connect_error_please_reorder)
-                                    )
+                                    showResponse(status, this@InterestActivity)
                                 }
                             }
 
                             override fun onError(error: ANError) {
                                 error.printStackTrace()
-                                DialogUtil.showNotiDialog(
-                                    this@InterestActivity,
-                                    getString(R.string.title_error),
-                                    getString(R.string.connect_error_please_reorder)
-                                )
+                                var status = error.errorCode.toString()
+                                error.errorBody?.let {
+                                    val jObj = JSONObject(it)
+                                    if (jObj.has("status_code")) {
+                                        status = jObj.getString("status_code")
+                                    }
+                                }
+                                showResponse(status, this@InterestActivity)
                                 Log.e(
                                     "panya",
                                     "onError : " + error.errorCode + ", detail " + error.errorDetail + ", errorBody" + error.errorBody
@@ -205,7 +206,7 @@ class InterestActivity : BaseK9Activity() {
 
     override fun setupView(info: ThiaIdInfoBeen) {
         super.setupView(info)
-        edt_name.setText(info.thaiFirstName + " " + info.thaiLastName)
+        edt_name.setText(info.thaiTitle +" "+info.thaiFirstName + "  " + info.thaiLastName)
         edt_idcard.setText(info.citizenId?.substring(0, info.citizenId.length - 3) + "XXX")
         if (interestOrderModel == null) {
             loadOrder(info.citizenId)
@@ -236,25 +237,32 @@ class InterestActivity : BaseK9Activity() {
                         val status = response.getString("status_code")
                         if (status == "200") {
                             val dataJsonArray = response.getJSONArray("data")
-                            val intent =
-                                Intent(this@InterestActivity, OrderListActivity::class.java)
-                            intent.putExtra("order_list", dataJsonArray.toString())
-                            startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                            if  (dataJsonArray.length() == 0) {
+                                DialogUtil.showNotiDialog(
+                                    this@InterestActivity,
+                                    getString(R.string.order_not_found),
+                                    getString(R.string.order_not_found)
+                                )
+                            } else {
+                                val intent =
+                                    Intent(this@InterestActivity, OrderListActivity::class.java)
+                                intent.putExtra("order_list", dataJsonArray.toString())
+                                startActivityForResult(intent, SELECT_ORDER_REQUEST_CODE)
+                            }
                         } else {
-                            DialogUtil.showNotiDialog(
-                                this@InterestActivity,
-                                getString(R.string.title_error),
-                                getString(R.string.search_error_please_research)
-                            )
+                            showResponse(status, this@InterestActivity)
                         }
                     }
 
                     override fun onError(error: ANError) {
-                        DialogUtil.showNotiDialog(
-                            this@InterestActivity,
-                            getString(R.string.title_error),
-                            getString(R.string.connect_error_please_reorder)
-                        )
+                        var status = error.errorCode.toString()
+                        error.errorBody?.let {
+                            val jObj = JSONObject(it)
+                            if (jObj.has("status_code")) {
+                                status = jObj.getString("status_code")
+                            }
+                        }
+                        showResponse(status, this@InterestActivity)
                         error.printStackTrace()
                         Log.e(
                             "panya",
@@ -282,20 +290,19 @@ class InterestActivity : BaseK9Activity() {
                                 Gson().fromJson(dataJsonObj.toString(), OrderModel::class.java)
                             addItemView(interestOrderModel!!)
                         } else {
-                            DialogUtil.showNotiDialog(
-                                this@InterestActivity,
-                                getString(R.string.title_error),
-                                getString(R.string.search_error_please_research)
-                            )
+                            showResponse(status, this@InterestActivity)
                         }
                     }
 
                     override fun onError(error: ANError) {
-                        DialogUtil.showNotiDialog(
-                            this@InterestActivity,
-                            getString(R.string.title_error),
-                            getString(R.string.connect_error_please_reorder)
-                        )
+                        var status = error.errorCode.toString()
+                        error.errorBody?.let {
+                            val jObj = JSONObject(it)
+                            if (jObj.has("status_code")) {
+                                status = jObj.getString("status_code")
+                            }
+                        }
+                        showResponse(status, this@InterestActivity)
                         error.printStackTrace()
                         Log.e(
                             "panya",
@@ -322,7 +329,10 @@ class InterestActivity : BaseK9Activity() {
         imgProduct.rectCorners = 10
 
         orderId.text = interestOrderModel.order_code
+        var i = 0
         for (product in interestOrderModel.products) {
+            i++
+            if (i>3) continue
             Glide.with(this) //1
                 .asBitmap()
                 .load(product.image_small)
@@ -346,7 +356,7 @@ class InterestActivity : BaseK9Activity() {
         }
         summaryInterest.text = getString(
             R.string.pay_interest,
-            NumberTextWatcherForThousand.getDecimalFormattedString((summary + mulctPrice).toString())
+            Util.addComma((summary + mulctPrice).toString())
         )
         mulct.visibility = View.GONE
         delete.visibility = View.VISIBLE
@@ -354,12 +364,13 @@ class InterestActivity : BaseK9Activity() {
         delete.tag = contentView.tag
         delete.setOnClickListener {
             this.interestOrderModel = null
+            orderList.clear()
             (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(
                 item_container.findViewWithTag<View>(it.tag)
             )
         }
 
-        for (interest in interestOrderModel.interest) {
+        for (interest in interestOrderModel.interests) {
             val checkBox = CheckBox(this)
             checkBox.text = "เดือนที่ : " + interest.month
             checkBox.isEnabled = !interest.status
@@ -367,11 +378,11 @@ class InterestActivity : BaseK9Activity() {
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
 //                Toast.makeText(this, isChecked.toString(), Toast.LENGTH_SHORT).show()
                 if (isChecked) {
-                    summary += interest.price.toFloat()
+                    summary += interest.price.toDouble()
                     val interestMonth = InterestMonthModel(interest.month, interest.price)
                     listInterestMonthModel.add(interestMonth)
                 } else {
-                    summary -= interest.price.toFloat()
+                    summary -= interest.price.toDouble()
                     for (monthModel in listInterestMonthModel) {
                         if (monthModel.month.equals(interest.month)) {
                             listInterestMonthModel.remove(monthModel)
@@ -380,29 +391,10 @@ class InterestActivity : BaseK9Activity() {
                     }
                 }
                 summaryInterest.text =
-                    getString(R.string.pay_interest, (summary + mulctPrice).toString())
+                    getString(R.string.pay_interest, Util.addComma((summary + mulctPrice).toString()))
             }
             layout.addView(checkBox)
         }
-        mulct.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                p0?.let {
-                    if (p0.isEmpty()) {
-                        mulctPrice = 0
-                    } else {
-                        mulctPrice = Integer.parseInt(p0.toString())
-                    }
-                }
-                summaryInterest.text =
-                    getString(R.string.pay_interest, (summary + mulctPrice).toString())
-            }
-        })
 
         item_container.addView(contentView)
     }
@@ -425,88 +417,122 @@ class InterestActivity : BaseK9Activity() {
         var bitmap = createImageBarcode(data.order_code, "Barcode")!!
         bitmap = Utility.toGrayscale(bitmap)
 
-        var printerParams1 = PrinterParams()
+        val title = Util.textToBitmap(data.type_name)
+        var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
-        printerParams1.setTextSize(30)
-        printerParams1.setText(data.type_name)
+        printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+        printerParams1.setBitmap(title)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(24)
         printerParams1.setText("\n")
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(bitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(24)
         printerParams1.setText(data.order_code)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ร้าน " + PreferencesManager.getInstance().companyName)
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("สาขา " + PreferencesManager.getInstance().companyBranchName)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        textList.add(getAddress())
+        textList.add(getPhoneNumber())
+        textList.add(getZipCode())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("วันที่ " + Util.toDateFormat(data.date_create))
         textList.add(printerParams1)
 
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("ลูกค้า " + data.customer_name)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
         printerParams1.setText("รหัสปชช. " + data.idcard)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(18)
-        printerParams1.setText("รายการ")
+        printerParams1.setText("รายการทรัพย์สิน")
+        textList.add(printerParams1)
+
+        var i = 0
+        for (product in data.products) {
+            i++
+            var name = product.product_name
+            var detail = product.detail
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+            textList.add(printerParams1)
+
+            val listProduct = arrayListOf<ProductModel>()
+            listProduct.add(product)
+            val list = Util.productListToProductList3Cost(listProduct)
+            val listBitmap = Util.productListToBitmap2(list)
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
+            printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
+            printerParams1.setBitmap(listBitmap)
+            textList.add(printerParams1)
+
+        }
+        printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(18)
+        printerParams1.setText("รายการต่อดอกเบี้ย")
         textList.add(printerParams1)
 
         val list = arrayListOf<ProductModel2>()
-        for (interest in data.interest) {
-            list.add(ProductModel2("เดือนที่ : " + interest.month, interest.price+ " บาท"))
+        for (interest in data.interests) {
+            list.add(ProductModel2("เดือนที่ : " + interest.month, Util.addComma(interest.price)+ " บาท"))
         }
 
         val listBitmap = Util.productListToBitmap(list)
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
         printerParams1.setBitmap(listBitmap)
         textList.add(printerParams1)
 
-        printerParams1 = PrinterParams()
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.RIGHT)
         printerParams1.setTextSize(24)
-        printerParams1.setText("ยอดชำระ " + data.total + " บาท")
+        printerParams1.setText("ยอดชำระ " + Util.addComma(data.total) + " บาท")
         textList.add(printerParams1)
-        printerParams1 = PrinterParams()
+        textList.add(Util.dashSignature())
+        printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
         printerParams1.setText("\n\n")
         textList.add(printerParams1)
+        textList.add(Util.dashLine(this@InterestActivity))
         printdata(textList)
     }
 }

@@ -57,6 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
+        android:maxLength="17"
         android:hint="@string/mulct"/>
 
     <TextView

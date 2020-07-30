@@ -8,7 +8,7 @@ public enum OrderType {
     BUY("1", "ซื้อ"),
     SELL("2", "ขาย"),
     PAWN("3", "จำนำ"),
-    CONSIGNMENT("4", "ฝากขาย"),
+    CONSIGNMENT("4", "ขายฝาก"),
     INTEREST("5", "ต่อดอก"),
     REDEEM("6", "ไถ่ถอน"),
     BORRROWED("7", "ยืม"),

@@ -3,21 +3,23 @@ package com.tss.quikpawn.util;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.text.InputType;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+
 
 import androidx.appcompat.app.AlertDialog;
 
 import com.tss.quikpawn.R;
 import com.tss.quikpawn.models.DialogParamModel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class DialogUtil {
 
     public static String CONFIRM = "confirm";
     public static String CANCEL = "cancel";
-    public static void showInputDialog(Context context, final InputTextBackListerner inputTextBackListerner) {
+    public static void showInputDialog(final Context context, final InputTextBackListerner inputTextBackListerner) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("ปรับปรุงราคาขาย");
 
@@ -26,6 +28,15 @@ public class DialogUtil {
 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.addTextChangedListener(new NumberTextWatcherForThousand(input));
+        input.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+                }
+            }
+        });
         builder.setView(input);
 
 // Set up the buttons

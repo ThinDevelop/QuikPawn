@@ -28,15 +28,13 @@ class Network {
         val URL_LOGOUT = "https://thequikpawn.com/api/v1/logout"
         val URL_LOAD_ORDER = "https://thequikpawn.com/api/v1/search/last/print"
 
-
-
         fun login(user: String, password: String, listener: JSONObjectRequestListener) {
             AndroidNetworking.post(URL_LOGIN)
                 .addBodyParameter("username", user)
                 .addBodyParameter("password", password)
-                .addBodyParameter("serial_number", android.os.Build.SERIAL)//"1234567890"
+                .addBodyParameter("serial_number", android.os.Build.SERIAL)
                 .setTag("login")
-                .setPriority(Priority.MEDIUM)
+                .setPriority(Priority.HIGH)
                 .build()
                 .getAsJSONObject(listener)
         }
@@ -78,7 +76,6 @@ class Network {
                 .addBodyParameter("company_id", buyModel.company_id)
                 .addBodyParameter("company_branch_id", buyModel.company_branch_id)
                 .addBodyParameter("tid", PreferencesManager.getInstance().tid)
-                .addBodyParameter("signature", buyModel.signature)
                 .addBodyParameter("user_id", buyModel.user_id)
                 .setTag("buyItem")
                 .setPriority(Priority.HIGH)
@@ -103,6 +100,7 @@ class Network {
                 .addHeaders("Content-type", "application/json")
                 .addHeaders("Accept", "application/json")
                 .addQueryParameter("tid", PreferencesManager.getInstance().tid)
+                .addQueryParameter("user_id", PreferencesManager.getInstance().userId)
                 .addQueryParameter("limit", "100")
                 .setTag("loadOrder")
                 .setPriority(Priority.MEDIUM)
@@ -136,9 +134,9 @@ class Network {
                 .addBodyParameter("customer_name", consignmentParamModel.customer_name)
                 .addBodyParameter("company_id", consignmentParamModel.company_id)
                 .addBodyParameter("company_branch_id", consignmentParamModel.company_branch_id)
-                .addBodyParameter("signature", consignmentParamModel.signature)
                 .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .addBodyParameter("user_id", consignmentParamModel.user_id)
+                .addBodyParameter("image_cover", consignmentParamModel.image_cover)
                 .setTag("orderConsignment")
                 .setPriority(Priority.HIGH)
                 .build()
@@ -211,7 +209,6 @@ class Network {
                 .addBodyParameter("customer_phonenumber", sellParamModel.customer_phonenumber)
                 .addBodyParameter("product", Gson().toJson(sellParamModel.product))
                 .addBodyParameter("total_price", sellParamModel.total_price.toString())
-                .addBodyParameter("signature", sellParamModel.signature)
                 .addBodyParameter("user_id", PreferencesManager.getInstance().userId)
                 .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("sellItem")
@@ -232,7 +229,6 @@ class Network {
                 .addBodyParameter("customer_image", interestParamModel.customer_image)
                 .addBodyParameter("customer_phonenumber", interestParamModel.customer_phonenumber)
                 .addBodyParameter("interest", Gson().toJson(interestParamModel.interest))
-                .addBodyParameter("signature", interestParamModel.signature)
                 .addBodyParameter("user_id", interestParamModel.user_id)
                 .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("interest")
@@ -255,7 +251,6 @@ class Network {
                 .addBodyParameter("interest", Gson().toJson(redeemParamModel.interest))
                 .addBodyParameter("principle_price", redeemParamModel.principle_price)
                 .addBodyParameter("mulct_price", redeemParamModel.mulct_price)
-                .addBodyParameter("signature", redeemParamModel.signature)
                 .addBodyParameter("user_id", redeemParamModel.user_id)
                 .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("interest")
@@ -276,7 +271,6 @@ class Network {
                 .addBodyParameter("customer_phonenumber", lendParamModel.customer_phonenumber)
                 .addBodyParameter("product", Gson().toJson(lendParamModel.product))
                 .addBodyParameter("deadline", lendParamModel.deadline)
-                .addBodyParameter("signature", lendParamModel.signature)
                 .addBodyParameter("user_id", PreferencesManager.getInstance().userId)
                 .addBodyParameter("tid", PreferencesManager.getInstance().tid)
                 .setTag("sellItem")
@@ -296,7 +290,6 @@ class Network {
                 .addBodyParameter("customer_address", returnParamModel.customer_address)
                 .addBodyParameter("customer_image", returnParamModel.customer_image)
                 .addBodyParameter("customer_phonenumber", returnParamModel.customer_phonenumber)
-                .addBodyParameter("signature", returnParamModel.signature)
                 .addBodyParameter("product", Gson().toJson(returnParamModel.product))
                 .addBodyParameter("user_id", PreferencesManager.getInstance().userId)
                 .addBodyParameter("tid", PreferencesManager.getInstance().tid)

@@ -30,7 +30,9 @@ import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import com.tss.quikpawn.models.OrderModel
+import com.tss.quikpawn.models.TssPrinterParams
 import com.tss.quikpawn.util.Util
+import com.tss.quikpawn.util.Util.Companion.rotageBitmap
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -181,7 +183,7 @@ open class BaseK9Activity: BaseActivity() {
     fun createImageBarcode(message: String?, type: String?): Bitmap? {
         var bitMatrix: BitMatrix? = null
         bitMatrix = when (type) {
-            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, 150, 150)
+            "QR Code" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, 140, 140)
             "Barcode" -> MultiFormatWriter().encode(message, BarcodeFormat.QR_CODE, 150, 150)
             "Barcode" -> MultiFormatWriter().encode(
                 message,
@@ -258,6 +260,28 @@ open class BaseK9Activity: BaseActivity() {
         imgView = img_view
     }
 
+    open fun cameraOpen(imageIndex: Int) {
+        if (!alreadyOpen) {
+            return
+        }
+        index = imageIndex
+        alreadyOpen = false
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if (checkSelfPermission(android.Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_DENIED ||
+                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_DENIED){
+                val permission = arrayOf(android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                requestPermissions(permission,PERMISSION_CODE)
+            }
+            else{
+                openCamera2()
+            }
+        } else {
+            openCamera2()
+        }
+    }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -282,7 +306,7 @@ open class BaseK9Activity: BaseActivity() {
         alreadyOpen = true
         if(resultCode != Activity.RESULT_OK) return
         if (IMAGE_CAPTURE_CODE == requestCode) {
-            imgView?.setImageURI(Uri.parse(imageFilePath))
+            imgView?.setImageBitmap(rotageBitmap(imageFilePath))
         }
     }
 
@@ -302,14 +326,6 @@ open class BaseK9Activity: BaseActivity() {
             //Create a file to store the image
             var photoFile: File? = null
             try {
-
-//                val cw = ContextWrapper(applicationContext)
-//                // path to /data/data/yourapp/app_data/imageDir
-//                // path to /data/data/yourapp/app_data/imageDir
-//                val directory: File = cw.getDir("imageDir", Context.MODE_PRIVATE)
-
-
-
                 val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES+ "/quikpawn")
                 photoFile = File.createTempFile(""+System.currentTimeMillis() ,  /* prefix */
                     ".jpg",         /* suffix */
@@ -378,5 +394,29 @@ open class BaseK9Activity: BaseActivity() {
 
     open fun setTagToImageView(id: String) {
         imgView?.tag = id
+    }
+
+    open fun getAddress(): TssPrinterParams {
+        var printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
+        printerParams1.setText("เลขที่ "+PreferencesManager.getInstance().address.replace(" ", " "))
+        return printerParams1
+    }
+
+    open fun getPhoneNumber(): TssPrinterParams {
+        var printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(22)
+        printerParams1.setText("เบอร์โทร " + PreferencesManager.getInstance().contactPhone)
+        return printerParams1
+    }
+
+    open fun getZipCode(): TssPrinterParams {
+        var printerParams1 = TssPrinterParams()
+        printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+        printerParams1.setTextSize(20)
+        printerParams1.setText("รหัสไปรษณีย์ "+ PreferencesManager.getInstance().zipCode)
+        return printerParams1
     }
 }

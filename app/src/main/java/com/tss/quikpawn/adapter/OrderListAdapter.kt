@@ -3,6 +3,7 @@ package com.tss.quikpawn.adapter
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,24 +49,32 @@ class OrderListAdapter(val context: Context, val listener: OnItemClickListener) 
         holder.orderType?.text = "รายการ "+orderType.typeName
 //        holder.orderType?.setTextColor(orderStatus.color)
         holder.orderImage.shape = MultiImageView.Shape.RECTANGLE
+        holder.orderUserCreate.text = "ผู้ทำรายการ "+orderModel.user_create
         holder.orderImage.rectCorners = 10
+        holder.orderImage.setTag(orderModel.order_code)
         val orderName = StringBuilder()
+        holder.orderImage.clear()
+        var i = 0
         for (product in orderModel.products) {
+            Log.e("panya", "start Tag :"+ orderModel.order_code + ", size : "+orderModel.products.size)
             orderName.append(product.product_name +",")
+            i++
+            if (i>3) continue
                 Glide.with(context) //1
                     .asBitmap()
                     .load(product.image_small)
                     .placeholder(R.drawable.ic_image_black_24dp)
                     .error(R.drawable.ic_broken_image_black_24dp)
-                    .skipMemoryCache(true) //2
                     .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE) //3
                     .into(object : CustomTarget<Bitmap?>() {
                         override fun onResourceReady(
                             resource: Bitmap,
                             transition: Transition<in Bitmap?>?
                         ) {
-                            holder.orderImage.addImage(resource)
+                            Log.e("panya", "onResourceReady Tag :"+ holder.orderImage.getTag()+", isSame :"+ holder.orderImage.getTag().equals(orderModel.order_code))
+                            if (holder.orderImage.getTag().equals(orderModel.order_code)) {
+                                holder.orderImage.addImage(resource)
+                            }
                         }
 
                         override fun onLoadCleared(placeholder: Drawable?) {
@@ -97,4 +106,7 @@ class ViewHolder (view: View) : RecyclerView.ViewHolder(view) {
     val orderContainer = view.order_container
     val orderImage = view.img_order
     val orderName = view.txt_name
+    val orderUserCreate = view.txt_user_create
+
+
 }
