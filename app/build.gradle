@@ -11,7 +11,7 @@ android {
         applicationId "com.tss.quikpawn"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 18git
+        versionCode 18
         versionName "1.8.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //keystore-password 123456
