@@ -1,12 +1,18 @@
 package com.tss.quikpawn.networks
 
+import android.content.Context
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.common.Priority
+import com.androidnetworking.error.ANError
+import com.androidnetworking.interfaces.DownloadListener
+import com.androidnetworking.interfaces.DownloadProgressListener
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.google.gson.Gson
 import com.tss.quikpawn.PreferencesManager
 import com.tss.quikpawn.models.*
+import com.tss.quikpawn.util.Util
 import java.io.File
+
 
 class Network {
 
@@ -27,6 +33,7 @@ class Network {
         val URL_SEARCH_BY_IDCARD = "https://thequikpawn.com/api/v1/search/order/byidcard"
         val URL_LOGOUT = "https://thequikpawn.com/api/v1/logout"
         val URL_LOAD_ORDER = "https://thequikpawn.com/api/v1/search/last/print"
+        val URL_GET_ORDER_PRINT = "https://thequikpawn.com/api/v1/order/print"
 
         fun login(user: String, password: String, listener: JSONObjectRequestListener) {
             AndroidNetworking.post(URL_LOGIN)
@@ -297,6 +304,29 @@ class Network {
                 .setPriority(Priority.MEDIUM)
                 .build()
                 .getAsJSONObject(listener)
+        }
+
+
+
+        fun downloadPDF(url: String, context: Context) {
+            AndroidNetworking.download(url, Util.getAppPath(context), "pdf_test.pdf")
+                .setTag("downloadTest")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .setDownloadProgressListener(object : DownloadProgressListener {
+                    override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
+
+                    }
+                })
+                .startDownload(object : DownloadListener{
+                    override fun onDownloadComplete() {
+
+                    }
+
+                    override fun onError(anError: ANError?) {
+
+                    }
+                })
         }
     }
 }

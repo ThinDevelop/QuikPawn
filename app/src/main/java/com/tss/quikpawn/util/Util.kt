@@ -3,19 +3,21 @@ package com.tss.quikpawn.util
 import android.content.Context
 import android.graphics.*
 import android.os.Build
+import android.os.Environment
 import android.util.Base64
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.centerm.smartpos.aidl.printer.PrinterParams
+import com.example.lakalakdblibapk.R.string.app_name
 import com.tss.quikpawn.R
 import com.tss.quikpawn.models.ProductModel
 import com.tss.quikpawn.models.ProductModel2
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.roundToInt
 
 
 class Util {
@@ -197,6 +199,12 @@ class Util {
                 canvas.drawText(product.price, x, y, paint)
             }
             return bitmap
+        }
+
+        fun getAppPath(context: Context): String? {
+            val dir = File(Environment.getExternalStorageDirectory().toString() + File.separator + "quikpawn" + File.separator)
+            if (!dir.exists()) dir.mkdir()
+            return dir.getPath() + File.separator
         }
 
         fun getTextRect(data: String): Rect {

@@ -35,6 +35,7 @@ import java.lang.reflect.Type
 
 class SellActivity : BaseK9Activity() {
 
+    var productName = HashMap<String, String>()
     var productList = mutableListOf<SellProductModel>()
     var orderCode: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +56,7 @@ class SellActivity : BaseK9Activity() {
                         product.sale.replace(".00", "").toInt()
                     )
                 )
+                productName.put(product.product_code, product.product_name)
                 addItemView(product)
             }
             updateSummaryPrice()
@@ -99,8 +101,14 @@ class SellActivity : BaseK9Activity() {
 
                     var sum = 0L
                     val list = mutableListOf("รหัสลูกค้า : "+ customerId+"\nรายการ\n")
+                    var a = 0
                     for (product in productList) {
-                        list.add(product.product_code+ " : " +Util.addComma(product.sale_price.toString()))
+                        a++
+                        var name = product.product_code
+                        productName.get(product.product_code)?.let {
+                            name = it
+                        }
+                        list.add(a.toString() +". "+name+ " : " +Util.addComma(product.sale_price.toString()))
                         sum += product.sale_price
                     }
                     list.add("รวม "+ Util.addComma(sum.toString()) +" บาท")
@@ -248,6 +256,7 @@ class SellActivity : BaseK9Activity() {
                     val data = Gson().fromJson(dataJsonObj.toString(), ProductModel::class.java)
                     val product = SellProductModel(key, 0)//Integer.parseInt(data.sale.replace(".00", "")))
                     productList.add(product)
+                    productName.put(key, data.product_name)
                     if (data.status_id.equals(ProductStatus.READY_FOR_SALE.statusId)) {
                         addItemView(data)
                         updateSummaryPrice()

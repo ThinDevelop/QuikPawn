@@ -1,6 +1,7 @@
 package com.tss.quikpawn
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -9,6 +10,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
+import android.print.PrintManager
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
@@ -16,13 +20,18 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.androidnetworking.AndroidNetworking
+import com.androidnetworking.common.Priority
 import com.androidnetworking.error.ANError
+import com.androidnetworking.interfaces.DownloadListener
+import com.androidnetworking.interfaces.DownloadProgressListener
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.google.gson.Gson
 import com.tss.quikpawn.adapter.ConsignListAdapter
+import com.tss.quikpawn.adapter.PdfDocumentAdapter
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
@@ -40,7 +49,6 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.roundToInt
 
 class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickListener{
     var expire = "0"
@@ -723,5 +731,41 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
 
     override fun onTakePhotoClick(index: Int) {
         cameraOpen(index)
+    }
+
+    fun downloadPDF(url: String, context: Context) {
+        AndroidNetworking.download(url, Util.getAppPath(context), "pdf_test.pdf")
+            .setTag("downloadTest")
+            .setPriority(Priority.MEDIUM)
+            .build()
+            .setDownloadProgressListener(object : DownloadProgressListener {
+                override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
+
+                }
+            })
+            .startDownload(object : DownloadListener {
+                override fun onDownloadComplete() {
+                    printPDF()
+                }
+
+                override fun onError(anError: ANError?) {
+
+                }
+            })
+    }
+
+    private fun printPDF() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            val printManager: PrintManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+            try {
+                val printDocumentAdapter: PrintDocumentAdapter = PdfDocumentAdapter(
+                    this@ConsignmentActivity,
+                    Util.getAppPath(this@ConsignmentActivity).toString() + "pdf_test.pdf"
+                )
+                printManager.print("Document", printDocumentAdapter, PrintAttributes.Builder().build())
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }
