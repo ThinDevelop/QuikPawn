@@ -41,6 +41,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class BorrowActivity: BaseK9Activity() {
+    var productName = HashMap<String, String>()
     var productList = mutableListOf<SellProductModel>()
     var productModelList = mutableListOf<ProductModel>()
     var picker: DatePickerDialog? = null
@@ -122,9 +123,8 @@ class BorrowActivity: BaseK9Activity() {
                         DialogUtil.showNotiDialog(this@BorrowActivity, getString(R.string.data_missing), getString(R.string.please_add_sale_price))
                         return@setOnClickListener
                     }
-
-                    list.add(getProductNameByCode(product.product_code) + " : " + Util.addComma(product.sale_price.toString())+ " บาท")
                     sum ++
+                    list.add(sum.toString() +". "+getProductNameByCode(product.product_code) + " : " + Util.addComma(product.sale_price.toString())+ " บาท")
                 }
                 list.add("รวม " + sum.toString() + " ชิ้น")
 

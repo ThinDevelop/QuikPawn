@@ -139,10 +139,12 @@ class BuyActivity : BaseK9Activity(), BuyListAdapter.OnItemClickListener {
                 }
 
                 var sum = 0.0
+                var a = 0
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
+                    a++
                     list.add(
-                        product.name + " : " + Util.addComma(
+                        a.toString()+". "+product.name + " : " + Util.addComma(
                             product.cost
                         ) + " บาท"
                     )

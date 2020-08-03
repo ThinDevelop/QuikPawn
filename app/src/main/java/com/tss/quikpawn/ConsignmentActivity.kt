@@ -121,9 +121,11 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                 }
 
                 var sum = 0.0
+                var a = 0
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
-                    list.add(product.name + " : " + Util.addComma(product.cost)+" บาท")
+                    a++
+                    list.add(a.toString()+". "+product.name + " : " + Util.addComma(product.cost)+" บาท")
                     sum += NumberTextWatcherForThousand.trimCommaOfString(product.cost).toDouble()
                 }
                 list.add("รวม " + Util.addComma(sum.toString()) + " บาท")

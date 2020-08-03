@@ -83,8 +83,8 @@ class ReturnActivity : BaseK9Activity() {
                 list.add("รหัสรายการ "+orderCode!!+ "\nรายการ")
                 var sum = 0
                 for (product in productList) {
-                    list.add(getProductNameByCode(product.product_code))
                     sum ++
+                    list.add(sum.toString()+". "+getProductNameByCode(product.product_code))
                 }
                 list.add("รวม " + sum.toString() + " ชิ้น")
                 if (productList.isEmpty()) {
