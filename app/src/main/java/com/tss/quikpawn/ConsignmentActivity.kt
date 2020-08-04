@@ -57,6 +57,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
     var imageIdFilePath = ""
     private var IMAGE_CAPTURE_IDCARD_CODE = 2001
     lateinit var consignListAdapter: ConsignListAdapter
+    var orderModel: OrderModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +77,54 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
 
         img_take_card.setOnClickListener {
             openCameraForCard()
+        }
+
+        btn_80mm.setOnClickListener {
+            orderModel?.let {
+                Network.get80mmPDFLink(it.order_code, object : JSONObjectRequestListener {
+                    override fun onResponse(response: JSONObject?) {
+                        response?.let {
+                            val statusCode = it.getInt("status_code")
+                            if (statusCode == 200 && it.has("data")) {
+                                val data = it.getJSONObject("data")
+                                val url = data.getString("url")
+                                Log.e("url", url)
+                                downloadPDF(url, this@ConsignmentActivity)
+                            } else {
+                                DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder))
+                            }
+                        }
+                    }
+
+                    override fun onError(anError: ANError?) {
+                        DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), anError?.message)
+                    }
+                })
+            }
+        }
+
+        btn_a5.setOnClickListener {
+            orderModel?.let {
+                Network.getA5PDFLink(it.order_code, object : JSONObjectRequestListener {
+                    override fun onResponse(response: JSONObject?) {
+                        response?.let {
+                            val statusCode = it.getInt("status_code")
+                            if (statusCode == 200 && it.has("data")) {
+                                val data = it.getJSONObject("data")
+                                val url = data.getString("url")
+                                Log.e("url", url)
+                                downloadPDF(url, this@ConsignmentActivity)
+                            } else {
+                                DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder))
+                            }
+                        }
+                    }
+
+                    override fun onError(anError: ANError?) {
+                        DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), anError?.message)
+                    }
+                })
+            }
         }
 
         btn_ok.setOnClickListener {
@@ -156,12 +205,15 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                             val status = response.getString("status_code")
                             if (status == "200") {
                                 val data = response.getJSONObject("data")
-                                val orderModel = Gson().fromJson(data.toString(), OrderModel::class.java)
-                                printSlip1(orderModel)
-                                Handler().postDelayed({
-                                    printSlip1(orderModel)
-                                }, 3000)
-                                showConfirmDialog(data)
+                                orderModel = Gson().fromJson(data.toString(), OrderModel::class.java)
+                                btn_ok.visibility = View.GONE
+                                action_response_layout.visibility = View.VISIBLE
+
+//                                printSlip1(orderModel)
+//                                Handler().postDelayed({
+//                                    printSlip1(orderModel)
+//                                }, 3000)
+//                                showConfirmDialog(data)
                             } else {
                                 showResponse(status, this@ConsignmentActivity)
                             }
@@ -192,6 +244,8 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                 Toast.makeText(this@ConsignmentActivity, "ข้อมูลไม่ครบถ้วน", Toast.LENGTH_LONG).show()
             }
         }
+
+
         new_item.callOnClick()
         initialK9()
     }
@@ -742,7 +796,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
             .build()
             .setDownloadProgressListener(object : DownloadProgressListener {
                 override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
-
+                    //loading
                 }
             })
             .startDownload(object : DownloadListener {
@@ -751,7 +805,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                 }
 
                 override fun onError(anError: ANError?) {
-
+                    Toast.makeText(this@ConsignmentActivity, getString(R.string.connect_error), Toast.LENGTH_SHORT).show()
                 }
             })
     }

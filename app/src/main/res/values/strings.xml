@@ -23,6 +23,8 @@
     <string name="msg_search_card_barcode_order">ค้นหาด้วย บัตร ปชช./บาร์โค้ด/เลขที่รายการ</string>
     <string name="msg_confirm_title_order">ยืนยันทำรายการ</string>
     <string name="msg_confirm_print">ยืนยันปริ้น</string>
+    <string name="print_80mm">พิมพ์ 80มม</string>
+    <string name="print_a5">พิมพ์ A5</string>
 
     <string name="text_status">สถานะ %s</string>
 

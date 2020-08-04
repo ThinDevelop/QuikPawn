@@ -49,13 +49,13 @@ class PdfDocumentAdapter(context: Context, path: String): PrintDocumentAdapter()
             val file = File(path)
             input = FileInputStream(file)
             output = FileOutputStream(parcelFileDescriptor?.fileDescriptor)
-//            val buf = ByteArray(input.available())
-//            var size = 0
-//
-//            while (size >= 0 && !cancellationSignal!!.isCanceled()) {
-//                output.write(buf, 0, size)
-//                size = input.read(buf)
-//            }
+            val buf = ByteArray(input.available())
+            var size = 0
+
+            while (size >= 0 && !cancellationSignal!!.isCanceled()) {
+                output.write(buf, 0, size)
+                size = input.read(buf)
+            }
             if (!cancellationSignal!!.isCanceled) {
                 writeResultCallback!!.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
             }else {

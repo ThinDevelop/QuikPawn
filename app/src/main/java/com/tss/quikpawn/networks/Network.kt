@@ -35,6 +35,9 @@ class Network {
         val URL_LOAD_ORDER = "https://thequikpawn.com/api/v1/search/last/print"
         val URL_GET_ORDER_PRINT = "https://thequikpawn.com/api/v1/order/print"
 
+        val PAPER_TYPE_A5 = "a5"
+        val PAPER_TYPE_80MM = "80mm"
+
         fun login(user: String, password: String, listener: JSONObjectRequestListener) {
             AndroidNetworking.post(URL_LOGIN)
                 .addBodyParameter("username", user)
@@ -306,7 +309,27 @@ class Network {
                 .getAsJSONObject(listener)
         }
 
+        fun getA5PDFLink(orderCode: String, listener: JSONObjectRequestListener) {
+            getPDFLink(orderCode, PAPER_TYPE_A5, listener)
+        }
 
+        fun get80mmPDFLink(orderCode: String, listener: JSONObjectRequestListener) {
+            getPDFLink(orderCode, PAPER_TYPE_80MM, listener)
+        }
+
+        private fun getPDFLink(orderCode: String, paper: String, listener: JSONObjectRequestListener) {
+            AndroidNetworking.get(URL_GET_ORDER_PRINT)
+                .addHeaders("Authorization", "Bearer "+ PreferencesManager.getInstance().token)
+                .addHeaders("Content-type", "application/json")
+                .addHeaders("Accept", "application/json")
+                .addQueryParameter("order_code", orderCode)
+                .addQueryParameter("paper", paper)
+                .addQueryParameter("user_id", PreferencesManager.getInstance().userId)
+                .setTag("category")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(listener)
+        }
 
         fun downloadPDF(url: String, context: Context) {
             AndroidNetworking.download(url, Util.getAppPath(context), "pdf_test.pdf")
