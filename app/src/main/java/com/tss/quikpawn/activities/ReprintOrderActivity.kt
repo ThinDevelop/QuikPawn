@@ -24,6 +24,7 @@ import com.tss.quikpawn.PreferencesManager
 import com.tss.quikpawn.R
 import com.tss.quikpawn.ScanActivity
 import com.tss.quikpawn.adapter.OrderListAdapter
+import com.tss.quikpawn.adapter.PdfDocumentAdapter
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.models.OrderType.getOrderType
 import com.tss.quikpawn.networks.Network
@@ -34,7 +35,6 @@ import org.json.JSONObject
 import java.lang.reflect.Type
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.roundToInt
 
 class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListener {
     lateinit var orderList: OrderListAdapter
@@ -546,15 +546,12 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
             printerParams1.setText("รหัสปชช. " + data.idcard +"\nรายการสินค้า")
             textList.add(printerParams1)
 
-            var i = 0
-            for (product in data.products) {
-                i++
                 var name = product.product_name
                 var detail = product.detail
                 printerParams1 = TssPrinterParams()
                 printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
                 printerParams1.setTextSize(20)
-                printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+                printerParams1.setText(name.replace(" "," ")+"\n"+detail.replace(" "," "))
                 textList.add(printerParams1)
 
                 val listProduct = arrayListOf<ProductModel>()
@@ -566,7 +563,6 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
                 printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
                 printerParams1.setBitmap(listBitmap)
                 textList.add(printerParams1)
-            }
 
             textList.add(Util.dashSignature())
 

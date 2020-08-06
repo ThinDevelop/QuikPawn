@@ -206,14 +206,14 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                             if (status == "200") {
                                 val data = response.getJSONObject("data")
                                 orderModel = Gson().fromJson(data.toString(), OrderModel::class.java)
-                                btn_ok.visibility = View.GONE
-                                action_response_layout.visibility = View.VISIBLE
+//                                btn_ok.visibility = View.GONE
+//                                action_response_layout.visibility = View.VISIBLE
 
-//                                printSlip1(orderModel)
-//                                Handler().postDelayed({
-//                                    printSlip1(orderModel)
-//                                }, 3000)
-//                                showConfirmDialog(data)
+                                printSlip1(orderModel!!)
+                                Handler().postDelayed({
+                                    printSlip1(orderModel!!)
+                                }, 3000)
+                                showConfirmDialog(data)
                             } else {
                                 showResponse(status, this@ConsignmentActivity)
                             }
@@ -248,6 +248,17 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
 
         new_item.callOnClick()
         initialK9()
+    }
+
+    fun showFinishView() {
+        new_item.visibility = View.GONE
+        edt_interest_rate.isEnabled = false
+        edt_time.isEnabled = false
+        edt_address.isEnabled = false
+        edt_phonenumber.isEnabled = false
+        edt_idcard.isEnabled = false
+        edt_name.isEnabled = false
+        img_take_card.setOnClickListener(null)
     }
 
     override fun onRequestPermissionsResult(

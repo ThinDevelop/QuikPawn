@@ -400,7 +400,8 @@ open class BaseK9Activity: BaseActivity() {
         var printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(20)
-        printerParams1.setText("เลขที่ "+PreferencesManager.getInstance().address.replace(" ", " "))
+        val address = "เลขที่ " + PreferencesManager.getInstance().address.replace(" ", " ")
+        printerParams1.setText(address)
         return printerParams1
     }
 

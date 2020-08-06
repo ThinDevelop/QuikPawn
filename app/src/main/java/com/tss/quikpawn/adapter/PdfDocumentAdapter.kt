@@ -9,6 +9,7 @@ import android.print.PageRange
 import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
+import android.util.Log
 import androidx.annotation.RequiresApi
 import java.io.*
 
@@ -69,6 +70,12 @@ class PdfDocumentAdapter(var context: Context, var path: String) :
                 e.printStackTrace()
             }
         }
+    }
+
+
+    override fun onFinish() {
+        super.onFinish()
+        Log.e("PdfDocumentAdapter", "onFinish")
     }
 
 }

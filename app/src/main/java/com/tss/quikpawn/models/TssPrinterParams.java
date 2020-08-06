@@ -7,6 +7,12 @@ public class TssPrinterParams extends PrinterParams {
     public TssPrinterParams() {
         setBold(true);
     }
+
+    @Override
+    public void setText(String text) throws Exception {
+        super.setText(text.replace((char) ' ', (char) 0x7F));
+    }
+
     @Override
     public boolean isBold() {
         return true;
