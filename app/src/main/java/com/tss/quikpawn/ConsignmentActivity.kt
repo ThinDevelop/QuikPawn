@@ -19,6 +19,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.common.Priority
@@ -208,12 +209,35 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                                 orderModel = Gson().fromJson(data.toString(), OrderModel::class.java)
 //                                btn_ok.visibility = View.GONE
 //                                action_response_layout.visibility = View.VISIBLE
+                                orderModel?.let {
+                                    loading.visibility = View.VISIBLE
+                                    Network.getPDFLink(it.order_code, PreferencesManager.getInstance().paperSize, object : JSONObjectRequestListener {
+                                        override fun onResponse(response: JSONObject?) {
+                                            response?.let {
+                                                val statusCode = it.getInt("status_code")
+                                                if (statusCode == 200 && it.has("data")) {
+                                                    val data = it.getJSONObject("data")
+                                                    val url = data.getString("url")
+                                                    Log.e("url", url)
+                                                    downloadPDF(url, this@ConsignmentActivity)
+                                                } else {
+                                                    DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder))
+                                                }
+                                            }
+                                            loading.visibility = View.GONE
+                                        }
 
-                                printSlip1(orderModel!!)
-                                Handler().postDelayed({
-                                    printSlip1(orderModel!!)
-                                }, 3000)
-                                showConfirmDialog(data)
+                                        override fun onError(anError: ANError?) {
+                                            loading.visibility = View.GONE
+                                            DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), anError?.message)
+                                        }
+                                    })
+                                }
+//                                printSlip1(orderModel!!)
+//                                Handler().postDelayed({
+//                                    printSlip1(orderModel!!)
+//                                }, 3000)
+//                                showConfirmDialog(data)
                             } else {
                                 showResponse(status, this@ConsignmentActivity)
                             }
@@ -240,11 +264,9 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                 })
 
             } else {
-
                 Toast.makeText(this@ConsignmentActivity, "ข้อมูลไม่ครบถ้วน", Toast.LENGTH_LONG).show()
             }
         }
-
 
         new_item.callOnClick()
         initialK9()
@@ -603,7 +625,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n\n___________________")
+        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n\n\n\n___________________")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)

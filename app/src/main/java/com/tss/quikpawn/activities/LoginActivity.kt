@@ -1,7 +1,9 @@
 package com.tss.quikpawn.activities
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +14,8 @@ import android.print.PrintManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager
@@ -26,6 +30,9 @@ import java.util.*
 
 
 class LoginActivity: BaseActivity() {
+
+    val PERMISSIONS_REQUEST_CODE = 103
+
     override fun onDeviceConnected(deviceManager: AidlDeviceManager?, capy: Boolean) {
     }
 
@@ -36,8 +43,45 @@ class LoginActivity: BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         logout()
+        setupPermissions()
         Log.e("panya", "SERIAL : "+ android.os.Build.SERIAL)
         version.text = "version "+BuildConfig.VERSION_NAME
+    }
+
+    private fun setupPermissions() {
+        val cameraPermission = ContextCompat.checkSelfPermission(this,
+            Manifest.permission.CAMERA)
+        val readPermission = ContextCompat.checkSelfPermission(this,
+            Manifest.permission.READ_EXTERNAL_STORAGE)
+        val writePermission = ContextCompat.checkSelfPermission(this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        if (cameraPermission != PackageManager.PERMISSION_GRANTED ||
+            readPermission != PackageManager.PERMISSION_GRANTED ||
+            writePermission != PackageManager.PERMISSION_GRANTED ) {
+            Log.i("CAMERA_REQUEST_CODE", "Permission to record denied")
+            makeRequest()
+        }
+    }
+
+    private fun makeRequest() {
+        ActivityCompat.requestPermissions(this,
+            arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+            PERMISSIONS_REQUEST_CODE)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            PERMISSIONS_REQUEST_CODE -> {
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Log.i("CAMERA_REQUEST_CODE", "Permission has been denied by user")
+                    this.finish()
+                } else {
+                    Log.i("CAMERA_REQUEST_CODE", "Permission has been granted by user")
+                }
+            }
+        }
     }
 
     fun logout() {
@@ -117,6 +161,7 @@ class LoginActivity: BaseActivity() {
                     val shopTypeCode = shop.getString("type_code")
                     val shopTypeName = shop.getString("type_name")
                     val shopZipCode = shop.getString("zipcode")
+                    val paperSize = shop.getString("paper_size")
 
                     PreferencesManager.getInstance().token = response.getString("access_token")
                     PreferencesManager.getInstance().userId = id
@@ -140,6 +185,7 @@ class LoginActivity: BaseActivity() {
                     PreferencesManager.getInstance().typeCode = shopTypeCode
                     PreferencesManager.getInstance().typeName = shopTypeName
                     PreferencesManager.getInstance().zipCode = shopZipCode
+                    PreferencesManager.getInstance().paperSize = paperSize
 
                     startActivity(Intent(this@LoginActivity, MainMenuActivity::class.java))
                     this@LoginActivity.finish()

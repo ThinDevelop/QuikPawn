@@ -28,6 +28,17 @@ public class PreferencesManager {
     private static final String KEY_TYPE_CODE = "type_code";
     private static final String KEY_TYPE_NAME = "type_name";
     private static final String KEY_ZIP_CODE = "zip_code";
+    private static final String KEY_PAPER_SIZE = "paper_size";
+
+    public void setPaperSize(String value) {
+        mPref.edit()
+                .putString(KEY_PAPER_SIZE, value)
+                .commit();
+    }
+
+    public String getPaperSize() {
+        return mPref.getString(KEY_PAPER_SIZE, "");
+    }
 
     public void setZipCode(String value) {
         mPref.edit()

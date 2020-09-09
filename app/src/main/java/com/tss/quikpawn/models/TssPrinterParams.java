@@ -10,7 +10,7 @@ public class TssPrinterParams extends PrinterParams {
 
     @Override
     public void setText(String text) throws Exception {
-        super.setText(text.replace((char) ' ', (char) 0x7F));
+        super.setText(text.replace((char) ' ', (char) 0x7F));//replace(" ", " "));//
     }
 
     @Override

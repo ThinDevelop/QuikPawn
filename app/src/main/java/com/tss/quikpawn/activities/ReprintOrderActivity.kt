@@ -1,19 +1,28 @@
 package com.tss.quikpawn.activities
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
-import android.os.Environment
-import android.os.Handler
+import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.os.*
+import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
 import android.print.PrintManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.androidnetworking.AndroidNetworking
+import com.androidnetworking.common.Priority
 import com.androidnetworking.error.ANError
+import com.androidnetworking.interfaces.DownloadListener
+import com.androidnetworking.interfaces.DownloadProgressListener
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
@@ -52,15 +61,16 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
                 val status = response.getString("status_code")
                 if (!status.equals("200")) {
                     showResponse(status, this@ReprintOrderActivity)
-                }
-                val data = response.getJSONArray("data")
-                val productListType: Type = object : TypeToken<ArrayList<OrderModel>?>() {}.type
-                val orderArray: ArrayList<OrderModel> =
-                    Gson().fromJson(data.toString(), productListType)
-                orderList.updateData(orderArray)
-                progress.visibility = View.GONE
-                if (orderArray.isEmpty()) {
-                    no_data.visibility = View.VISIBLE
+                } else {
+                    val data = response.getJSONArray("data")
+                    val productListType: Type = object : TypeToken<ArrayList<OrderModel>?>() {}.type
+                    val orderArray: ArrayList<OrderModel> =
+                        Gson().fromJson(data.toString(), productListType)
+                    orderList.updateData(orderArray)
+                    progress.visibility = View.GONE
+                    if (orderArray.isEmpty()) {
+                        no_data.visibility = View.VISIBLE
+                    }
                 }
             }
 
@@ -155,27 +165,6 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
                 printBuySlip(orderModel, true)
             }
         })
-    }
-
-    fun printPdf() {
-        val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
-        val printAdapter = PdfDocumentAdapter(this@ReprintOrderActivity,  Environment.getExternalStorageDirectory().absolutePath+ "/insurancePDF.pdf")
-
-        printManager.print("test print", printAdapter, null)
-
-//        val outputFile = File(
-//            Environment.getExternalStorageDirectory().absolutePath,
-//            "insurancePDF.pdf"
-//        )
-//        val uri: Uri = Uri.fromFile(outputFile)
-//
-//        val share = Intent()
-//        share.action = Intent.ACTION_SEND
-////        share.type = "text/plain"
-//        share.type = "application/pdf"
-//        share.putExtra(Intent.EXTRA_STREAM, uri)
-////        share.setPackage("com.tss.quikpawn")
-//        startActivity(share)
     }
 
     fun printQRCode(code: String) {
@@ -577,17 +566,18 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
     }
 
     fun manageConsignOrder(orderModel: OrderModel) {
-        printConsignSlip1(orderModel)
-        Handler().postDelayed({
-            printConsignSlip1(orderModel)
-        }, 3000)
-        val list = listOf(getString(R.string.dialog_msg_for_shop))
-        val dialogParamModel = DialogParamModel("ปริ้น", list, getString(R.string.text_ok), getString(R.string.text_skip))
-        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
-            if (it.equals(DialogUtil.CONFIRM)) {
-                printConsignSlip(orderModel, true)
-            }
-        })
+        consignmentPrint(orderModel.order_code)
+//        printConsignSlip1(orderModel)
+//        Handler().postDelayed({
+//            printConsignSlip1(orderModel)
+//        }, 3000)
+//        val list = listOf(getString(R.string.dialog_msg_for_shop))
+//        val dialogParamModel = DialogParamModel("ปริ้น", list, getString(R.string.text_ok), getString(R.string.text_skip))
+//        DialogUtil.showConfirmDialog(dialogParamModel, this, DialogUtil.InputTextBackListerner {
+//            if (it.equals(DialogUtil.CONFIRM)) {
+//                printConsignSlip(orderModel, true)
+//            }
+//        })
     }
 
     fun printConsignSlip1(data: OrderModel) {
@@ -652,14 +642,14 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("ข้าพเจ้า"+data.customer_name+" \nบัตรประชาชนเลขที่ "+data.idcard+"\n" +
+        printerParams1.setText("ข้าพเจ้า "+data.customer_name+" \nบัตรประชาชนเลขที่ "+data.idcard+"\n" +
                 "ผู้ขายฝากอยู่บ้านเลขที่ "+data.customer_address+"\n")
         textList.add(printerParams1)
 
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("ได้ทำหนังสือขายฝากนี้ให้แก่ นาย"+PreferencesManager.getInstance().contact+" ดังมีข้อความดังต่อไปนี้\n" + "   ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้\n\n")
+        printerParams1.setText("ได้ทำหนังสือขายฝากนี้ให้แก่\n นาย"+PreferencesManager.getInstance().contact+" \nดังมีข้อความดังต่อไปนี้\n" + "   ข้อ 1. ผู้ขายฝากได้นำทรัพย์สินปรากฎตามรายการดังนี้\n\n")
         textList.add(printerParams1)
 
         var i = 0
@@ -698,7 +688,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+  Util.addComma(sum.toString()) +" บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
+        printerParams1.setText("\n\nมาขายฝากให้เป็นจำนวนเงิน \n"+  Util.addComma(sum.toString()) +" บาท\nและได้รับเงินไปเสร็จแล้วแต่วันทำ\nหนังสือนี้\nข้อ 2. ผู้ขายฝากยอมให้คิดดอกเบี้ย\nตามจำนวนเงินที่ขายฝากไว้\n" +
                 " นับตั้งแต่วันทำหนังสือนี้เป็นต้นไป\n จนกว่าจะมาไถ่ถอนคืน\nในวันที่ "+ calendar.get(
             Calendar.DATE) +" เดือน "+ Util.getMonth(calendar) +" พ.ศ."+ (calendar.get(Calendar.YEAR)+543)+"\n" +
                 "ข้อ 3. ผู้ขายฝากยืนยันว่าผู้ขายฝาก\nเป็นผู้มีกรรมสิทธิ์ในทรัพย์สินที่มา\nขายฝากแต่เพียงผู้เดียวและไม่มีคู่สมรสแต่อย่างใด\n" +
@@ -772,7 +762,7 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n\n___________________")
+        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n\n\n\n___________________")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
@@ -1542,6 +1532,78 @@ class ReprintOrderActivity : BaseK9Activity(), OrderListAdapter.OnItemClickListe
         textList.add(printerParams1)
         textList.add(Util.dashLine(this@ReprintOrderActivity))
         printdata(textList)
+    }
+
+    fun consignmentPrint(orderCode: String) {
+        progress.visibility = View.VISIBLE
+        Network.getPDFLink(orderCode, PreferencesManager.getInstance().paperSize, object : JSONObjectRequestListener {
+            override fun onResponse(response: JSONObject?) {
+                response?.let {
+                    val statusCode = it.getInt("status_code")
+                    if (statusCode == 200 && it.has("data")) {
+                        val data = it.getJSONObject("data")
+                        val url = data.getString("url")
+                        Log.e("url", url)
+                        downloadPDF(url, this@ReprintOrderActivity)
+                    } else {
+                        DialogUtil.showNotiDialog(this@ReprintOrderActivity, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder))
+                    }
+                }
+                progress.visibility = View.GONE
+            }
+
+            override fun onError(anError: ANError?) {
+                progress.visibility = View.GONE
+                var status = anError?.errorCode.toString()
+                anError?.errorBody?.let {
+                    val jObj = JSONObject(it)
+                    if (jObj.has("status_code")) {
+                        status = jObj.getString("status_code")
+                    }
+                }
+                showResponse(status, this@ReprintOrderActivity)
+            }
+        })
+    }
+    fun downloadPDF(url: String, context: Context) {
+        AndroidNetworking.download(url, Util.getAppPath(context), "pdf_test.pdf")
+            .setTag("downloadTest")
+            .setPriority(Priority.MEDIUM)
+            .build()
+            .setDownloadProgressListener(object : DownloadProgressListener {
+                override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
+                    //loading
+                }
+            })
+            .startDownload(object : DownloadListener {
+                override fun onDownloadComplete() {
+                    printPDF()
+                }
+
+                override fun onError(anError: ANError?) {
+                    Toast.makeText(this@ReprintOrderActivity, getString(R.string.connect_error), Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    private fun printPDF() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            val printManager: PrintManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+            try {
+                val printDocumentAdapter: PrintDocumentAdapter = PdfDocumentAdapter(
+                    this@ReprintOrderActivity,
+                    Util.getAppPath(this@ReprintOrderActivity).toString() + "pdf_test.pdf"
+                )
+                val pm: PackageManager = this@ReprintOrderActivity.getPackageManager()
+                if (!pm.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
+                    Log.i("test hasSystemFeature", "Feature android.software.print not available"
+                    )
+                }
+                printManager.print("Document", printDocumentAdapter, PrintAttributes.Builder().build())
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
 }

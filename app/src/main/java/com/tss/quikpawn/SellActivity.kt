@@ -312,6 +312,7 @@ class SellActivity : BaseK9Activity() {
                     list.add(product)
                 }
             }
+            productList.clear()
             productList = list
             updateSummaryPrice()
             (item_container.findViewWithTag<View>(it.tag).parent as ViewManager).removeView(

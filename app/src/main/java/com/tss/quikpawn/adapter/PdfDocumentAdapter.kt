@@ -1,7 +1,7 @@
 package com.tss.quikpawn.adapter
 
+import android.app.Activity
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
@@ -10,11 +10,10 @@ import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.util.Log
-import androidx.annotation.RequiresApi
+import com.tss.quikpawn.activities.ReprintOrderActivity
 import java.io.*
 
-@RequiresApi(api = Build.VERSION_CODES.KITKAT)
-class PdfDocumentAdapter(var context: Context, var path: String) :
+class PdfDocumentAdapter(var activity: Activity, var path: String) :
     PrintDocumentAdapter() {
     override fun onLayout(
         printAttributes: PrintAttributes,
@@ -37,6 +36,10 @@ class PdfDocumentAdapter(var context: Context, var path: String) :
         }
     }
 
+    override fun onStart() {
+        Log.e("PdfDocumentAdapter", "onStart")
+        super.onStart()
+    }
     override fun onWrite(
         pageRanges: Array<PageRange>,
         parcelFileDescriptor: ParcelFileDescriptor,
@@ -75,6 +78,9 @@ class PdfDocumentAdapter(var context: Context, var path: String) :
 
     override fun onFinish() {
         super.onFinish()
+        if (activity !is ReprintOrderActivity) {
+            activity.finish()
+        }
         Log.e("PdfDocumentAdapter", "onFinish")
     }
 

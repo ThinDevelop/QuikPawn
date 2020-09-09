@@ -317,7 +317,7 @@ class Network {
             getPDFLink(orderCode, PAPER_TYPE_80MM, listener)
         }
 
-        private fun getPDFLink(orderCode: String, paper: String, listener: JSONObjectRequestListener) {
+        fun getPDFLink(orderCode: String, paper: String, listener: JSONObjectRequestListener) {
             AndroidNetworking.get(URL_GET_ORDER_PRINT)
                 .addHeaders("Authorization", "Bearer "+ PreferencesManager.getInstance().token)
                 .addHeaders("Content-type", "application/json")
@@ -331,25 +331,5 @@ class Network {
                 .getAsJSONObject(listener)
         }
 
-        fun downloadPDF(url: String, context: Context) {
-            AndroidNetworking.download(url, Util.getAppPath(context), "pdf_test.pdf")
-                .setTag("downloadTest")
-                .setPriority(Priority.MEDIUM)
-                .build()
-                .setDownloadProgressListener(object : DownloadProgressListener {
-                    override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
-
-                    }
-                })
-                .startDownload(object : DownloadListener{
-                    override fun onDownloadComplete() {
-
-                    }
-
-                    override fun onError(anError: ANError?) {
-
-                    }
-                })
-        }
     }
 }
