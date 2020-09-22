@@ -59,6 +59,9 @@
 
     <string name="upload_error_please_upload_again">การอัพโหลดข้อมูลผิดพลาด กรุณาทำถ่ายรูปใหม่อีกครั้ง</string>
     <string name="delete_tag_key">delete_key</string>
+    <string name="sys_install_back_exception">Install Error</string>
+    <string name="sys_install_failed">Install Failed</string>
+    <string name="sys_install_success">Install Successfully</string>
 
 
 </resources>

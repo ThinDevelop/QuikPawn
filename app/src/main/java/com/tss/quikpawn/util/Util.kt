@@ -68,20 +68,6 @@ class Util {
             }else {
                 bitmap2 = bitmap
             }
-//            val ei = ExifInterface(filePath)
-//            val orientation: Int = ei.getAttributeInt(
-//                ExifInterface.TAG_ORIENTATION,
-//                ExifInterface.ORIENTATION_UNDEFINED
-//            )
-//
-//            var rotatedBitmap = bitmap
-//            when (orientation) {
-//                ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
-//                ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
-//                ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
-//                ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
-//                else -> rotatedBitmap = bitmap
-//            }
             return bitmap2
         }
 

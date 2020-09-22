@@ -14,6 +14,7 @@ import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -110,6 +111,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 			String msg1 = bundle.getString("msg1");
 			String msg2 = bundle.getString("msg2");
 			int color = bundle.getInt("color");
+			Toast.makeText(getBaseContext(), msg1, Toast.LENGTH_LONG).show();
 //			updateView(msg1, msg2, color);
 		}
 	};

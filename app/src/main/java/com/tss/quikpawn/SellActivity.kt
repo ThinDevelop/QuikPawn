@@ -459,7 +459,13 @@ class SellActivity : BaseK9Activity() {
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
-            printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+            printerParams1.setText("\n" + i + ". " + name.replace(" "," "))
+            textList.add(printerParams1)
+
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText(detail)
             textList.add(printerParams1)
 
             val listProduct = arrayListOf<ProductModel>()
@@ -552,9 +558,6 @@ class SellActivity : BaseK9Activity() {
             printerParams1.setText("รหัสปชช. " + data.idcard +"\nรายการสินค้า")
             textList.add(printerParams1)
 
-//            var i = 0
-//            for (product in data.products) {
-//                i++
                 val name = product.product_name
                 val detail = product.detail
                 printerParams1 = TssPrinterParams()
@@ -572,8 +575,6 @@ class SellActivity : BaseK9Activity() {
                 printerParams1.setDataType(PrinterParams.DATATYPE.IMAGE)
                 printerParams1.setBitmap(listBitmap)
                 textList.add(printerParams1)
-//            }
-
 
             textList.add(Util.dashSignature())
 
