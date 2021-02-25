@@ -1,12 +1,18 @@
 package com.tss.quikpawn.networks
 
+import android.content.Context
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.common.Priority
+import com.androidnetworking.error.ANError
+import com.androidnetworking.interfaces.DownloadListener
+import com.androidnetworking.interfaces.DownloadProgressListener
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.google.gson.Gson
 import com.tss.quikpawn.PreferencesManager
 import com.tss.quikpawn.models.*
+import com.tss.quikpawn.util.Util
 import java.io.File
+
 
 class Network {
 
@@ -27,6 +33,10 @@ class Network {
         val URL_SEARCH_BY_IDCARD = "https://thequikpawn.com/api/v1/search/order/byidcard"
         val URL_LOGOUT = "https://thequikpawn.com/api/v1/logout"
         val URL_LOAD_ORDER = "https://thequikpawn.com/api/v1/search/last/print"
+        val URL_GET_ORDER_PRINT = "https://thequikpawn.com/api/v1/order/print"
+
+        val PAPER_TYPE_A5 = "a5"
+        val PAPER_TYPE_80MM = "80mm"
 
         fun login(user: String, password: String, listener: JSONObjectRequestListener) {
             AndroidNetworking.post(URL_LOGIN)
@@ -298,5 +308,28 @@ class Network {
                 .build()
                 .getAsJSONObject(listener)
         }
+
+        fun getA5PDFLink(orderCode: String, listener: JSONObjectRequestListener) {
+            getPDFLink(orderCode, PAPER_TYPE_A5, listener)
+        }
+
+        fun get80mmPDFLink(orderCode: String, listener: JSONObjectRequestListener) {
+            getPDFLink(orderCode, PAPER_TYPE_80MM, listener)
+        }
+
+        fun getPDFLink(orderCode: String, paper: String, listener: JSONObjectRequestListener) {
+            AndroidNetworking.get(URL_GET_ORDER_PRINT)
+                .addHeaders("Authorization", "Bearer "+ PreferencesManager.getInstance().token)
+                .addHeaders("Content-type", "application/json")
+                .addHeaders("Accept", "application/json")
+                .addQueryParameter("order_code", orderCode)
+                .addQueryParameter("paper", paper)
+                .addQueryParameter("user_id", PreferencesManager.getInstance().userId)
+                .setTag("category")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(listener)
+        }
+
     }
 }

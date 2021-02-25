@@ -1,6 +1,7 @@
 package com.tss.quikpawn
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -9,20 +10,29 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
+import android.print.PrintManager
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.androidnetworking.AndroidNetworking
+import com.androidnetworking.common.Priority
 import com.androidnetworking.error.ANError
+import com.androidnetworking.interfaces.DownloadListener
+import com.androidnetworking.interfaces.DownloadProgressListener
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import com.centerm.centermposoversealib.thailand.ThiaIdInfoBeen
 import com.centerm.centermposoversealib.util.Utility
 import com.centerm.smartpos.aidl.printer.PrinterParams
 import com.google.gson.Gson
 import com.tss.quikpawn.adapter.ConsignListAdapter
+import com.tss.quikpawn.adapter.PdfDocumentAdapter
 import com.tss.quikpawn.models.*
 import com.tss.quikpawn.networks.Network
 import com.tss.quikpawn.util.DialogUtil
@@ -40,7 +50,6 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.roundToInt
 
 class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickListener{
     var expire = "0"
@@ -49,6 +58,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
     var imageIdFilePath = ""
     private var IMAGE_CAPTURE_IDCARD_CODE = 2001
     lateinit var consignListAdapter: ConsignListAdapter
+    var orderModel: OrderModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +78,54 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
 
         img_take_card.setOnClickListener {
             openCameraForCard()
+        }
+
+        btn_80mm.setOnClickListener {
+            orderModel?.let {
+                Network.get80mmPDFLink(it.order_code, object : JSONObjectRequestListener {
+                    override fun onResponse(response: JSONObject?) {
+                        response?.let {
+                            val statusCode = it.getInt("status_code")
+                            if (statusCode == 200 && it.has("data")) {
+                                val data = it.getJSONObject("data")
+                                val url = data.getString("url")
+                                Log.e("url", url)
+                                downloadPDF(url, this@ConsignmentActivity)
+                            } else {
+                                DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder))
+                            }
+                        }
+                    }
+
+                    override fun onError(anError: ANError?) {
+                        DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), anError?.message)
+                    }
+                })
+            }
+        }
+
+        btn_a5.setOnClickListener {
+            orderModel?.let {
+                Network.getA5PDFLink(it.order_code, object : JSONObjectRequestListener {
+                    override fun onResponse(response: JSONObject?) {
+                        response?.let {
+                            val statusCode = it.getInt("status_code")
+                            if (statusCode == 200 && it.has("data")) {
+                                val data = it.getJSONObject("data")
+                                val url = data.getString("url")
+                                Log.e("url", url)
+                                downloadPDF(url, this@ConsignmentActivity)
+                            } else {
+                                DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder))
+                            }
+                        }
+                    }
+
+                    override fun onError(anError: ANError?) {
+                        DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), anError?.message)
+                    }
+                })
+            }
         }
 
         btn_ok.setOnClickListener {
@@ -113,9 +171,11 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                 }
 
                 var sum = 0.0
+                var a = 0
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
-                    list.add(product.name + " : " + Util.addComma(product.cost)+" บาท")
+                    a++
+                    list.add(a.toString()+". "+product.name + " : " + Util.addComma(product.cost)+" บาท")
                     sum += NumberTextWatcherForThousand.trimCommaOfString(product.cost).toDouble()
                 }
                 list.add("รวม " + Util.addComma(sum.toString()) + " บาท")
@@ -146,12 +206,38 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                             val status = response.getString("status_code")
                             if (status == "200") {
                                 val data = response.getJSONObject("data")
-                                val orderModel = Gson().fromJson(data.toString(), OrderModel::class.java)
-                                printSlip1(orderModel)
-                                Handler().postDelayed({
-                                    printSlip1(orderModel)
-                                }, 3000)
-                                showConfirmDialog(data)
+                                orderModel = Gson().fromJson(data.toString(), OrderModel::class.java)
+//                                btn_ok.visibility = View.GONE
+//                                action_response_layout.visibility = View.VISIBLE
+                                orderModel?.let {
+                                    loading.visibility = View.VISIBLE
+                                    Network.getPDFLink(it.order_code, PreferencesManager.getInstance().paperSize, object : JSONObjectRequestListener {
+                                        override fun onResponse(response: JSONObject?) {
+                                            response?.let {
+                                                val statusCode = it.getInt("status_code")
+                                                if (statusCode == 200 && it.has("data")) {
+                                                    val data = it.getJSONObject("data")
+                                                    val url = data.getString("url")
+                                                    Log.e("url", url)
+                                                    downloadPDF(url, this@ConsignmentActivity)
+                                                } else {
+                                                    DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), getString(R.string.connect_error_please_reorder))
+                                                }
+                                            }
+                                            loading.visibility = View.GONE
+                                        }
+
+                                        override fun onError(anError: ANError?) {
+                                            loading.visibility = View.GONE
+                                            DialogUtil.showNotiDialog(this@ConsignmentActivity, getString(R.string.connect_error), anError?.message)
+                                        }
+                                    })
+                                }
+//                                printSlip1(orderModel!!)
+//                                Handler().postDelayed({
+//                                    printSlip1(orderModel!!)
+//                                }, 3000)
+//                                showConfirmDialog(data)
                             } else {
                                 showResponse(status, this@ConsignmentActivity)
                             }
@@ -178,12 +264,23 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
                 })
 
             } else {
-
                 Toast.makeText(this@ConsignmentActivity, "ข้อมูลไม่ครบถ้วน", Toast.LENGTH_LONG).show()
             }
         }
+
         new_item.callOnClick()
         initialK9()
+    }
+
+    fun showFinishView() {
+        new_item.visibility = View.GONE
+        edt_interest_rate.isEnabled = false
+        edt_time.isEnabled = false
+        edt_address.isEnabled = false
+        edt_phonenumber.isEnabled = false
+        edt_idcard.isEnabled = false
+        edt_name.isEnabled = false
+        img_take_card.setOnClickListener(null)
     }
 
     override fun onRequestPermissionsResult(
@@ -208,10 +305,8 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
 
     fun openCameraForCard() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (checkSelfPermission(android.Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_DENIED ||
-                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_DENIED){
+            if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED
+                || checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED){
                 val permission = arrayOf(android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 requestPermissions(permission,PERMISSION_CODE)
             }
@@ -424,7 +519,13 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
-            printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+            printerParams1.setText("\n" + i + ". " + name.replace(" "," "))
+            textList.add(printerParams1)
+
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText(detail)
             textList.add(printerParams1)
 
             val listProduct = arrayListOf<ProductModel>()
@@ -528,7 +629,7 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
         printerParams1.setTextSize(22)
-        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n\n___________________")
+        printerParams1.setText("\n\nข้าพเจ้ามอบอำนาจให้\n\n\n\n___________________")
         textList.add(printerParams1)
         printerParams1 = TssPrinterParams()
         printerParams1.setAlign(PrinterParams.ALIGN.CENTER)
@@ -652,7 +753,13 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
-            printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+            printerParams1.setText("\n" + i + ". " + name.replace(" "," "))
+            textList.add(printerParams1)
+
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText(detail)
             textList.add(printerParams1)
 
             val listProduct = arrayListOf<ProductModel>()
@@ -723,5 +830,41 @@ class ConsignmentActivity : BaseK9Activity(), ConsignListAdapter.OnItemClickList
 
     override fun onTakePhotoClick(index: Int) {
         cameraOpen(index)
+    }
+
+    fun downloadPDF(url: String, context: Context) {
+        AndroidNetworking.download(url, Util.getAppPath(context), "pdf_test.pdf")
+            .setTag("downloadTest")
+            .setPriority(Priority.MEDIUM)
+            .build()
+            .setDownloadProgressListener(object : DownloadProgressListener {
+                override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
+                    //loading
+                }
+            })
+            .startDownload(object : DownloadListener {
+                override fun onDownloadComplete() {
+                    printPDF()
+                }
+
+                override fun onError(anError: ANError?) {
+                    Toast.makeText(this@ConsignmentActivity, getString(R.string.connect_error), Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    private fun printPDF() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            val printManager: PrintManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+            try {
+                val printDocumentAdapter: PrintDocumentAdapter = PdfDocumentAdapter(
+                    this@ConsignmentActivity,
+                    Util.getAppPath(this@ConsignmentActivity).toString() + "pdf_test.pdf"
+                )
+                printManager.print("Document", printDocumentAdapter, PrintAttributes.Builder().build())
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

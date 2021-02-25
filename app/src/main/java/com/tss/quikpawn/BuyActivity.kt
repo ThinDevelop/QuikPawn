@@ -139,10 +139,12 @@ class BuyActivity : BaseK9Activity(), BuyListAdapter.OnItemClickListener {
                 }
 
                 var sum = 0.0
+                var a = 0
                 val list = mutableListOf("รหัสลูกค้า : " + customerId + "\nรายการ")
                 for (product in productList) {
+                    a++
                     list.add(
-                        product.name + " : " + Util.addComma(
+                        a.toString()+". "+product.name + " : " + Util.addComma(
                             product.cost
                         ) + " บาท"
                     )
@@ -390,7 +392,13 @@ class BuyActivity : BaseK9Activity(), BuyListAdapter.OnItemClickListener {
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
-            printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+            printerParams1.setText("\n" + i + ". " + name.replace(" "," "))
+            textList.add(printerParams1)
+
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText(detail)
             textList.add(printerParams1)
 
             val listProduct = arrayListOf<ProductModel>()

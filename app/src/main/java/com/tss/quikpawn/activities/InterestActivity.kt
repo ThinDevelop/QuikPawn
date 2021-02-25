@@ -489,7 +489,13 @@ class InterestActivity : BaseK9Activity() {
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
-            printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+            printerParams1.setText("\n" + i + ". " + name.replace(" "," "))
+            textList.add(printerParams1)
+
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText(detail)
             textList.add(printerParams1)
 
             val listProduct = arrayListOf<ProductModel>()

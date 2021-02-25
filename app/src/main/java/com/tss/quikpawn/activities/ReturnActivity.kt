@@ -83,8 +83,8 @@ class ReturnActivity : BaseK9Activity() {
                 list.add("รหัสรายการ "+orderCode!!+ "\nรายการ")
                 var sum = 0
                 for (product in productList) {
-                    list.add(getProductNameByCode(product.product_code))
                     sum ++
+                    list.add(sum.toString()+". "+getProductNameByCode(product.product_code))
                 }
                 list.add("รวม " + sum.toString() + " ชิ้น")
                 if (productList.isEmpty()) {
@@ -326,11 +326,17 @@ class ReturnActivity : BaseK9Activity() {
             i++
             var name = product.product_name
             var detail = product.detail
-            sumPrice += product.sale.toLong()
+            sumPrice += product.sale.toDouble()
             printerParams1 = TssPrinterParams()
             printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
             printerParams1.setTextSize(20)
-            printerParams1.setText("\n" + i + ". " + name.replace(" "," ")+"\n"+detail.replace(" "," "))
+            printerParams1.setText("\n" + i + ". " + name.replace(" "," "))
+            textList.add(printerParams1)
+
+            printerParams1 = TssPrinterParams()
+            printerParams1.setAlign(PrinterParams.ALIGN.LEFT)
+            printerParams1.setTextSize(20)
+            printerParams1.setText(detail)
             textList.add(printerParams1)
 
             val listProduct = arrayListOf<ProductModel>()

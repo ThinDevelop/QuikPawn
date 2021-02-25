@@ -2,13 +2,12 @@ package com.tss.quikpawn.util;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.InputFilter;
 import android.text.InputType;
+import android.text.Spanned;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -27,6 +26,12 @@ public class DialogUtil {
         final EditText input = new EditText(context);
 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setFilters(new InputFilter[]{new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                return null;
+            }
+        }, new InputFilter.LengthFilter(11)});
         input.addTextChangedListener(new NumberTextWatcherForThousand(input));
         input.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override

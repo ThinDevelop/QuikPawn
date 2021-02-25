@@ -155,6 +155,11 @@
                 android:src="@drawable/ic_add_circle_black_80dp" />
 
             <include layout="@layout/item_sign_view" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
             <Button
                 android:id="@+id/btn_ok"
                 android:layout_width="match_parent"
@@ -164,8 +169,43 @@
                 android:text="ตกลง"
                 android:textColor="@color/cardview_light_background"
                 android:textSize="20dp" />
+                <LinearLayout
+                    android:id="@+id/action_response_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+                    <Button
+                        android:id="@+id/btn_80mm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_ok"
+                        android:text="@string/print_80mm"
+                        android:textColor="@color/cardview_light_background"
+                        android:textSize="20dp" />
+                    <Button
+                        android:id="@+id/btn_a5"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_ok"
+                        android:text="@string/print_a5"
+                        android:textColor="@color/cardview_light_background"
+                        android:textSize="20dp" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
 
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
 </RelativeLayout>
